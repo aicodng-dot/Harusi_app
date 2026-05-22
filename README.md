@@ -1,17 +1,21 @@
 # Wedding QR Admission System
 
-A Laravel, MySQL, Blade, Tailwind CSS, and vanilla JavaScript web app for managing wedding invitations with secure QR admission passes.
+Harusi app: a wedding invite manager built with Laravel, MySQL, Blade, Tailwind CSS, and vanilla JavaScript.
+
+The system manages wedding guest invitations with secure QR admission passes.
 
 ## Features
 
-- Desktop admin panel for adding guests, generating QR codes, downloading QR SVG files, and tracking pass usage.
+- Desktop admin panel for guests, QR codes, check-ins, reports, and scanner users.
 - Mobile-first scanner app for gate personnel.
 - Secure QR payloads: QR codes contain only a random token or verification URL, never guest name or phone number.
-- Backend token validation using a stored SHA-256 token hash.
-- Partial pass usage for double and family passes until the allowed count is exhausted.
+- Backend token validation using the database.
+- Partial pass usage for double and special/family passes until the allowed count is exhausted.
 - Hard maximum of 10 admissions per QR code.
-- Scan logs and admission records for auditing.
-- Pass states: unused, partially used, fully used, cancelled, and revoked.
+- Scan attempts and admission records for auditing.
+- Pass states: unused, partially used, fully used, cancelled, inactive, and revoked.
+- CSV exports for reports, check-ins, and QR lists.
+- Batch QR generation and ZIP download of QR PNG images.
 
 ## Privacy Model
 
@@ -22,7 +26,7 @@ Guest records store only:
 - Pass type
 - Number of guests allowed
 
-The QR token is encrypted for QR regeneration and stored as a hash for lookup. Admission validation always happens on the backend.
+QR codes do not expose guest details. Admission validation always happens on the backend.
 
 ## Requirements
 
@@ -57,7 +61,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Run migrations and optional sample data:
+Run migrations and seed the default users:
 
 ```bash
 php artisan migrate
@@ -88,6 +92,6 @@ Open:
 php artisan test
 ```
 
-## Notes
+## Scanner Notes
 
-The mobile camera scanner uses the browser `BarcodeDetector` API when available. If a browser does not support it, gate personnel can paste or type the QR URL/token into the scanner form.
+The mobile scanner uses a browser QR scanner library with camera access. If camera scanning is unavailable, gate personnel can paste or type the QR URL/token into the manual scanner form.
