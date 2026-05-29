@@ -5,13 +5,14 @@
         $resultBadge = fn (?string $result) => match ($result) {
             'valid', 'admitted' => 'bg-emerald-400 text-zinc-950',
             'already_used' => 'bg-amber-300 text-zinc-950',
-            'cancelled', 'revoked', 'invalid', 'error' => 'bg-rose-400 text-white',
+            'cancelled', 'revoked', 'invalid', 'wrong_event', 'error' => 'bg-rose-400 text-white',
             default => 'bg-white/10 text-white',
         };
         $resultLabel = fn (?string $result) => match ($result) {
             'valid' => 'VALID PASS',
             'admitted' => 'ADMITTED SUCCESSFULLY',
             'already_used' => 'ALREADY FULLY USED',
+            'wrong_event' => 'WRONG EVENT',
             'invalid', 'error' => 'INVALID QR CODE',
             'cancelled' => 'CANCELLED PASS',
             'revoked' => 'REVOKED QR CODE',
@@ -24,7 +25,7 @@
             <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-emerald-300">Scanner app</p>
                 <h1 class="mt-2 truncate text-2xl font-semibold">Recent Scans</h1>
-                <p class="mt-1 truncate text-sm font-semibold text-zinc-400">{{ auth()->user()?->gate_name ?? 'Gate activity' }}</p>
+                <p class="mt-1 truncate text-sm font-semibold text-zinc-400">{{ auth()->user()?->gate_name ?? 'Gate activity' }} &middot; {{ $assignedEvent->event_name ?? 'Assigned event' }}</p>
             </div>
             <a href="{{ route('scanner.scan') }}" class="scanner-quiet-button">Scan</a>
         </header>

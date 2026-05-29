@@ -16,9 +16,11 @@ class Checkin extends Model
     public const RESULT_ALREADY_USED = 'already_used';
     public const RESULT_CANCELLED = 'cancelled';
     public const RESULT_REVOKED = 'revoked';
+    public const RESULT_WRONG_EVENT = 'wrong_event';
     public const RESULT_ERROR = 'error';
 
     protected $fillable = [
+        'event_id',
         'guest_id',
         'qr_code_id',
         'user_id',
@@ -37,6 +39,30 @@ class Checkin extends Model
         return [
             'checked_in_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Checkin $checkin): void {
+            if ($checkin->event_id) {
+                return;
+            }
+
+            if ($checkin->guest_id) {
+                $checkin->event_id = Guest::query()->whereKey($checkin->guest_id)->value('event_id');
+            }
+
+            if (! $checkin->event_id && $checkin->user_id) {
+                $checkin->event_id = User::query()->whereKey($checkin->user_id)->value('event_id');
+            }
+
+            $checkin->event_id ??= Event::defaultEvent()->id;
+        });
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     public function guest(): BelongsTo

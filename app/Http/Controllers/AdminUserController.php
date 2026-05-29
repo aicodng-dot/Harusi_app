@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class AdminUserController extends Controller
     {
         return view('admin.users.index', [
             'users' => User::query()
+                ->with('event')
                 ->latest()
                 ->paginate(15),
         ]);
@@ -26,6 +28,7 @@ class AdminUserController extends Controller
             'userRecord' => new User([
                 'role' => User::ROLE_SCANNER,
             ]),
+            'activeEvents' => $this->activeEvents(),
         ]);
     }
 
@@ -44,6 +47,7 @@ class AdminUserController extends Controller
     {
         return view('admin.users.edit', [
             'userRecord' => $user,
+            'activeEvents' => $this->activeEvents(),
         ]);
     }
 
@@ -91,6 +95,7 @@ class AdminUserController extends Controller
             ],
             'password' => $passwordRules,
             'role' => ['required', Rule::in([User::ROLE_ADMIN, User::ROLE_SCANNER])],
+            'event_id' => ['nullable', 'integer', Rule::exists('events', 'id')->where('status', Event::STATUS_ACTIVE)],
             'gate_name' => ['nullable', 'string', 'max:120', 'required_if:role,'.User::ROLE_SCANNER],
         ], [
             'gate_name.required_if' => 'Assign a gate name for scanner users.',
@@ -98,6 +103,9 @@ class AdminUserController extends Controller
 
         if (($validated['role'] ?? null) !== User::ROLE_SCANNER) {
             $validated['gate_name'] = null;
+            $validated['event_id'] = null;
+        } elseif (empty($validated['event_id'])) {
+            $validated['event_id'] = Event::defaultEvent()->id;
         }
 
         if (($validated['password'] ?? '') === '') {
@@ -105,5 +113,14 @@ class AdminUserController extends Controller
         }
 
         return $validated;
+    }
+
+    private function activeEvents()
+    {
+        return Event::query()
+            ->where('status', Event::STATUS_ACTIVE)
+            ->orderBy('event_date')
+            ->orderBy('event_name')
+            ->get();
     }
 }

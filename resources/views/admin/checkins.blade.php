@@ -5,7 +5,7 @@
         $resultBadge = fn (?string $result) => match ($result) {
             \App\Models\Checkin::RESULT_ADMITTED => 'bg-emerald-100 text-emerald-800',
             \App\Models\Checkin::RESULT_VALID => 'bg-sky-100 text-sky-800',
-            \App\Models\Checkin::RESULT_INVALID, \App\Models\Checkin::RESULT_ERROR => 'bg-rose-100 text-rose-800',
+            \App\Models\Checkin::RESULT_INVALID, \App\Models\Checkin::RESULT_WRONG_EVENT, \App\Models\Checkin::RESULT_ERROR => 'bg-rose-100 text-rose-800',
             \App\Models\Checkin::RESULT_ALREADY_USED => 'bg-orange-100 text-orange-800',
             \App\Models\Checkin::RESULT_CANCELLED => 'bg-zinc-200 text-zinc-700',
             \App\Models\Checkin::RESULT_REVOKED => 'bg-red-950 text-white',

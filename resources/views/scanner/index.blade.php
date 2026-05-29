@@ -13,6 +13,7 @@
             <div class="min-w-0">
                 <p class="text-xs font-bold uppercase text-emerald-300">Gate scanner</p>
                 <h1 class="mt-2 truncate text-2xl font-semibold">Scan QR</h1>
+                <p class="mt-1 truncate text-sm font-semibold text-zinc-400">{{ $assignedEvent->event_name ?? 'Assigned event' }}</p>
             </div>
             <a href="{{ route('scanner.dashboard') }}" class="scanner-quiet-button">Dashboard</a>
         </header>

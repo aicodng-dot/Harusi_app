@@ -11,6 +11,7 @@ class ScanLog extends Model
     use HasFactory;
 
     protected $fillable = [
+        'event_id',
         'guest_id',
         'token_hash',
         'action',
@@ -29,6 +30,26 @@ class ScanLog extends Model
             'metadata' => 'array',
             'scanned_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (ScanLog $scanLog): void {
+            if ($scanLog->event_id) {
+                return;
+            }
+
+            if ($scanLog->guest_id) {
+                $scanLog->event_id = Guest::query()->whereKey($scanLog->guest_id)->value('event_id');
+            }
+
+            $scanLog->event_id ??= Event::defaultEvent()->id;
+        });
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     public function guest(): BelongsTo

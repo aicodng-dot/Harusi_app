@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\Checkin;
+use App\Models\Event;
 use App\Models\Guest;
 use App\Models\QrCode;
 use App\Models\ScanLog;
@@ -18,11 +19,13 @@ class ScannerController extends Controller
 {
     public function dashboard(Request $request): View
     {
+        $assignedEvent = $this->scannerEvent($request);
         $todayQuery = $this->scannerCheckinsQuery($request)
             ->whereDate('checked_in_at', today());
 
         return view('scanner.dashboard', [
             'scannerUser' => $request->user(),
+            'assignedEvent' => $assignedEvent,
             'todayEntries' => (clone $todayQuery)
                 ->where('scan_result', Checkin::RESULT_ADMITTED)
                 ->sum('entries_added'),
@@ -30,6 +33,7 @@ class ScannerController extends Controller
             'todayInvalidAttempts' => (clone $todayQuery)
                 ->whereIn('scan_result', [
                     Checkin::RESULT_INVALID,
+                    Checkin::RESULT_WRONG_EVENT,
                     Checkin::RESULT_ALREADY_USED,
                     Checkin::RESULT_CANCELLED,
                     Checkin::RESULT_REVOKED,
@@ -49,19 +53,22 @@ class ScannerController extends Controller
     {
         return view('scanner.index', [
             'initialToken' => $request->query('token', ''),
+            'assignedEvent' => $this->scannerEvent($request),
         ]);
     }
 
-    public function ticket(string $token): View
+    public function ticket(Request $request, string $token): View
     {
         return view('scanner.index', [
             'initialToken' => $token,
+            'assignedEvent' => $this->scannerEvent($request),
         ]);
     }
 
     public function recentScans(Request $request): View
     {
         return view('scanner.recent-scans', [
+            'assignedEvent' => $this->scannerEvent($request),
             'checkins' => $this->scannerCheckinsQuery($request)
                 ->with('guest')
                 ->latest('checked_in_at')
@@ -78,6 +85,7 @@ class ScannerController extends Controller
         if ($search !== '') {
             $guests = Guest::query()
                 ->with('qrCode')
+                ->where('event_id', $this->scannerEvent($request)->id)
                 ->where(function (Builder $query) use ($search): void {
                     $query->where('name', 'like', '%'.$search.'%')
                         ->orWhere('phone_number', 'like', '%'.$search.'%');
@@ -90,6 +98,7 @@ class ScannerController extends Controller
         return view('scanner.manual-search', [
             'search' => $search,
             'guests' => $guests,
+            'assignedEvent' => $this->scannerEvent($request),
         ]);
     }
 
@@ -108,6 +117,7 @@ class ScannerController extends Controller
             $guest = Guest::query()
                 ->with('qrCode')
                 ->whereKey((int) $validated['guest_id'])
+                ->where('event_id', $this->scannerEvent($request)->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -156,6 +166,7 @@ class ScannerController extends Controller
             }
 
             Admission::query()->create([
+                'event_id' => $guest->event_id,
                 'guest_id' => $guest->id,
                 'quantity' => $quantity,
                 'admitted_by' => $request->user()?->name,
@@ -211,22 +222,32 @@ class ScannerController extends Controller
             ]);
         }
 
-        if (! $qrCode->is_active || $qrCode->revoked_at) {
-            $message = 'This QR code has been revoked.';
-            $this->recordScan($qrCode->guest, $qrCode, null, Checkin::RESULT_REVOKED, $message, $request);
-
-            return response()->json([
-                'status' => Checkin::RESULT_REVOKED,
-                'message' => $message,
-            ]);
-        }
-
         if (! $qrCode->guest) {
             $message = 'This QR code is not registered.';
             $this->recordScan(null, $qrCode, null, Checkin::RESULT_INVALID, $message, $request);
 
             return response()->json([
                 'status' => Checkin::RESULT_INVALID,
+                'message' => $message,
+            ]);
+        }
+
+        if (! $this->qrBelongsToScannerEvent($qrCode, $request)) {
+            $message = 'This QR code belongs to a different event.';
+            $this->recordScan(null, null, null, Checkin::RESULT_WRONG_EVENT, $message, $request, $this->scannerEvent($request));
+
+            return response()->json([
+                'status' => Checkin::RESULT_WRONG_EVENT,
+                'message' => $message,
+            ]);
+        }
+
+        if (! $qrCode->is_active || $qrCode->revoked_at) {
+            $message = 'This QR code has been revoked.';
+            $this->recordScan($qrCode->guest, $qrCode, null, Checkin::RESULT_REVOKED, $message, $request);
+
+            return response()->json([
+                'status' => Checkin::RESULT_REVOKED,
                 'message' => $message,
             ]);
         }
@@ -297,6 +318,30 @@ class ScannerController extends Controller
             ], 404);
         }
 
+        if (! $qrCode->guest) {
+            $message = 'This QR code is not registered.';
+            $this->recordScan(null, $qrCode, null, Checkin::RESULT_INVALID, $message, $request);
+
+            return response()->json([
+                'ok' => false,
+                'result' => Checkin::RESULT_INVALID,
+                'status' => Checkin::RESULT_INVALID,
+                'message' => $message,
+            ], 404);
+        }
+
+        if (! $this->qrBelongsToScannerEvent($qrCode, $request)) {
+            $message = 'This QR code belongs to a different event.';
+            $this->recordScan(null, null, null, Checkin::RESULT_WRONG_EVENT, $message, $request, $this->scannerEvent($request));
+
+            return response()->json([
+                'ok' => false,
+                'result' => Checkin::RESULT_WRONG_EVENT,
+                'status' => Checkin::RESULT_WRONG_EVENT,
+                'message' => $message,
+            ], 409);
+        }
+
         $result = $this->resultFor($qrCode);
         $this->recordScan($qrCode->guest, $qrCode, null, $result['result'], $result['message'], $request);
 
@@ -356,24 +401,6 @@ class ScannerController extends Controller
                 ];
             }
 
-            if (! $qrCode->is_active || $qrCode->revoked_at) {
-                $guest = Guest::query()->whereKey($qrCode->guest_id)->lockForUpdate()->first();
-                $qrCode->setRelation('guest', $guest);
-                $message = 'This QR code has been revoked.';
-                $this->recordScan($guest, $qrCode, $quantity, Checkin::RESULT_REVOKED, $message, $request);
-
-                return [
-                    'status' => 409,
-                    'payload' => [
-                        'ok' => false,
-                        'status' => Checkin::RESULT_REVOKED,
-                        'result' => Checkin::RESULT_REVOKED,
-                        'message' => $message,
-                        'guest' => $guest ? $this->guestPayload($guest) : null,
-                    ],
-                ];
-            }
-
             $guest = Guest::query()->whereKey($qrCode->guest_id)->lockForUpdate()->first();
             if (! $guest) {
                 $message = 'This QR code is not registered.';
@@ -391,6 +418,37 @@ class ScannerController extends Controller
             }
 
             $qrCode->setRelation('guest', $guest);
+
+            if (! $this->guestBelongsToScannerEvent($guest, $request)) {
+                $message = 'This QR code belongs to a different event.';
+                $this->recordScan(null, null, $quantity, Checkin::RESULT_WRONG_EVENT, $message, $request, $this->scannerEvent($request));
+
+                return [
+                    'status' => 409,
+                    'payload' => [
+                        'ok' => false,
+                        'status' => Checkin::RESULT_WRONG_EVENT,
+                        'result' => Checkin::RESULT_WRONG_EVENT,
+                        'message' => $message,
+                    ],
+                ];
+            }
+
+            if (! $qrCode->is_active || $qrCode->revoked_at) {
+                $message = 'This QR code has been revoked.';
+                $this->recordScan($guest, $qrCode, $quantity, Checkin::RESULT_REVOKED, $message, $request);
+
+                return [
+                    'status' => 409,
+                    'payload' => [
+                        'ok' => false,
+                        'status' => Checkin::RESULT_REVOKED,
+                        'result' => Checkin::RESULT_REVOKED,
+                        'message' => $message,
+                        'guest' => $this->guestPayload($guest),
+                    ],
+                ];
+            }
 
             if ($guestId !== null && $guestId !== $guest->id) {
                 $message = 'QR code does not match this guest.';
@@ -495,6 +553,7 @@ class ScannerController extends Controller
             $qrCode->setRelation('guest', $guest);
 
             Admission::query()->create([
+                'event_id' => $guest->event_id,
                 'guest_id' => $guest->id,
                 'quantity' => $quantity,
                 'admitted_by' => $validated['admitted_by'] ?? null,
@@ -528,9 +587,34 @@ class ScannerController extends Controller
         }
 
         return QrCode::query()
-            ->with('guest')
+            ->with('guest.event')
             ->where('qr_token', $token)
             ->first();
+    }
+
+    private function scannerEvent(Request $request): Event
+    {
+        $user = $request->user();
+
+        if ($user?->event) {
+            return $user->event;
+        }
+
+        if ($user?->event_id) {
+            return Event::query()->find($user->event_id) ?? Event::defaultEvent();
+        }
+
+        return Event::defaultEvent();
+    }
+
+    private function guestBelongsToScannerEvent(Guest $guest, Request $request): bool
+    {
+        return (int) $guest->event_id === $this->scannerEvent($request)->id;
+    }
+
+    private function qrBelongsToScannerEvent(QrCode $qrCode, Request $request): bool
+    {
+        return $qrCode->guest && $this->guestBelongsToScannerEvent($qrCode->guest, $request);
     }
 
     private function looksLikeQrToken(string $token): bool
@@ -616,6 +700,7 @@ class ScannerController extends Controller
         $newUsedEntries = $usedEntries + $quantity;
         $updated = Guest::query()
             ->whereKey($guest->id)
+            ->where('event_id', $guest->event_id)
             ->where('status', '<>', Guest::STATUS_CANCELLED)
             ->where('allowed_entries', '<=', 10)
             ->whereRaw('(used_entries + ?) <= allowed_entries', [$quantity])
@@ -632,6 +717,7 @@ class ScannerController extends Controller
         return Guest::query()
             ->with('qrCode')
             ->whereKey($guest->id)
+            ->where('event_id', $guest->event_id)
             ->first();
     }
 
@@ -653,8 +739,15 @@ class ScannerController extends Controller
         string $result,
         string $message,
         Request $request,
+        ?Event $event = null,
     ): void {
+        $eventId = $event?->id
+            ?? $guest?->event_id
+            ?? $request->user()?->event_id
+            ?? Event::defaultEvent()->id;
+
         Checkin::query()->create([
+            'event_id' => $eventId,
             'guest_id' => $guest?->id,
             'qr_code_id' => $qrCode?->id,
             'user_id' => $request->user()?->id,
@@ -669,6 +762,7 @@ class ScannerController extends Controller
         ]);
 
         ScanLog::query()->create([
+            'event_id' => $eventId,
             'guest_id' => $guest?->id,
             'token_hash' => $qrCode ? Guest::hashToken($qrCode->qr_token) : null,
             'action' => $result === Checkin::RESULT_ADMITTED ? 'admit' : 'verify',
@@ -689,6 +783,8 @@ class ScannerController extends Controller
     {
         $user = $request->user();
 
-        return Checkin::query()->where('user_id', $user?->id);
+        return Checkin::query()
+            ->where('user_id', $user?->id)
+            ->where('event_id', $this->scannerEvent($request)->id);
     }
 }

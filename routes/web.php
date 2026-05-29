@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScannerController;
@@ -14,40 +15,53 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:'.User::ROLE_ADMIN])->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('index');
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/guests', [AdminController::class, 'guests'])->name('guests.index');
-    Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('qr-codes.index');
-    Route::post('/qr-codes/generate-missing', [AdminController::class, 'generateMissingQrCodes'])->name('qr-codes.generate-missing');
-    Route::get('/qr-codes/download-all', [AdminController::class, 'downloadAllQrCodes'])->name('qr-codes.download-all');
-    Route::get('/qr-codes/export', [AdminController::class, 'exportQrList'])->name('qr-codes.export');
-    Route::patch('/qr-codes/{guest}/activate', [AdminController::class, 'activateQr'])->name('qr-codes.activate');
-    Route::patch('/qr-codes/{guest}/deactivate', [AdminController::class, 'deactivateQr'])->name('qr-codes.deactivate');
-    Route::get('/checkins', [AdminController::class, 'checkins'])->name('checkins.index');
-    Route::get('/checkins/export', [AdminController::class, 'exportCheckins'])->name('checkins.export');
-    Route::get('/reports', [AdminController::class, 'reports'])->name('reports.index');
-    Route::get('/reports/export/guest-list', [AdminController::class, 'exportGuestList'])->name('reports.export.guest-list');
-    Route::get('/reports/export/checked-in-guests', [AdminController::class, 'exportCheckedInGuests'])->name('reports.export.checked-in-guests');
-    Route::get('/reports/export/remaining-guests', [AdminController::class, 'exportRemainingGuests'])->name('reports.export.remaining-guests');
-    Route::get('/reports/export/invalid-scans', [AdminController::class, 'exportInvalidScans'])->name('reports.export.invalid-scans');
+    Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
+    Route::get('/events/create', [AdminEventController::class, 'create'])->name('events.create');
+    Route::post('/events', [AdminEventController::class, 'store'])->name('events.store');
+    Route::get('/events/{event}/edit', [AdminEventController::class, 'edit'])->name('events.edit');
+    Route::put('/events/{event}', [AdminEventController::class, 'update'])->name('events.update');
+    Route::match(['get', 'post'], '/events/{event}/select', [AdminEventController::class, 'select'])->name('events.select');
+    Route::patch('/events/{event}/archive', [AdminEventController::class, 'archive'])->name('events.archive');
+    Route::patch('/events/{event}/cancel', [AdminEventController::class, 'cancel'])->name('events.cancel');
+
+    Route::middleware('admin.event')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/guests', [AdminController::class, 'guests'])->name('guests.index');
+        Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('qr-codes.index');
+        Route::post('/qr-codes/generate-missing', [AdminController::class, 'generateMissingQrCodes'])->name('qr-codes.generate-missing');
+        Route::get('/qr-codes/download-all', [AdminController::class, 'downloadAllQrCodes'])->name('qr-codes.download-all');
+        Route::get('/qr-codes/export', [AdminController::class, 'exportQrList'])->name('qr-codes.export');
+        Route::patch('/qr-codes/{guest}/activate', [AdminController::class, 'activateQr'])->name('qr-codes.activate');
+        Route::patch('/qr-codes/{guest}/deactivate', [AdminController::class, 'deactivateQr'])->name('qr-codes.deactivate');
+        Route::get('/checkins', [AdminController::class, 'checkins'])->name('checkins.index');
+        Route::get('/checkins/export', [AdminController::class, 'exportCheckins'])->name('checkins.export');
+        Route::get('/reports', [AdminController::class, 'reports'])->name('reports.index');
+        Route::get('/reports/export/guest-list', [AdminController::class, 'exportGuestList'])->name('reports.export.guest-list');
+        Route::get('/reports/export/checked-in-guests', [AdminController::class, 'exportCheckedInGuests'])->name('reports.export.checked-in-guests');
+        Route::get('/reports/export/remaining-guests', [AdminController::class, 'exportRemainingGuests'])->name('reports.export.remaining-guests');
+        Route::get('/reports/export/invalid-scans', [AdminController::class, 'exportInvalidScans'])->name('reports.export.invalid-scans');
+    });
     Route::redirect('/scanner-users', '/admin/users')->name('scanner-users.index');
     Route::resource('/users', AdminUserController::class)->except(['show']);
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index');
 
-    Route::get('/guests/create', [AdminController::class, 'create'])->name('guests.create');
-    Route::post('/guests', [AdminController::class, 'store'])->name('guests.store');
-    Route::get('/guests/import', [AdminController::class, 'import'])->name('guests.import');
-    Route::post('/guests/import', [AdminController::class, 'processGuestImport'])->name('guests.import.process');
-    Route::get('/guests/import/sample', [AdminController::class, 'sampleGuestImport'])->name('guests.import.sample');
-    Route::get('/guests/{guest}', [AdminController::class, 'show'])->name('guests.show');
-    Route::get('/guests/{guest}/edit', [AdminController::class, 'edit'])->name('guests.edit');
-    Route::put('/guests/{guest}', [AdminController::class, 'update'])->name('guests.update');
-    Route::delete('/guests/{guest}', [AdminController::class, 'destroy'])->name('guests.destroy');
-    Route::post('/guests/{guest}/qr/generate', [AdminController::class, 'generateQr'])->name('guests.qr.generate');
-    Route::get('/guests/{guest}/qr', [AdminController::class, 'qr'])->name('guests.qr');
-    Route::get('/guests/{guest}/qr/download', [AdminController::class, 'downloadQr'])->name('guests.qr.download');
-    Route::patch('/guests/{guest}/cancel', [AdminController::class, 'cancel'])->name('guests.cancel');
-    Route::patch('/guests/{guest}/revoke', [AdminController::class, 'revoke'])->name('guests.revoke');
-    Route::patch('/guests/{guest}/restore', [AdminController::class, 'restore'])->name('guests.restore');
+    Route::middleware('admin.event')->group(function () {
+        Route::get('/guests/create', [AdminController::class, 'create'])->name('guests.create');
+        Route::post('/guests', [AdminController::class, 'store'])->name('guests.store');
+        Route::get('/guests/import', [AdminController::class, 'import'])->name('guests.import');
+        Route::post('/guests/import', [AdminController::class, 'processGuestImport'])->name('guests.import.process');
+        Route::get('/guests/import/sample', [AdminController::class, 'sampleGuestImport'])->name('guests.import.sample');
+        Route::get('/guests/{guest}', [AdminController::class, 'show'])->name('guests.show');
+        Route::get('/guests/{guest}/edit', [AdminController::class, 'edit'])->name('guests.edit');
+        Route::put('/guests/{guest}', [AdminController::class, 'update'])->name('guests.update');
+        Route::delete('/guests/{guest}', [AdminController::class, 'destroy'])->name('guests.destroy');
+        Route::post('/guests/{guest}/qr/generate', [AdminController::class, 'generateQr'])->name('guests.qr.generate');
+        Route::get('/guests/{guest}/qr', [AdminController::class, 'qr'])->name('guests.qr');
+        Route::get('/guests/{guest}/qr/download', [AdminController::class, 'downloadQr'])->name('guests.qr.download');
+        Route::patch('/guests/{guest}/cancel', [AdminController::class, 'cancel'])->name('guests.cancel');
+        Route::patch('/guests/{guest}/revoke', [AdminController::class, 'revoke'])->name('guests.revoke');
+        Route::patch('/guests/{guest}/restore', [AdminController::class, 'restore'])->name('guests.restore');
+    });
 });
 
 Route::prefix('scanner')->name('scanner.')->middleware(['auth', 'role:'.User::ROLE_SCANNER])->group(function () {

@@ -1,6 +1,7 @@
 @php
     $isEdit = $userRecord->exists;
     $selectedRole = old('role', $userRecord->role ?: \App\Models\User::ROLE_SCANNER);
+    $selectedEventId = old('event_id', $userRecord->event_id);
 @endphp
 
 <form method="POST" action="{{ $isEdit ? route('admin.users.update', $userRecord) : route('admin.users.store') }}" class="app-card p-5">
@@ -42,6 +43,20 @@
             <input name="gate_name" value="{{ old('gate_name', $userRecord->gate_name) }}" class="input-control" autocomplete="off" data-gate-name>
             <span class="text-xs font-semibold text-zinc-500">Required for scanner users. Admin users do not need a gate.</span>
             @error('gate_name')
+                <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field-label">
+            Assigned event
+            <select name="event_id" class="input-control">
+                <option value="">Default active event</option>
+                @foreach ($activeEvents as $event)
+                    <option value="{{ $event->id }}" @selected((string) $selectedEventId === (string) $event->id)>{{ $event->event_name }}</option>
+                @endforeach
+            </select>
+            <span class="text-xs font-semibold text-zinc-500">Scanner users scan and admit guests for this event.</span>
+            @error('event_id')
                 <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
             @enderror
         </label>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
@@ -27,6 +28,7 @@ class Guest extends Model
     public const STATUS_REVOKED = self::STATUS_CANCELLED;
 
     protected $fillable = [
+        'event_id',
         'name',
         'phone_number',
         'pass_type',
@@ -37,6 +39,10 @@ class Guest extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Guest $guest): void {
+            $guest->event_id ??= Event::defaultEvent()->id;
+        });
+
         static::saving(function (Guest $guest): void {
             $guest->applyPassRules();
             $guest->applyUsageStatus();
@@ -52,6 +58,11 @@ class Guest extends Model
     public static function makeSecureToken(): string
     {
         return Str::random(64);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     public static function allowedEntriesForPassType(string $passType, int $requestedEntries): int

@@ -15,6 +15,7 @@
     @php
         $navItems = [
             ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'marker' => 'bg-emerald-500', 'icon' => 'DB'],
+            ['label' => 'Events', 'route' => 'admin.events.index', 'active' => 'admin.events.*', 'marker' => 'bg-teal-500', 'icon' => 'EV'],
             ['label' => 'Guests', 'route' => 'admin.guests.index', 'active' => 'admin.guests.*', 'marker' => 'bg-sky-500', 'icon' => 'GS'],
             ['label' => 'QR Codes', 'route' => 'admin.qr-codes.index', 'active' => 'admin.qr-codes.*', 'marker' => 'bg-violet-500', 'icon' => 'QR'],
             ['label' => 'Check-ins', 'route' => 'admin.checkins.index', 'active' => 'admin.checkins.*', 'marker' => 'bg-amber-500', 'icon' => 'IN'],
@@ -69,7 +70,32 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('admin.guests.create') }}" class="hidden secondary-button sm:inline-flex">New invite</a>
+                        @if ($selectedEvent ?? null)
+                            <details class="relative hidden md:block">
+                                <summary class="secondary-button cursor-pointer list-none">
+                                    <span class="max-w-48 truncate">{{ $selectedEvent->event_name }}</span>
+                                </summary>
+                                <div class="absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-lg">
+                                    <div class="border-b border-stone-100 px-4 py-3">
+                                        <p class="text-xs font-bold uppercase text-zinc-500">Current event</p>
+                                        <p class="mt-1 truncate text-sm font-bold text-zinc-950">{{ $selectedEvent->event_name }}</p>
+                                    </div>
+                                    <div class="max-h-72 overflow-y-auto py-2">
+                                        @forelse ($eventSwitcherEvents as $eventOption)
+                                            <a href="{{ route('admin.events.select', $eventOption) }}" class="block px-4 py-2 text-sm font-semibold hover:bg-stone-50">
+                                                {{ $eventOption->event_name }}
+                                            </a>
+                                        @empty
+                                            <p class="px-4 py-3 text-sm font-semibold text-zinc-500">No active events.</p>
+                                        @endforelse
+                                    </div>
+                                    <a href="{{ route('admin.events.index') }}" class="block border-t border-stone-100 px-4 py-3 text-sm font-bold text-emerald-700 hover:bg-emerald-50">Manage Events</a>
+                                </div>
+                            </details>
+                            <a href="{{ route('admin.guests.create') }}" class="hidden secondary-button sm:inline-flex">New invite</a>
+                        @else
+                            <a href="{{ route('admin.events.index') }}" class="hidden secondary-button sm:inline-flex">Manage Events</a>
+                        @endif
                         <div class="hidden rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-right md:block">
                             <p class="text-sm font-semibold">{{ auth()->user()?->name ?? 'Admin' }}</p>
                             <p class="mt-0.5 text-xs font-semibold text-zinc-500">{{ now()->format('M j, Y') }}</p>
@@ -86,6 +112,12 @@
                         <a href="{{ route($item['route']) }}" @class(['filter-pill shrink-0', 'is-active' => request()->routeIs($item['active'])])>{{ $item['label'] }}</a>
                     @endforeach
                 </nav>
+                @if ($selectedEvent ?? null)
+                    <div class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 md:hidden">
+                        <span class="truncate text-sm font-bold">{{ $selectedEvent->event_name }}</span>
+                        <a href="{{ route('admin.events.index') }}" class="text-xs font-black uppercase text-emerald-700">Switch</a>
+                    </div>
+                @endif
             </header>
 
             <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

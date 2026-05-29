@@ -52,6 +52,7 @@
                             <th class="px-5 py-3">Name</th>
                             <th class="px-5 py-3">Email</th>
                             <th class="px-5 py-3">Role</th>
+                            <th class="px-5 py-3">Assigned event</th>
                             <th class="px-5 py-3">Gate name</th>
                             <th class="px-5 py-3">Status</th>
                             <th class="px-5 py-3">Created</th>
@@ -65,6 +66,9 @@
                                 <td class="px-5 py-4">{{ $userRecord->email }}</td>
                                 <td class="px-5 py-4">
                                     <span class="status-badge {{ $roleBadge($userRecord->role) }}">{{ $userRecord->role }}</span>
+                                </td>
+                                <td class="px-5 py-4">
+                                    {{ $userRecord->event?->event_name ?? ($userRecord->role === \App\Models\User::ROLE_SCANNER ? 'Default event' : '--') }}
                                 </td>
                                 <td class="px-5 py-4">
                                     <span class="status-badge {{ $gateBadge($userRecord->gate_name) }}">
@@ -93,7 +97,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-5 py-12 text-center text-sm font-semibold text-zinc-500">No scanner users have been created yet.</td>
+                                <td colspan="8" class="px-5 py-12 text-center text-sm font-semibold text-zinc-500">No scanner users have been created yet.</td>
                             </tr>
                         @endforelse
                     </tbody>

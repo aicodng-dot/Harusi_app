@@ -19,7 +19,7 @@
         $resultBadge = fn (?string $result) => match ($result) {
             'valid', 'admitted' => 'bg-emerald-100 text-emerald-800',
             'already_used' => 'bg-amber-100 text-amber-800',
-            'cancelled', 'revoked', 'invalid', 'error' => 'bg-rose-100 text-rose-800',
+            'cancelled', 'revoked', 'invalid', 'wrong_event', 'error' => 'bg-rose-100 text-rose-800',
             default => 'bg-zinc-100 text-zinc-700',
         };
     @endphp
@@ -41,6 +41,33 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        <article class="app-card p-5">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <p class="section-kicker">Selected event</p>
+                    <h3 class="mt-2 text-2xl font-semibold">{{ $event->event_name }}</h3>
+                    @if ($event->displayCouple())
+                        <p class="mt-1 text-sm font-semibold text-zinc-600">{{ $event->displayCouple() }}</p>
+                    @endif
+                </div>
+                <a href="{{ route('admin.events.index') }}" class="secondary-button">Switch event</a>
+            </div>
+            <div class="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <div class="rounded-lg bg-stone-50 px-3 py-2">
+                    <p class="text-xs font-bold uppercase text-zinc-500">Venue</p>
+                    <p class="mt-1 font-semibold">{{ $event->venue_name ?: 'Not set' }}</p>
+                </div>
+                <div class="rounded-lg bg-stone-50 px-3 py-2">
+                    <p class="text-xs font-bold uppercase text-zinc-500">Event date</p>
+                    <p class="mt-1 font-semibold">{{ $event->event_date?->format('M j, Y') ?? 'Not set' }}</p>
+                </div>
+                <div class="rounded-lg bg-stone-50 px-3 py-2">
+                    <p class="text-xs font-bold uppercase text-zinc-500">Status</p>
+                    <p class="mt-1 font-semibold">{{ ucfirst($event->status) }}</p>
+                </div>
+            </div>
+        </article>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
             @foreach ($statCards as $card)

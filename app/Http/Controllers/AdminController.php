@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checkin;
+use App\Models\Event;
 use App\Models\Guest;
 use App\Models\QrCode;
 use App\Models\User;
@@ -29,14 +30,17 @@ class AdminController extends Controller
 
     public function dashboard(): View
     {
+        $event = $this->currentEvent();
+
         return view('admin.dashboard', [
+            'event' => $event,
             'stats' => $this->dashboardStats(),
-            'recentGuests' => Guest::query()
+            'recentGuests' => $this->eventGuestQuery()
                 ->with('qrCode')
                 ->latest()
                 ->take(6)
                 ->get(),
-            'recentCheckins' => Checkin::query()
+            'recentCheckins' => $this->eventCheckinQuery()
                 ->with(['guest', 'user'])
                 ->latest('checked_in_at')
                 ->latest()
@@ -55,6 +59,7 @@ class AdminController extends Controller
         }
 
         $guestsQuery = Guest::query()
+            ->where('event_id', $this->currentEvent()->id)
             ->with('qrCode')
             ->latest();
 
@@ -76,17 +81,17 @@ class AdminController extends Controller
             'guests' => $guestsQuery->paginate(15)->withQueryString(),
             'activeFilter' => $filter,
             'stats' => [
-                'total_guests' => Guest::query()->count(),
-                'has_qr' => Guest::query()->whereHas('qrCode')->count(),
-                'missing_qr' => Guest::query()->whereDoesntHave('qrCode')->count(),
-                'active' => QrCode::query()->where('is_active', true)->whereNull('revoked_at')->count(),
-                'revoked' => QrCode::query()
+                'total_guests' => $this->eventGuestQuery()->count(),
+                'has_qr' => $this->eventGuestQuery()->whereHas('qrCode')->count(),
+                'missing_qr' => $this->eventGuestQuery()->whereDoesntHave('qrCode')->count(),
+                'active' => $this->eventQrQuery()->where('is_active', true)->whereNull('revoked_at')->count(),
+                'revoked' => $this->eventQrQuery()
                     ->where(function ($query): void {
                         $query->where('is_active', false)->orWhereNotNull('revoked_at');
                     })
                 ->count(),
-                'fully_used' => Guest::query()->where('status', Guest::STATUS_FULLY_USED)->count(),
-                'unused' => Guest::query()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
+                'fully_used' => $this->eventGuestQuery()->where('status', Guest::STATUS_FULLY_USED)->count(),
+                'unused' => $this->eventGuestQuery()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
             ],
         ]);
     }
@@ -95,7 +100,7 @@ class AdminController extends Controller
     {
         $generated = 0;
 
-        Guest::query()
+        $this->eventGuestQuery()
             ->whereDoesntHave('qrCode')
             ->orderBy('id')
             ->get()
@@ -111,7 +116,9 @@ class AdminController extends Controller
     {
         $files = [];
 
-        Guest::query()
+        $event = $this->currentEvent();
+
+        $this->eventGuestQuery()
             ->with('qrCode')
             ->whereHas('qrCode')
             ->orderBy('name')
@@ -123,7 +130,7 @@ class AdminController extends Controller
 
         return response($this->createZip($files), 200, [
             'Content-Type' => 'application/zip',
-            'Content-Disposition' => 'attachment; filename="wedding-qr-codes-'.now()->format('Y-m-d-His').'.zip"',
+            'Content-Disposition' => 'attachment; filename="'.$event->safeSlug().'-qr-codes-'.now()->format('Y-m-d-His').'.zip"',
         ]);
     }
 
@@ -142,7 +149,7 @@ class AdminController extends Controller
             'Revoked at',
             'Download file name',
         ], function () {
-            return Guest::query()
+            return $this->eventGuestQuery()
                 ->with('qrCode')
                 ->orderBy('name')
                 ->get()
@@ -166,6 +173,8 @@ class AdminController extends Controller
 
     public function activateQr(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         if (! $guest->qrCode) {
             abort(404, 'QR code has not been generated.');
         }
@@ -180,6 +189,8 @@ class AdminController extends Controller
 
     public function deactivateQr(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         if (! $guest->qrCode) {
             abort(404, 'QR code has not been generated.');
         }
@@ -198,6 +209,7 @@ class AdminController extends Controller
         $status = (string) $request->query('status', '');
 
         $guestsQuery = Guest::query()
+            ->where('event_id', $this->currentEvent()->id)
             ->with('qrCode')
             ->withCount('checkins')
             ->latest();
@@ -310,6 +322,8 @@ class AdminController extends Controller
 
     public function show(Guest $guest): View
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         return view('admin.guests.show', [
             'guest' => $guest->load(['qrCode', 'checkins.user']),
         ]);
@@ -393,7 +407,7 @@ class AdminController extends Controller
     public function exportGuestList(): StreamedResponse
     {
         return $this->streamCsv('guest-list-'.now()->format('Y-m-d-His').'.csv', $this->guestCsvHeadings(), function () {
-            return Guest::query()
+            return $this->eventGuestQuery()
                 ->with('qrCode')
                 ->orderBy('name')
                 ->get()
@@ -404,7 +418,7 @@ class AdminController extends Controller
     public function exportCheckedInGuests(): StreamedResponse
     {
         return $this->streamCsv('checked-in-guests-'.now()->format('Y-m-d-His').'.csv', $this->guestCsvHeadings(), function () {
-            return Guest::query()
+            return $this->eventGuestQuery()
                 ->with('qrCode')
                 ->where('used_entries', '>', 0)
                 ->orderBy('name')
@@ -416,7 +430,7 @@ class AdminController extends Controller
     public function exportRemainingGuests(): StreamedResponse
     {
         return $this->streamCsv('remaining-guests-'.now()->format('Y-m-d-His').'.csv', $this->guestCsvHeadings(), function () {
-            return Guest::query()
+            return $this->eventGuestQuery()
                 ->with('qrCode')
                 ->where('status', '<>', Guest::STATUS_CANCELLED)
                 ->whereColumn('used_entries', '<', 'allowed_entries')
@@ -438,7 +452,7 @@ class AdminController extends Controller
             'Scanner user',
             'IP address',
         ], function () {
-            return Checkin::query()
+            return $this->eventCheckinQuery()
                 ->with(['guest', 'user'])
                 ->whereIn('scan_result', $this->invalidScanResults())
                 ->latest('checked_in_at')
@@ -482,6 +496,7 @@ class AdminController extends Controller
         $validated = $this->validateGuest($request);
 
         $guest = Guest::query()->create([
+            'event_id' => $this->currentEvent()->id,
             'name' => $validated['name'],
             'phone_number' => $validated['phone_number'],
             'pass_type' => $validated['pass_type'],
@@ -498,6 +513,8 @@ class AdminController extends Controller
 
     public function edit(Guest $guest): View
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         return view('admin.guests.edit', [
             'guest' => $guest->load('qrCode'),
         ]);
@@ -508,6 +525,8 @@ class AdminController extends Controller
      */
     public function update(Request $request, Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $validated = $this->validateGuest($request, $guest);
 
         $guest->update([
@@ -524,6 +543,8 @@ class AdminController extends Controller
 
     public function destroy(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         if ($guest->qrCode?->qr_image_path) {
             Storage::disk('public')->delete($guest->qrCode->qr_image_path);
         }
@@ -537,6 +558,8 @@ class AdminController extends Controller
 
     public function generateQr(Guest $guest, QrCodeService $qrCodes): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $hadQrCode = $guest->qrCode()->exists();
         $this->generateQrForGuest($guest, $qrCodes);
 
@@ -545,6 +568,8 @@ class AdminController extends Controller
 
     public function qr(Guest $guest, QrCodeService $qrCodes): Response
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $qrCode = $this->ensureQrImage($guest, $qrCodes);
 
         return response(Storage::disk('public')->get($qrCode->qr_image_path), 200, [
@@ -555,6 +580,8 @@ class AdminController extends Controller
 
     public function downloadQr(Guest $guest, QrCodeService $qrCodes): Response
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $qrCode = $this->ensureQrImage($guest, $qrCodes);
         $filename = $this->qrDownloadFilename($guest);
 
@@ -566,6 +593,8 @@ class AdminController extends Controller
 
     public function cancel(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $guest->update([
             'status' => Guest::STATUS_CANCELLED,
         ]);
@@ -575,6 +604,8 @@ class AdminController extends Controller
 
     public function revoke(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $guest->qrCode?->update([
             'is_active' => false,
             'revoked_at' => now(),
@@ -585,6 +616,8 @@ class AdminController extends Controller
 
     public function restore(Guest $guest): RedirectResponse
     {
+        $this->ensureGuestBelongsToSelectedEvent($guest);
+
         $guest->update([
             'status' => Guest::STATUS_ACTIVE,
         ]);
@@ -597,27 +630,59 @@ class AdminController extends Controller
         return back()->with('success', 'Pass restored.');
     }
 
+    private function currentEvent(): Event
+    {
+        $eventId = session('selected_event_id');
+        $event = $eventId ? Event::query()->find($eventId) : null;
+
+        return $event ?: Event::defaultEvent();
+    }
+
+    private function eventGuestQuery(): Builder
+    {
+        return Guest::query()->where('event_id', $this->currentEvent()->id);
+    }
+
+    private function eventCheckinQuery(): Builder
+    {
+        return Checkin::query()->where('event_id', $this->currentEvent()->id);
+    }
+
+    private function eventQrQuery(): Builder
+    {
+        return QrCode::query()->whereHas('guest', function (Builder $query): void {
+            $query->where('event_id', $this->currentEvent()->id);
+        });
+    }
+
+    private function ensureGuestBelongsToSelectedEvent(Guest $guest): Guest
+    {
+        abort_unless((int) $guest->event_id === $this->currentEvent()->id, 404);
+
+        return $guest;
+    }
+
     private function dashboardStats(): array
     {
-        $totalAllowed = (int) Guest::query()
+        $totalAllowed = (int) $this->eventGuestQuery()
             ->where('status', '<>', Guest::STATUS_CANCELLED)
             ->sum('allowed_entries');
-        $totalUsed = (int) Guest::query()->sum('used_entries');
-        $activeUsed = (int) Guest::query()
+        $totalUsed = (int) $this->eventGuestQuery()->sum('used_entries');
+        $activeUsed = (int) $this->eventGuestQuery()
             ->where('status', '<>', Guest::STATUS_CANCELLED)
             ->sum('used_entries');
 
         return [
-            'total_guests' => Guest::query()->count(),
-            'single_passes' => Guest::query()->where('pass_type', Guest::PASS_SINGLE)->count(),
-            'double_passes' => Guest::query()->where('pass_type', Guest::PASS_DOUBLE)->count(),
-            'special_passes' => Guest::query()->where('pass_type', Guest::PASS_SPECIAL)->count(),
-            'unused_passes' => Guest::query()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
-            'partially_used' => Guest::query()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
-            'fully_used' => Guest::query()->where('status', Guest::STATUS_FULLY_USED)->count(),
-            'cancelled' => Guest::query()->where('status', Guest::STATUS_CANCELLED)->count(),
-            'qr_codes' => QrCode::query()->count(),
-            'revoked_qr_codes' => QrCode::query()
+            'total_guests' => $this->eventGuestQuery()->count(),
+            'single_passes' => $this->eventGuestQuery()->where('pass_type', Guest::PASS_SINGLE)->count(),
+            'double_passes' => $this->eventGuestQuery()->where('pass_type', Guest::PASS_DOUBLE)->count(),
+            'special_passes' => $this->eventGuestQuery()->where('pass_type', Guest::PASS_SPECIAL)->count(),
+            'unused_passes' => $this->eventGuestQuery()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
+            'partially_used' => $this->eventGuestQuery()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
+            'fully_used' => $this->eventGuestQuery()->where('status', Guest::STATUS_FULLY_USED)->count(),
+            'cancelled' => $this->eventGuestQuery()->where('status', Guest::STATUS_CANCELLED)->count(),
+            'qr_codes' => $this->eventQrQuery()->count(),
+            'revoked_qr_codes' => $this->eventQrQuery()
                 ->where(function ($query): void {
                     $query->where('is_active', false)->orWhereNotNull('revoked_at');
                 })
@@ -625,8 +690,8 @@ class AdminController extends Controller
             'admitted_entries' => $totalUsed,
             'remaining_entries' => max(0, $totalAllowed - $activeUsed),
             'total_allowed_entries' => $totalAllowed,
-            'today_scans' => Checkin::query()->whereDate('checked_in_at', today())->count(),
-            'today_admitted' => Checkin::query()
+            'today_scans' => $this->eventCheckinQuery()->whereDate('checked_in_at', today())->count(),
+            'today_admitted' => $this->eventCheckinQuery()
                 ->whereDate('checked_in_at', today())
                 ->where('scan_result', Checkin::RESULT_ADMITTED)
                 ->sum('entries_added'),
@@ -635,17 +700,17 @@ class AdminController extends Controller
 
     private function guestAdmissionSummary(): array
     {
-        $totalExpected = (int) Guest::query()
+        $totalExpected = (int) $this->eventGuestQuery()
             ->where('status', '<>', Guest::STATUS_CANCELLED)
             ->sum('allowed_entries');
-        $activeUsed = (int) Guest::query()
+        $activeUsed = (int) $this->eventGuestQuery()
             ->where('status', '<>', Guest::STATUS_CANCELLED)
             ->sum('used_entries');
 
         return [
-            'total_invites' => Guest::query()->count(),
+            'total_invites' => $this->eventGuestQuery()->count(),
             'total_expected_admissions' => $totalExpected,
-            'total_admitted_people' => (int) Guest::query()->sum('used_entries'),
+            'total_admitted_people' => (int) $this->eventGuestQuery()->sum('used_entries'),
             'total_remaining_admissions' => max(0, $totalExpected - $activeUsed),
         ];
     }
@@ -653,19 +718,19 @@ class AdminController extends Controller
     private function passTypeReport(): array
     {
         return [
-            Guest::PASS_SINGLE => Guest::query()->where('pass_type', Guest::PASS_SINGLE)->count(),
-            Guest::PASS_DOUBLE => Guest::query()->where('pass_type', Guest::PASS_DOUBLE)->count(),
-            Guest::PASS_SPECIAL => Guest::query()->where('pass_type', Guest::PASS_SPECIAL)->count(),
+            Guest::PASS_SINGLE => $this->eventGuestQuery()->where('pass_type', Guest::PASS_SINGLE)->count(),
+            Guest::PASS_DOUBLE => $this->eventGuestQuery()->where('pass_type', Guest::PASS_DOUBLE)->count(),
+            Guest::PASS_SPECIAL => $this->eventGuestQuery()->where('pass_type', Guest::PASS_SPECIAL)->count(),
         ];
     }
 
     private function statusReport(): array
     {
         return [
-            'unused' => Guest::query()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
-            Guest::STATUS_PARTIALLY_USED => Guest::query()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
-            Guest::STATUS_FULLY_USED => Guest::query()->where('status', Guest::STATUS_FULLY_USED)->count(),
-            Guest::STATUS_CANCELLED => Guest::query()->where('status', Guest::STATUS_CANCELLED)->count(),
+            'unused' => $this->eventGuestQuery()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
+            Guest::STATUS_PARTIALLY_USED => $this->eventGuestQuery()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
+            Guest::STATUS_FULLY_USED => $this->eventGuestQuery()->where('status', Guest::STATUS_FULLY_USED)->count(),
+            Guest::STATUS_CANCELLED => $this->eventGuestQuery()->where('status', Guest::STATUS_CANCELLED)->count(),
         ];
     }
 
@@ -686,7 +751,7 @@ class AdminController extends Controller
             return $key;
         };
 
-        Checkin::query()
+        $this->eventCheckinQuery()
             ->where('scan_result', Checkin::RESULT_ADMITTED)
             ->get(['gate_name', 'entries_added'])
             ->each(function (Checkin $checkin) use (&$rows, $ensureGate): void {
@@ -694,7 +759,7 @@ class AdminController extends Controller
                 $rows[$gateName]['admissions'] += (int) $checkin->entries_added;
             });
 
-        Checkin::query()
+        $this->eventCheckinQuery()
             ->whereIn('scan_result', $this->invalidScanResults())
             ->get(['gate_name'])
             ->each(function (Checkin $checkin) use (&$rows, $ensureGate): void {
@@ -718,7 +783,7 @@ class AdminController extends Controller
             ];
         }
 
-        Checkin::query()
+        $this->eventCheckinQuery()
             ->where('scan_result', Checkin::RESULT_ADMITTED)
             ->get(['checked_in_at', 'created_at', 'entries_added'])
             ->each(function (Checkin $checkin) use (&$hours): void {
@@ -733,12 +798,12 @@ class AdminController extends Controller
     private function guestFilterCounts(): array
     {
         return [
-            'all' => Guest::query()->count(),
-            'unused' => Guest::query()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
-            Guest::STATUS_PARTIALLY_USED => Guest::query()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
-            Guest::STATUS_FULLY_USED => Guest::query()->where('status', Guest::STATUS_FULLY_USED)->count(),
-            Guest::STATUS_CANCELLED => Guest::query()->where('status', Guest::STATUS_CANCELLED)->count(),
-            'revoked' => QrCode::query()
+            'all' => $this->eventGuestQuery()->count(),
+            'unused' => $this->eventGuestQuery()->where('status', Guest::STATUS_ACTIVE)->where('used_entries', 0)->count(),
+            Guest::STATUS_PARTIALLY_USED => $this->eventGuestQuery()->where('status', Guest::STATUS_PARTIALLY_USED)->count(),
+            Guest::STATUS_FULLY_USED => $this->eventGuestQuery()->where('status', Guest::STATUS_FULLY_USED)->count(),
+            Guest::STATUS_CANCELLED => $this->eventGuestQuery()->where('status', Guest::STATUS_CANCELLED)->count(),
+            'revoked' => $this->eventQrQuery()
                 ->where(function ($query): void {
                     $query->where('is_active', false)->orWhereNotNull('revoked_at');
                 })
@@ -771,7 +836,7 @@ class AdminController extends Controller
 
     private function filteredCheckinsQuery(array $filters): Builder
     {
-        $query = Checkin::query();
+        $query = $this->eventCheckinQuery();
 
         if ($filters['search'] !== '') {
             $search = $filters['search'];
@@ -800,7 +865,7 @@ class AdminController extends Controller
 
     private function checkinSummary(): array
     {
-        $todayQuery = Checkin::query()->whereDate('checked_in_at', today());
+        $todayQuery = $this->eventCheckinQuery()->whereDate('checked_in_at', today());
 
         return [
             'total_scans_today' => (clone $todayQuery)->count(),
@@ -808,7 +873,7 @@ class AdminController extends Controller
                 ->where('scan_result', Checkin::RESULT_ADMITTED)
                 ->sum('entries_added'),
             'invalid_attempts_today' => (clone $todayQuery)
-                ->whereIn('scan_result', [Checkin::RESULT_INVALID, Checkin::RESULT_ERROR])
+                ->whereIn('scan_result', [Checkin::RESULT_INVALID, Checkin::RESULT_WRONG_EVENT, Checkin::RESULT_ERROR])
                 ->count(),
             'already_used_attempts_today' => (clone $todayQuery)
                 ->where('scan_result', Checkin::RESULT_ALREADY_USED)
@@ -822,6 +887,7 @@ class AdminController extends Controller
     private function checkinGateNames()
     {
         return Checkin::query()
+            ->where('event_id', $this->currentEvent()->id)
             ->whereNotNull('gate_name')
             ->where('gate_name', '<>', '')
             ->distinct()
@@ -835,6 +901,7 @@ class AdminController extends Controller
             Checkin::RESULT_ADMITTED,
             Checkin::RESULT_VALID,
             Checkin::RESULT_INVALID,
+            Checkin::RESULT_WRONG_EVENT,
             Checkin::RESULT_ALREADY_USED,
             Checkin::RESULT_CANCELLED,
             Checkin::RESULT_REVOKED,
@@ -846,6 +913,7 @@ class AdminController extends Controller
     {
         return [
             Checkin::RESULT_INVALID,
+            Checkin::RESULT_WRONG_EVENT,
             Checkin::RESULT_ALREADY_USED,
             Checkin::RESULT_CANCELLED,
             Checkin::RESULT_REVOKED,
@@ -912,10 +980,12 @@ class AdminController extends Controller
         $generateQr = $request->boolean('generate_qr');
         $imported = 0;
         $generated = 0;
+        $eventId = $this->currentEvent()->id;
 
-        DB::transaction(function () use ($validRows, $generateQr, $qrCodes, &$imported, &$generated): void {
+        DB::transaction(function () use ($validRows, $generateQr, $qrCodes, $eventId, &$imported, &$generated): void {
             foreach ($validRows as $row) {
                 $guest = Guest::query()->create([
+                    'event_id' => $eventId,
                     'name' => $row['name'],
                     'phone_number' => $row['phone_number'],
                     'pass_type' => $row['pass_type'],
@@ -1101,6 +1171,9 @@ class AdminController extends Controller
 
     private function qrDownloadFilename(Guest $guest): string
     {
+        $guest->loadMissing('event');
+
+        $safeEvent = $guest->event?->safeSlug() ?? 'event';
         $safeName = (string) Str::of($guest->name)
             ->ascii()
             ->lower()
@@ -1112,7 +1185,7 @@ class AdminController extends Controller
             $safeName = 'guest';
         }
 
-        return $safeName.'_'.str_pad((string) $guest->id, 3, '0', STR_PAD_LEFT).'_qr.png';
+        return $safeEvent.'_'.$safeName.'_'.str_pad((string) $guest->id, 3, '0', STR_PAD_LEFT).'_qr.png';
     }
 
     private function createZip(array $files): string
@@ -1288,6 +1361,7 @@ class AdminController extends Controller
             $guest = Guest::query()
                 ->with('qrCode')
                 ->whereKey($guest->id)
+                ->where('event_id', $guest->event_id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
@@ -1349,9 +1423,12 @@ class AdminController extends Controller
 
     private function qrImagePath(Guest $guest, string $token): string
     {
+        $guest->loadMissing('event');
+
+        $safeEvent = $guest->event?->safeSlug() ?? 'event_'.$guest->event_id;
         $safeToken = preg_replace('/[^A-Za-z0-9]/', '', $token) ?: hash('sha256', $token);
 
-        return 'qr-codes/guest-'.$guest->id.'-'.$safeToken.'.png';
+        return 'qr-codes/'.$safeEvent.'/guest-'.$guest->id.'-'.$safeToken.'.png';
     }
 
     private function storeQrImage(string $path, string $contents): void

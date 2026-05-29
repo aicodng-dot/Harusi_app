@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -27,6 +28,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'event_id',
         'gate_name',
     ];
 
@@ -51,6 +53,15 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            if ($user->role === self::ROLE_SCANNER && ! $user->event_id) {
+                $user->event_id = Event::defaultEvent()->id;
+            }
+        });
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -64,5 +75,10 @@ class User extends Authenticatable
     public function checkins(): HasMany
     {
         return $this->hasMany(Checkin::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 }

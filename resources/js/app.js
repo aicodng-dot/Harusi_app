@@ -1,5 +1,5 @@
 import './bootstrap';
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || min));
 
@@ -207,14 +207,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const state = {
         scanner: null,
-        scanning: false,
-        busy: false,
-        resultLocked: false,
+        isScanning: false,
+        isStarting: false,
+        isProcessing: false,
+        scanLocked: false,
         token: '',
         guestId: null,
         remaining: 0,
-        lastVerifiedToken: '',
-        lastVerifiedAt: 0,
+        lastScannedCode: null,
+        lastScannedAt: 0,
     };
 
     if (admittedBy) {
@@ -226,10 +227,88 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cameraStatus) cameraStatus.textContent = message;
     };
 
-    const stopCamera = async (message = 'Camera stopped') => {
-        state.scanning = false;
+    const getScannerState = () => {
+        if (!state.scanner) return Html5QrcodeScannerState.NOT_STARTED;
 
-        if (state.scanner) {
+        try {
+            return state.scanner.getState();
+        } catch (error) {
+            return Html5QrcodeScannerState.NOT_STARTED;
+        }
+    };
+
+    const scannerIsStarted = () => [
+        Html5QrcodeScannerState.SCANNING,
+        Html5QrcodeScannerState.PAUSED,
+    ].includes(getScannerState());
+
+    const scannerIsScanning = () => getScannerState() === Html5QrcodeScannerState.SCANNING;
+    const scannerIsPaused = () => getScannerState() === Html5QrcodeScannerState.PAUSED;
+
+    const ensureScanner = () => {
+        if (!state.scanner && qrReader) {
+            state.scanner = new Html5Qrcode(qrReader.id, {
+                formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                verbose: false,
+            });
+        }
+
+        return state.scanner;
+    };
+
+    const clearResult = () => {
+        idleResult?.removeAttribute('hidden');
+        panel?.setAttribute('hidden', '');
+        scanAnotherButton?.setAttribute('hidden', '');
+        admitControls?.setAttribute('hidden', '');
+
+        if (resultMessage) resultMessage.textContent = '';
+        if (allowedCount) allowedCount.textContent = '0';
+        if (usedCount) usedCount.textContent = '0';
+        if (remainingCount) remainingCount.textContent = '0';
+        if (phoneNumber) phoneNumber.textContent = 'Unavailable';
+        if (systemStatus) systemStatus.textContent = 'Unknown';
+        if (quantityInput) {
+            quantityInput.max = '10';
+            quantityInput.value = '1';
+        }
+    };
+
+    const resetScanState = () => {
+        state.isProcessing = false;
+        state.scanLocked = false;
+        state.token = '';
+        state.guestId = null;
+        state.remaining = 0;
+        state.lastScannedCode = null;
+        state.lastScannedAt = 0;
+
+        if (manualToken) manualToken.value = '';
+    };
+
+    const pauseCameraForResult = async (message = 'Scan paused') => {
+        state.isScanning = false;
+        state.scanLocked = true;
+
+        if (state.scanner && scannerIsScanning()) {
+            try {
+                state.scanner.pause(true);
+                setCameraStatus(message);
+                return;
+            } catch (error) {
+                await stopCamera(message);
+                state.scanLocked = true;
+                return;
+            }
+        }
+
+        setCameraStatus(message);
+    };
+
+    const stopCamera = async (message = 'Camera stopped') => {
+        state.isScanning = false;
+
+        if (state.scanner && scannerIsStarted()) {
             try {
                 await state.scanner.stop();
             } catch (error) {
@@ -237,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        state.scanLocked = false;
         setCameraStatus(message);
     };
 
@@ -245,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         admitted: 'ADMITTED SUCCESSFULLY',
         already_used: 'ALREADY FULLY USED',
         fully_used: 'ALREADY FULLY USED',
+        wrong_event: 'WRONG EVENT',
         invalid: 'INVALID QR CODE',
         cancelled: 'CANCELLED PASS',
         revoked: 'REVOKED QR CODE',
@@ -255,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const badgeClass = (result) => {
         if (['valid', 'admitted'].includes(result)) return 'bg-emerald-600 text-white';
         if (['already_used', 'partially_used', 'over_limit', 'fully_used'].includes(result)) return 'bg-amber-400 text-zinc-950';
-        if (['revoked', 'cancelled', 'invalid', 'error', 'connection_error'].includes(result)) return 'bg-rose-600 text-white';
+        if (['revoked', 'cancelled', 'invalid', 'wrong_event', 'error', 'connection_error'].includes(result)) return 'bg-rose-600 text-white';
         return 'bg-zinc-100 text-zinc-700';
     };
 
@@ -307,6 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
         idleResult?.setAttribute('hidden', '');
         panel?.removeAttribute('hidden');
         scanAnotherButton?.removeAttribute('hidden');
+        state.isScanning = false;
+        state.scanLocked = true;
 
         const guest = payload.guest || null;
         const result = payload.result || 'unknown';
@@ -338,22 +421,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const verifyToken = async (rawToken) => {
-        if (state.busy) return;
+        if (state.isProcessing) return false;
 
         const token = (rawToken || manualToken?.value || '').trim();
         if (!token) {
             setResult({ ok: false, result: 'invalid', message: 'Enter or scan a QR token.' });
-            return;
+            return false;
         }
 
-        const now = Date.now();
-        if (state.lastVerifiedToken === token && now - state.lastVerifiedAt < 1800) {
-            return;
-        }
-        state.lastVerifiedToken = token;
-        state.lastVerifiedAt = now;
-
-        state.busy = true;
+        state.isProcessing = true;
         if (verifyButton) verifyButton.textContent = 'Verifying...';
         setCameraStatus('Validating QR code...');
 
@@ -365,15 +441,25 @@ document.addEventListener('DOMContentLoaded', () => {
             setResult({ ok: false, result: 'connection_error', message: 'Connection failed. Try again.' });
         }
 
-        state.busy = false;
+        state.isProcessing = false;
         if (verifyButton) verifyButton.textContent = 'Verify pass';
         setCameraStatus('Result ready');
+        return true;
     };
 
-    const startCamera = async () => {
+    const startCamera = async ({ reset = false } = {}) => {
         if (!qrReader) {
             setCameraStatus('Camera scanner unavailable');
             return;
+        }
+
+        if (state.isStarting || state.isProcessing) {
+            return;
+        }
+
+        if (reset) {
+            resetScanState();
+            clearResult();
         }
 
         if (!window.isSecureContext) {
@@ -386,12 +472,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (state.scanning || state.busy) {
+        state.scanLocked = false;
+        scanAnotherButton?.setAttribute('hidden', '');
+
+        ensureScanner();
+
+        if (state.scanner && scannerIsPaused()) {
+            setCameraStatus('Resuming camera...');
+            state.isStarting = true;
+
+            try {
+                state.scanner.resume();
+                state.isScanning = true;
+                setCameraStatus('Scanning QR code');
+                window.setTimeout(() => {
+                    state.isStarting = false;
+                }, 300);
+                return;
+            } catch (error) {
+                state.isStarting = false;
+                await stopCamera('Restarting camera...');
+            }
+        }
+
+        if (state.scanner && scannerIsScanning()) {
+            state.isScanning = true;
+            setCameraStatus('Scanning QR code');
             return;
         }
 
-        state.resultLocked = false;
-        scanAnotherButton?.setAttribute('hidden', '');
         setCameraStatus('Starting camera...');
 
         const scanConfig = {
@@ -401,22 +510,23 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const onScanSuccess = async (decodedText) => {
-            if (state.busy || state.resultLocked) return;
+            const scannedCode = (decodedText || '').trim();
+            const now = Date.now();
 
-            state.resultLocked = true;
-            if (manualToken) manualToken.value = decodedText;
+            if (!scannedCode || state.isProcessing || state.scanLocked) return;
+            if (state.lastScannedCode === scannedCode && now - state.lastScannedAt < 1500) return;
+
+            state.scanLocked = true;
+            state.lastScannedCode = scannedCode;
+            state.lastScannedAt = now;
+            if (manualToken) manualToken.value = scannedCode;
             setCameraStatus('QR detected');
-            await stopCamera('Scan paused');
-            await verifyToken(decodedText);
+            await pauseCameraForResult('Scan paused');
+            await verifyToken(scannedCode);
         };
 
         try {
-            if (!state.scanner) {
-                state.scanner = new Html5Qrcode(qrReader.id, {
-                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-                    verbose: false,
-                });
-            }
+            state.isStarting = true;
 
             try {
                 await state.scanner.start({ facingMode: 'environment' }, scanConfig, onScanSuccess);
@@ -431,9 +541,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 await state.scanner.start(fallbackCamera.id, scanConfig, onScanSuccess);
             }
 
-            state.scanning = true;
+            state.isScanning = true;
             setCameraStatus('Scanning QR code');
         } catch (error) {
+            state.isScanning = false;
+            state.scanLocked = false;
             const errorText = `${error?.name || ''} ${error?.message || error || ''}`.toLowerCase();
 
             if (errorText.includes('permission') || errorText.includes('notallowed') || errorText.includes('denied')) {
@@ -443,22 +555,24 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 setCameraStatus('Camera could not start');
             }
+        } finally {
+            state.isStarting = false;
         }
     };
 
     startCameraButton?.addEventListener('click', startCamera);
     stopCameraButton?.addEventListener('click', () => stopCamera());
-    scanAnotherButton?.addEventListener('click', startCamera);
+    scanAnotherButton?.addEventListener('click', () => startCamera({ reset: true }));
     verifyButton?.addEventListener('click', async () => {
-        state.resultLocked = true;
-        await stopCamera('Manual verification');
-        await verifyToken();
+        state.scanLocked = true;
+        await pauseCameraForResult('Manual verification');
+        await verifyToken(manualToken?.value || '');
     });
     manualToken?.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            state.resultLocked = true;
-            stopCamera('Manual verification').then(() => verifyToken());
+            state.scanLocked = true;
+            pauseCameraForResult('Manual verification').then(() => verifyToken(manualToken?.value || ''));
         }
     });
 
@@ -480,10 +594,10 @@ document.addEventListener('DOMContentLoaded', () => {
     quantityInput?.addEventListener('input', syncQuantity);
 
     admitButton?.addEventListener('click', async () => {
-        if (state.busy) return;
+        if (state.isProcessing) return;
 
         const quantity = clamp(quantityInput?.value, 1, Math.max(1, state.remaining));
-        state.busy = true;
+        state.isProcessing = true;
         admitButton.disabled = true;
         admitButton.classList.add('opacity-70', 'cursor-not-allowed');
         admitButton.textContent = 'Recording...';
@@ -501,16 +615,29 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             setResult({ ok: false, result: 'error', message: 'Network error. Try again.' });
         } finally {
-            state.busy = false;
+            state.isProcessing = false;
             admitButton.disabled = false;
             admitButton.classList.remove('opacity-70', 'cursor-not-allowed');
             admitButton.textContent = 'Confirm Admission';
         }
     });
 
+    ensureScanner();
+    window.addEventListener('beforeunload', () => {
+        if (state.scanner && scannerIsStarted()) {
+            try {
+                state.scanner.stop().catch(() => {});
+            } catch (error) {
+                // The browser can unload during a scanner state transition.
+            }
+        }
+    });
+
     if ((scanner.dataset.initialToken || '').trim()) {
         verifyToken(scanner.dataset.initialToken);
     } else {
+        resetScanState();
+        clearResult();
         setCameraStatus('Tap Start Camera to scan');
     }
 });
