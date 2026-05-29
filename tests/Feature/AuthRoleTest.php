@@ -59,6 +59,20 @@ class AuthRoleTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_logout_clears_authenticated_session(): void
+    {
+        $admin = $this->makeUser(User::ROLE_ADMIN, 'admin@example.com');
+
+        $this->actingAs($admin)
+            ->post(route('logout'))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+
+        $this->get(route('admin.dashboard'))
+            ->assertRedirect(route('login'));
+    }
+
     private function makeUser(string $role, string $email, ?string $gateName = null): User
     {
         return User::query()->create([

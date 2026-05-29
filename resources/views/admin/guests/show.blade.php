@@ -69,7 +69,7 @@
                         <p class="section-kicker">QR code</p>
                         <p class="mt-2"><span class="status-badge {{ $statusBadge($qrStatus) }}">{{ $qrStatus }}</span></p>
                     </div>
-                    <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) onsubmit="return confirm('Regenerate this QR code? The old token will stop working.');" @endif>
+                    <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) data-confirm data-confirm-title="Regenerate QR code" data-confirm-message="The current QR token will stop working immediately." @endif>
                         @csrf
                         <button type="submit" class="secondary-button">{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}</button>
                     </form>

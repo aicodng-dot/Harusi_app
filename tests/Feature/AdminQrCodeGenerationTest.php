@@ -86,6 +86,7 @@ class AdminQrCodeGenerationTest extends TestCase
 
         $this->assertNotSame($oldToken, $newQrCode->qr_token);
         $this->assertNotSame($oldImagePath, $newQrCode->qr_image_path);
+        $this->assertDatabaseCount('qr_codes', 1);
         Storage::disk('public')->assertMissing($oldImagePath);
         Storage::disk('public')->assertExists($newQrCode->qr_image_path);
 

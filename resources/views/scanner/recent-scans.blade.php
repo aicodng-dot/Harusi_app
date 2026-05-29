@@ -8,6 +8,15 @@
             'cancelled', 'revoked', 'invalid', 'error' => 'bg-rose-400 text-white',
             default => 'bg-white/10 text-white',
         };
+        $resultLabel = fn (?string $result) => match ($result) {
+            'valid' => 'VALID PASS',
+            'admitted' => 'ADMITTED SUCCESSFULLY',
+            'already_used' => 'ALREADY FULLY USED',
+            'invalid', 'error' => 'INVALID QR CODE',
+            'cancelled' => 'CANCELLED PASS',
+            'revoked' => 'REVOKED QR CODE',
+            default => 'SCAN RESULT',
+        };
     @endphp
 
     <main class="scanner-shell">
@@ -28,7 +37,7 @@
                             <p class="truncate text-base font-semibold">{{ $checkin->guest?->name ?? 'Unknown QR' }}</p>
                             <p class="mt-1 text-sm font-semibold text-zinc-400">{{ $checkin->checked_in_at?->format('M j, H:i') ?? $checkin->created_at->format('M j, H:i') }}</p>
                         </div>
-                        <span class="shrink-0 rounded-md px-2 py-1 text-xs font-bold {{ $resultBadge($checkin->scan_result) }}">{{ str_replace('_', ' ', $checkin->scan_result) }}</span>
+                        <span class="shrink-0 rounded-md px-2 py-1 text-xs font-black {{ $resultBadge($checkin->scan_result) }}">{{ $resultLabel($checkin->scan_result) }}</span>
                     </div>
 
                     <div class="mt-4 grid grid-cols-3 gap-2 text-center">

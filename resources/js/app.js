@@ -55,10 +55,90 @@ document.addEventListener('DOMContentLoaded', () => {
     allowedAdmissions?.addEventListener('input', syncPassType);
     syncPassType();
 
+    const userRole = document.querySelector('[data-user-role]');
+    const gateName = document.querySelector('[data-gate-name]');
+
+    const syncUserRole = () => {
+        if (!userRole || !gateName) return;
+
+        const scannerSelected = userRole.value === 'scanner';
+        gateName.required = scannerSelected;
+        gateName.disabled = !scannerSelected;
+        gateName.classList.toggle('bg-stone-100', !scannerSelected);
+
+        if (!scannerSelected) {
+            gateName.value = '';
+        }
+    };
+
+    userRole?.addEventListener('change', syncUserRole);
+    syncUserRole();
+
     const qrDialog = document.querySelector('[data-qr-dialog]');
     const qrImage = document.querySelector('[data-qr-preview-image]');
     const qrTitle = document.querySelector('[data-qr-title]');
     const qrDownload = document.querySelector('[data-qr-download]');
+    const confirmDialog = document.querySelector('[data-confirm-dialog]');
+    const confirmTitle = document.querySelector('[data-confirm-title]');
+    const confirmMessage = document.querySelector('[data-confirm-message]');
+    const confirmCancel = document.querySelector('[data-confirm-cancel]');
+    const confirmAccept = document.querySelector('[data-confirm-accept]');
+    let pendingConfirmForm = null;
+
+    document.querySelectorAll('form[data-confirm]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (form.dataset.confirmed === 'true') {
+                delete form.dataset.confirmed;
+                return;
+            }
+
+            event.preventDefault();
+
+            const title = form.dataset.confirmTitle || 'Confirm action';
+            const message = form.dataset.confirmMessage || form.dataset.confirm || 'This action cannot be undone.';
+
+            if (!confirmDialog || typeof confirmDialog.showModal !== 'function') {
+                if (window.confirm(`${title}\n\n${message}`)) {
+                    form.dataset.confirmed = 'true';
+                    form.requestSubmit();
+                }
+                return;
+            }
+
+            pendingConfirmForm = form;
+            if (confirmTitle) confirmTitle.textContent = title;
+            if (confirmMessage) confirmMessage.textContent = message;
+            confirmDialog.showModal();
+        });
+    });
+
+    confirmCancel?.addEventListener('click', () => {
+        pendingConfirmForm = null;
+        confirmDialog?.close();
+    });
+
+    confirmAccept?.addEventListener('click', () => {
+        if (!pendingConfirmForm) return;
+
+        const form = pendingConfirmForm;
+        pendingConfirmForm = null;
+        form.dataset.confirmed = 'true';
+        confirmDialog?.close();
+        form.requestSubmit();
+    });
+
+    document.querySelectorAll('[data-disable-on-submit]').forEach((form) => {
+        form.addEventListener('submit', () => {
+            form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-not-allowed');
+
+                if (button.dataset.submittingText) {
+                    button.textContent = button.dataset.submittingText;
+                }
+            });
+        });
+    });
 
     document.querySelectorAll('[data-preview-qr]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -80,6 +160,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const scanner = document.querySelector('[data-scanner]');
+    document.querySelectorAll('[data-manual-admit-card]').forEach((card) => {
+        const quantity = card.querySelector('[data-manual-quantity]');
+        const minus = card.querySelector('[data-manual-minus]');
+        const plus = card.querySelector('[data-manual-plus]');
+
+        const syncManualQuantity = (nextValue = quantity?.value) => {
+            if (!quantity) return;
+            quantity.value = String(clamp(nextValue, Number(quantity.min || 1), Number(quantity.max || 1)));
+        };
+
+        minus?.addEventListener('click', () => syncManualQuantity(Number(quantity?.value || 1) - 1));
+        plus?.addEventListener('click', () => syncManualQuantity(Number(quantity?.value || 1) + 1));
+        quantity?.addEventListener('input', () => syncManualQuantity());
+    });
+
     if (!scanner) return;
 
     const csrf = scanner.dataset.csrf;
@@ -145,11 +240,30 @@ document.addEventListener('DOMContentLoaded', () => {
         setCameraStatus(message);
     };
 
+    const displayStatus = (result) => ({
+        valid: 'VALID PASS',
+        admitted: 'ADMITTED SUCCESSFULLY',
+        already_used: 'ALREADY FULLY USED',
+        fully_used: 'ALREADY FULLY USED',
+        invalid: 'INVALID QR CODE',
+        cancelled: 'CANCELLED PASS',
+        revoked: 'REVOKED QR CODE',
+        error: 'INVALID QR CODE',
+        connection_error: 'CONNECTION ERROR',
+    }[result] || 'SCAN RESULT');
+
     const badgeClass = (result) => {
-        if (['valid', 'admitted'].includes(result)) return 'bg-emerald-100 text-emerald-800';
-        if (['already_used', 'partially_used', 'over_limit'].includes(result)) return 'bg-amber-100 text-amber-800';
-        if (['revoked', 'cancelled', 'fully_used', 'invalid', 'error'].includes(result)) return 'bg-rose-100 text-rose-800';
+        if (['valid', 'admitted'].includes(result)) return 'bg-emerald-600 text-white';
+        if (['already_used', 'partially_used', 'over_limit', 'fully_used'].includes(result)) return 'bg-amber-400 text-zinc-950';
+        if (['revoked', 'cancelled', 'invalid', 'error', 'connection_error'].includes(result)) return 'bg-rose-600 text-white';
         return 'bg-zinc-100 text-zinc-700';
+    };
+
+    const panelClass = (result) => {
+        if (result === 'admitted') return 'scanner-result-panel scanner-result-admitted';
+        if (result === 'valid') return 'scanner-result-panel scanner-result-valid';
+        if (['already_used', 'fully_used'].includes(result)) return 'scanner-result-panel scanner-result-warning';
+        return 'scanner-result-panel scanner-result-danger';
     };
 
     const normalizeValidationPayload = (payload) => {
@@ -198,12 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = payload.result || 'unknown';
         const canAdmit = Boolean(payload.ok && result !== 'admitted' && guest && guest.remaining_admissions > 0);
 
+        if (panel) panel.className = panelClass(result);
         if (resultLabel) resultLabel.textContent = guest?.pass_type || 'QR result';
         if (resultTitle) resultTitle.textContent = guest?.guest_name || 'Unknown pass';
-        if (resultMessage) resultMessage.textContent = payload.message || 'Scan again.';
+        if (resultMessage) resultMessage.textContent = payload.message || displayStatus(result);
         if (resultBadge) {
-            resultBadge.className = `rounded-md px-2.5 py-1 text-xs font-semibold ${badgeClass(result)}`;
-            resultBadge.textContent = result.replaceAll('_', ' ');
+            resultBadge.className = `shrink-0 rounded-md px-2.5 py-1 text-xs font-black ${badgeClass(result)}`;
+            resultBadge.textContent = displayStatus(result);
         }
         if (allowedCount) allowedCount.textContent = guest?.allowed_admissions ?? 0;
         if (usedCount) usedCount.textContent = guest?.admitted_count ?? 0;
@@ -242,9 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (verifyButton) verifyButton.textContent = 'Verifying...';
         setCameraStatus('Validating QR code...');
 
-        const { data } = await jsonRequest(verifyUrl, csrf, { scanned_url: token });
-        if (manualToken) manualToken.value = data.token || token;
-        setResult(data);
+        try {
+            const { data } = await jsonRequest(verifyUrl, csrf, { scanned_url: token });
+            if (manualToken) manualToken.value = data.token || token;
+            setResult(data);
+        } catch (error) {
+            setResult({ ok: false, result: 'connection_error', message: 'Connection failed. Try again.' });
+        }
 
         state.busy = false;
         if (verifyButton) verifyButton.textContent = 'Verify pass';
@@ -257,6 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!window.isSecureContext) {
+            setCameraStatus('Phone camera requires HTTPS');
+            return;
+        }
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCameraStatus('Camera not supported');
+            return;
+        }
+
         if (state.scanning || state.busy) {
             return;
         }
@@ -264,6 +393,22 @@ document.addEventListener('DOMContentLoaded', () => {
         state.resultLocked = false;
         scanAnotherButton?.setAttribute('hidden', '');
         setCameraStatus('Starting camera...');
+
+        const scanConfig = {
+            fps: 10,
+            qrbox: { width: 240, height: 240 },
+            aspectRatio: 1,
+        };
+
+        const onScanSuccess = async (decodedText) => {
+            if (state.busy || state.resultLocked) return;
+
+            state.resultLocked = true;
+            if (manualToken) manualToken.value = decodedText;
+            setCameraStatus('QR detected');
+            await stopCamera('Scan paused');
+            await verifyToken(decodedText);
+        };
 
         try {
             if (!state.scanner) {
@@ -273,28 +418,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            await state.scanner.start(
-                { facingMode: { ideal: 'environment' } },
-                {
-                    fps: 10,
-                    qrbox: { width: 240, height: 240 },
-                    aspectRatio: 1,
-                },
-                async (decodedText) => {
-                    if (state.busy || state.resultLocked) return;
+            try {
+                await state.scanner.start({ facingMode: 'environment' }, scanConfig, onScanSuccess);
+            } catch (error) {
+                const cameras = await Html5Qrcode.getCameras().catch(() => []);
+                const fallbackCamera = cameras.find((camera) => /back|rear|environment/i.test(camera.label || '')) || cameras[0];
 
-                    state.resultLocked = true;
-                    if (manualToken) manualToken.value = decodedText;
-                    setCameraStatus('QR detected');
-                    await stopCamera('Scan paused');
-                    await verifyToken(decodedText);
-                },
-            );
+                if (!fallbackCamera?.id) {
+                    throw error;
+                }
+
+                await state.scanner.start(fallbackCamera.id, scanConfig, onScanSuccess);
+            }
 
             state.scanning = true;
             setCameraStatus('Scanning QR code');
         } catch (error) {
-            setCameraStatus('Camera permission needed');
+            const errorText = `${error?.name || ''} ${error?.message || error || ''}`.toLowerCase();
+
+            if (errorText.includes('permission') || errorText.includes('notallowed') || errorText.includes('denied')) {
+                setCameraStatus('Allow camera permission, then tap Start Camera');
+            } else if (errorText.includes('notfound') || errorText.includes('overconstrained') || errorText.includes('no cameras')) {
+                setCameraStatus('No camera found');
+            } else {
+                setCameraStatus('Camera could not start');
+            }
         }
     };
 
@@ -336,24 +484,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const quantity = clamp(quantityInput?.value, 1, Math.max(1, state.remaining));
         state.busy = true;
+        admitButton.disabled = true;
+        admitButton.classList.add('opacity-70', 'cursor-not-allowed');
         admitButton.textContent = 'Recording...';
 
-        const { data } = await jsonRequest(admitUrl, csrf, {
-            guest_id: state.guestId,
-            qr_token: state.token || manualToken?.value || '',
-            entries_to_admit: quantity,
-            admitted_by: admittedBy?.value || '',
-            device_label: 'Mobile scanner',
-        });
+        try {
+            const { data } = await jsonRequest(admitUrl, csrf, {
+                guest_id: state.guestId,
+                qr_token: state.token || manualToken?.value || '',
+                entries_to_admit: quantity,
+                admitted_by: admittedBy?.value || '',
+                device_label: 'Mobile scanner',
+            });
 
-        setResult(data);
-        state.busy = false;
-        admitButton.textContent = 'Confirm Admission';
+            setResult(data);
+        } catch (error) {
+            setResult({ ok: false, result: 'error', message: 'Network error. Try again.' });
+        } finally {
+            state.busy = false;
+            admitButton.disabled = false;
+            admitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+            admitButton.textContent = 'Confirm Admission';
+        }
     });
 
     if ((scanner.dataset.initialToken || '').trim()) {
         verifyToken(scanner.dataset.initialToken);
     } else {
-        setTimeout(startCamera, 350);
+        setCameraStatus('Tap Start Camera to scan');
     }
 });

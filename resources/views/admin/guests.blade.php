@@ -31,7 +31,10 @@
                 <p class="section-kicker">Guest management</p>
                 <h2 class="mt-2 text-2xl font-semibold sm:text-3xl">Guest passes</h2>
             </div>
-            <a href="{{ route('admin.guests.create') }}" class="primary-button">Create guest</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('admin.guests.import') }}" class="secondary-button">Import CSV</a>
+                <a href="{{ route('admin.guests.create') }}" class="primary-button">Create guest</a>
+            </div>
         </div>
 
         @if (session('success'))
@@ -112,7 +115,7 @@
                                         <a href="{{ route('admin.guests.show', $guest) }}" class="table-action">View</a>
                                         <a href="{{ route('admin.guests.edit', $guest) }}" class="table-action">Edit</a>
 
-                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) onsubmit="return confirm('Regenerate this QR code? The old token will stop working.');" @endif>
+                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) data-confirm data-confirm-title="Regenerate QR code" data-confirm-message="The current QR token will stop working immediately." @endif>
                                             @csrf
                                             <button type="submit" class="table-action">{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}</button>
                                         </form>
@@ -122,14 +125,14 @@
                                         @endif
 
                                         @if ($guest->status !== 'cancelled')
-                                            <form method="POST" action="{{ route('admin.guests.cancel', $guest) }}">
+                                            <form method="POST" action="{{ route('admin.guests.cancel', $guest) }}" data-confirm data-confirm-title="Cancel guest pass" data-confirm-message="This pass will no longer be admitted at the gate.">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="table-action table-action-danger">Cancel</button>
                                             </form>
                                         @endif
 
-                                        <form method="POST" action="{{ route('admin.guests.destroy', $guest) }}" onsubmit="return confirm('Delete this guest pass? This cannot be undone.');">
+                                        <form method="POST" action="{{ route('admin.guests.destroy', $guest) }}" data-confirm data-confirm-title="Delete guest pass" data-confirm-message="This will delete the guest and linked QR data. This cannot be undone.">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="table-action table-action-danger">Delete</button>

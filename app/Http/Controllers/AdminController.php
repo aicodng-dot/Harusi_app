@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -240,6 +241,71 @@ class AdminController extends Controller
                 'used_entries' => 0,
             ]),
         ]);
+    }
+
+    public function import(): View
+    {
+        return view('admin.guests.import', [
+            'rows' => [],
+            'summary' => null,
+            'headerErrors' => [],
+            'generateQr' => true,
+        ]);
+    }
+
+    public function processGuestImport(Request $request, QrCodeService $qrCodes): View|RedirectResponse
+    {
+        if ($request->input('import_action') === 'confirm') {
+            return $this->confirmGuestImport($request, $qrCodes);
+        }
+
+        $validated = $request->validate([
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+            'generate_qr' => ['nullable', 'boolean'],
+        ], [
+            'csv_file.required' => 'Choose a CSV file to import.',
+            'csv_file.mimes' => 'Upload a CSV file.',
+        ]);
+
+        [$rows, $headerErrors] = $this->parseGuestImportCsv($validated['csv_file']->getRealPath());
+        $validRows = collect($rows)
+            ->where('is_valid', true)
+            ->pluck('data')
+            ->values()
+            ->all();
+
+        if ($validRows === []) {
+            $request->session()->forget('guest_import.valid_rows');
+        } else {
+            $request->session()->put('guest_import.valid_rows', $validRows);
+        }
+
+        return view('admin.guests.import', [
+            'rows' => $rows,
+            'summary' => [
+                'total' => count($rows),
+                'valid' => count($validRows),
+                'invalid' => count($rows) - count($validRows),
+            ],
+            'headerErrors' => $headerErrors,
+            'generateQr' => $request->boolean('generate_qr'),
+        ]);
+    }
+
+    public function sampleGuestImport(): StreamedResponse
+    {
+        return $this->streamCsv('guest-import-template.csv', [
+            'name',
+            'phone_number',
+            'pass_type',
+            'allowed_entries',
+        ], function () {
+            return [
+                ['John Peter', '0712345678', Guest::PASS_SINGLE, 1],
+                ['Mary Joseph', '0755555555', Guest::PASS_DOUBLE, 2],
+                ['Kimaro Family', '0788888888', Guest::PASS_SPECIAL, 6],
+            ];
+        });
     }
 
     public function show(Guest $guest): View
@@ -815,6 +881,211 @@ class AdminController extends Controller
         ];
     }
 
+    private function confirmGuestImport(Request $request, QrCodeService $qrCodes): RedirectResponse
+    {
+        $request->validate([
+            'generate_qr' => ['nullable', 'boolean'],
+        ]);
+
+        $rows = $request->session()->get('guest_import.valid_rows', []);
+        if (! is_array($rows) || $rows === []) {
+            return redirect()
+                ->route('admin.guests.import')
+                ->withErrors(['csv_file' => 'Upload and preview a CSV file before importing.']);
+        }
+
+        $validRows = collect($rows)
+            ->map(fn (array $row): array => $this->validateGuestImportRow($row))
+            ->filter(fn (array $row): bool => $row['errors'] === [])
+            ->pluck('data')
+            ->values()
+            ->all();
+
+        if ($validRows === []) {
+            $request->session()->forget('guest_import.valid_rows');
+
+            return redirect()
+                ->route('admin.guests.import')
+                ->withErrors(['csv_file' => 'There are no valid rows to import.']);
+        }
+
+        $generateQr = $request->boolean('generate_qr');
+        $imported = 0;
+        $generated = 0;
+
+        DB::transaction(function () use ($validRows, $generateQr, $qrCodes, &$imported, &$generated): void {
+            foreach ($validRows as $row) {
+                $guest = Guest::query()->create([
+                    'name' => $row['name'],
+                    'phone_number' => $row['phone_number'],
+                    'pass_type' => $row['pass_type'],
+                    'allowed_entries' => $row['allowed_entries'],
+                    'used_entries' => 0,
+                    'status' => Guest::STATUS_ACTIVE,
+                ]);
+
+                $imported++;
+
+                if ($generateQr) {
+                    $this->generateQrForGuest($guest, $qrCodes);
+                    $generated++;
+                }
+            }
+        });
+
+        $request->session()->forget('guest_import.valid_rows');
+
+        $message = 'Imported '.$imported.' '.($imported === 1 ? 'guest' : 'guests').'.';
+        if ($generateQr) {
+            $message = 'Imported '.$imported.' '.($imported === 1 ? 'guest' : 'guests')
+                .' and generated '.$generated.' QR '.($generated === 1 ? 'code' : 'codes').'.';
+        }
+
+        return redirect()
+            ->route('admin.guests.index')
+            ->with('success', $message);
+    }
+
+    private function parseGuestImportCsv(string $path): array
+    {
+        $handle = fopen($path, 'r');
+        if (! $handle) {
+            return [[], ['Unable to read the CSV file.']];
+        }
+
+        $header = fgetcsv($handle);
+        if (! is_array($header)) {
+            fclose($handle);
+
+            return [[], ['The CSV file is empty.']];
+        }
+
+        $header = array_map(fn ($column): string => $this->normalizeCsvHeader($column), $header);
+        $requiredColumns = ['name', 'phone_number', 'pass_type', 'allowed_entries'];
+        $missingColumns = array_values(array_diff($requiredColumns, $header));
+
+        if ($missingColumns !== []) {
+            fclose($handle);
+
+            return [[], ['Missing required columns: '.implode(', ', $missingColumns).'.']];
+        }
+
+        $columnIndexes = array_flip($header);
+        $rows = [];
+        $rowNumber = 1;
+
+        while (($values = fgetcsv($handle)) !== false) {
+            $rowNumber++;
+
+            if ($this->csvRowIsBlank($values)) {
+                continue;
+            }
+
+            $rawRow = [];
+            foreach ($requiredColumns as $column) {
+                $rawRow[$column] = trim((string) ($values[$columnIndexes[$column]] ?? ''));
+            }
+
+            $validated = $this->validateGuestImportRow($rawRow);
+
+            $rows[] = [
+                'row_number' => $rowNumber,
+                'data' => $validated['errors'] === [] ? $validated['data'] : $rawRow,
+                'errors' => $validated['errors'],
+                'is_valid' => $validated['errors'] === [],
+            ];
+        }
+
+        fclose($handle);
+
+        return [$rows, []];
+    }
+
+    private function validateGuestImportRow(array $row): array
+    {
+        $errors = [];
+        $name = trim((string) ($row['name'] ?? ''));
+        $phoneNumber = trim((string) ($row['phone_number'] ?? ''));
+        $passType = strtolower(trim((string) ($row['pass_type'] ?? '')));
+        $allowedEntriesRaw = trim((string) ($row['allowed_entries'] ?? ''));
+        $allowedEntries = null;
+
+        if ($name === '') {
+            $errors[] = 'Name is required.';
+        }
+
+        if ($phoneNumber === '') {
+            $errors[] = 'Phone number is required.';
+        }
+
+        if (! in_array($passType, [Guest::PASS_SINGLE, Guest::PASS_DOUBLE, Guest::PASS_SPECIAL], true)) {
+            $errors[] = 'Pass type must be single, double, or special.';
+        }
+
+        if ($allowedEntriesRaw === '') {
+            $errors[] = 'Allowed entries is required.';
+        } else {
+            $allowedEntries = filter_var($allowedEntriesRaw, FILTER_VALIDATE_INT);
+
+            if ($allowedEntries === false) {
+                $errors[] = 'Allowed entries must be a whole number.';
+            } else {
+                $allowedEntries = (int) $allowedEntries;
+
+                if ($allowedEntries < 1) {
+                    $errors[] = 'Allowed entries cannot be less than 1.';
+                }
+
+                if ($allowedEntries > 10) {
+                    $errors[] = 'Allowed entries cannot be more than 10.';
+                }
+            }
+        }
+
+        if ($allowedEntries !== null && in_array($passType, [Guest::PASS_SINGLE, Guest::PASS_DOUBLE, Guest::PASS_SPECIAL], true)) {
+            if ($passType === Guest::PASS_SINGLE && $allowedEntries !== 1) {
+                $errors[] = 'Single passes must have allowed_entries = 1.';
+            }
+
+            if ($passType === Guest::PASS_DOUBLE && $allowedEntries !== 2) {
+                $errors[] = 'Double passes must have allowed_entries = 2.';
+            }
+
+            if ($passType === Guest::PASS_SPECIAL && ($allowedEntries < 3 || $allowedEntries > 10)) {
+                $errors[] = 'Special / Family passes must have allowed_entries from 3 to 10.';
+            }
+        }
+
+        return [
+            'data' => [
+                'name' => $name,
+                'phone_number' => $phoneNumber,
+                'pass_type' => $passType,
+                'allowed_entries' => $allowedEntries ?? $allowedEntriesRaw,
+            ],
+            'errors' => $errors,
+        ];
+    }
+
+    private function normalizeCsvHeader($column): string
+    {
+        $column = preg_replace('/^\xEF\xBB\xBF/', '', (string) $column);
+        $column = strtolower(trim($column));
+
+        return str_replace([' ', '-'], '_', $column);
+    }
+
+    private function csvRowIsBlank(array $row): bool
+    {
+        foreach ($row as $value) {
+            if (trim((string) $value) !== '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function qrStatusLabel(Guest $guest): string
     {
         if (! $guest->qrCode) {
@@ -1013,31 +1284,38 @@ class AdminController extends Controller
 
     private function generateQrForGuest(Guest $guest, QrCodeService $qrCodes): QrCode
     {
-        $guest->loadMissing('qrCode');
-        $oldImagePath = $guest->qrCode?->qr_image_path;
-        $token = $this->uniqueToken();
-        $imagePath = $this->qrImagePath($guest, $token);
+        return DB::transaction(function () use ($guest, $qrCodes): QrCode {
+            $guest = Guest::query()
+                ->with('qrCode')
+                ->whereKey($guest->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $this->storeQrImage($imagePath, $qrCodes->png($this->verificationUrlForToken($token)));
+            $oldImagePath = $guest->qrCode?->qr_image_path;
+            $token = $this->uniqueToken();
+            $imagePath = $this->qrImagePath($guest, $token);
 
-        if ($oldImagePath && $oldImagePath !== $imagePath) {
-            Storage::disk('public')->delete($oldImagePath);
-        }
+            $this->storeQrImage($imagePath, $qrCodes->png($this->verificationUrlForToken($token)));
 
-        $qrCode = $guest->qrCode()->updateOrCreate(
-            ['guest_id' => $guest->id],
-            [
-                'qr_token' => $token,
-                'qr_image_path' => $imagePath,
-                'is_active' => true,
-                'generated_at' => now(),
-                'revoked_at' => null,
-            ]
-        );
+            if ($oldImagePath && $oldImagePath !== $imagePath) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
 
-        $guest->setRelation('qrCode', $qrCode);
+            $qrCode = $guest->qrCode()->updateOrCreate(
+                ['guest_id' => $guest->id],
+                [
+                    'qr_token' => $token,
+                    'qr_image_path' => $imagePath,
+                    'is_active' => true,
+                    'generated_at' => now(),
+                    'revoked_at' => null,
+                ]
+            );
 
-        return $qrCode;
+            $guest->setRelation('qrCode', $qrCode);
+
+            return $qrCode;
+        }, 3);
     }
 
     private function ensureQrImage(Guest $guest, QrCodeService $qrCodes): QrCode

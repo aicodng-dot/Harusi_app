@@ -9,6 +9,7 @@ use App\Models\QrCode;
 use App\Models\ScanLog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -67,6 +68,116 @@ class ScannerController extends Controller
                 ->latest()
                 ->paginate(15),
         ]);
+    }
+
+    public function manualSearch(Request $request): View
+    {
+        $search = trim((string) $request->query('q', ''));
+        $guests = collect();
+
+        if ($search !== '') {
+            $guests = Guest::query()
+                ->with('qrCode')
+                ->where(function (Builder $query) use ($search): void {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('phone_number', 'like', '%'.$search.'%');
+                })
+                ->orderBy('name')
+                ->take(12)
+                ->get();
+        }
+
+        return view('scanner.manual-search', [
+            'search' => $search,
+            'guests' => $guests,
+        ]);
+    }
+
+    public function manualAdmit(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'guest_id' => ['required', 'integer', 'min:1'],
+            'entries_to_admit' => ['required', 'integer', 'min:1', 'max:10'],
+            'search' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $quantity = (int) $validated['entries_to_admit'];
+        $search = trim((string) ($validated['search'] ?? ''));
+
+        $result = DB::transaction(function () use ($request, $validated, $quantity) {
+            $guest = Guest::query()
+                ->with('qrCode')
+                ->whereKey((int) $validated['guest_id'])
+                ->lockForUpdate()
+                ->first();
+
+            if (! $guest) {
+                return [
+                    'ok' => false,
+                    'message' => 'Guest was not found.',
+                ];
+            }
+
+            if ($guest->status === Guest::STATUS_CANCELLED) {
+                return [
+                    'ok' => false,
+                    'message' => 'Cancelled pass. Admission was not recorded.',
+                ];
+            }
+
+            $remainingEntries = $guest->remainingEntries();
+            if ($guest->status === Guest::STATUS_FULLY_USED || $remainingEntries <= 0) {
+                return [
+                    'ok' => false,
+                    'message' => 'Already fully used. Admission was not recorded.',
+                ];
+            }
+
+            if ($guest->allowed_entries > 10) {
+                return [
+                    'ok' => false,
+                    'message' => 'Allowed entries may not exceed 10.',
+                ];
+            }
+
+            if ($quantity > $remainingEntries) {
+                return [
+                    'ok' => false,
+                    'message' => 'Requested entries exceed the remaining allowance.',
+                ];
+            }
+
+            $guest = $this->applyAdmissionToLockedGuest($guest, $quantity);
+            if (! $guest) {
+                return [
+                    'ok' => false,
+                    'message' => 'Requested entries exceed the remaining allowance.',
+                ];
+            }
+
+            Admission::query()->create([
+                'guest_id' => $guest->id,
+                'quantity' => $quantity,
+                'admitted_by' => $request->user()?->name,
+                'device_label' => 'Manual search',
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+                'admitted_at' => now(),
+            ]);
+
+            $this->recordScan($guest, $guest->qrCode, $quantity, Checkin::RESULT_ADMITTED, 'Manual admission recorded.', $request);
+
+            return [
+                'ok' => true,
+                'message' => $quantity.' entr'.($quantity === 1 ? 'y' : 'ies').' recorded for '.$guest->name.'.',
+            ];
+        }, 3);
+
+        $redirect = redirect()->route('scanner.manual-search', $search !== '' ? ['q' => $search] : []);
+
+        return $result['ok']
+            ? $redirect->with('success', $result['message'])
+            : $redirect->withErrors(['entries_to_admit' => $result['message']]);
     }
 
     public function validateQr(Request $request): JsonResponse
@@ -362,9 +473,26 @@ class ScannerController extends Controller
                 ];
             }
 
-            $guest->used_entries += $quantity;
-            $guest->save();
-            $guest = $guest->fresh();
+            $guest = $this->applyAdmissionToLockedGuest($guest, $quantity);
+            if (! $guest) {
+                $message = 'Requested entries exceed the remaining allowance.';
+                $freshGuest = Guest::query()->whereKey($qrCode->guest_id)->first();
+                $qrCode->setRelation('guest', $freshGuest);
+                $this->recordScan($freshGuest, $qrCode, $quantity, Checkin::RESULT_ERROR, $message, $request);
+
+                return [
+                    'status' => 422,
+                    'payload' => [
+                        'ok' => false,
+                        'status' => Checkin::RESULT_ERROR,
+                        'result' => Checkin::RESULT_ERROR,
+                        'message' => $message,
+                        'guest' => $freshGuest ? $this->guestPayload($freshGuest) : null,
+                    ],
+                ];
+            }
+
+            $qrCode->setRelation('guest', $guest);
 
             Admission::query()->create([
                 'guest_id' => $guest->id,
@@ -388,14 +516,14 @@ class ScannerController extends Controller
                     'guest' => $this->guestPayload($guest),
                 ],
             ];
-        });
+        }, 3);
 
         return response()->json($result['payload'], $result['status']);
     }
 
     private function findQrCode(string $token): ?QrCode
     {
-        if ($token === '') {
+        if ($token === '' || ! $this->looksLikeQrToken($token)) {
             return null;
         }
 
@@ -403,6 +531,11 @@ class ScannerController extends Controller
             ->with('guest')
             ->where('qr_token', $token)
             ->first();
+    }
+
+    private function looksLikeQrToken(string $token): bool
+    {
+        return (bool) preg_match('/^[A-Za-z0-9]{40,128}$/', $token);
     }
 
     private function extractToken(string $value): string
@@ -465,6 +598,52 @@ class ScannerController extends Controller
             'system_status' => $guest->status,
             'token_preview' => substr((string) $guest->qrCode?->qr_token, -8),
         ];
+    }
+
+    private function applyAdmissionToLockedGuest(Guest $guest, int $quantity): ?Guest
+    {
+        if ($quantity < 1 || $quantity > 10) {
+            return null;
+        }
+
+        $allowedEntries = (int) $guest->allowed_entries;
+        $usedEntries = (int) $guest->used_entries;
+
+        if ($allowedEntries > 10 || $quantity > max(0, $allowedEntries - $usedEntries)) {
+            return null;
+        }
+
+        $newUsedEntries = $usedEntries + $quantity;
+        $updated = Guest::query()
+            ->whereKey($guest->id)
+            ->where('status', '<>', Guest::STATUS_CANCELLED)
+            ->where('allowed_entries', '<=', 10)
+            ->whereRaw('(used_entries + ?) <= allowed_entries', [$quantity])
+            ->update([
+                'used_entries' => DB::raw('used_entries + '.(int) $quantity),
+                'status' => $this->statusForUsedEntries($newUsedEntries, $allowedEntries),
+                'updated_at' => now(),
+            ]);
+
+        if ($updated !== 1) {
+            return null;
+        }
+
+        return Guest::query()
+            ->with('qrCode')
+            ->whereKey($guest->id)
+            ->first();
+    }
+
+    private function statusForUsedEntries(int $usedEntries, int $allowedEntries): string
+    {
+        if ($usedEntries <= 0) {
+            return Guest::STATUS_ACTIVE;
+        }
+
+        return $usedEntries >= $allowedEntries
+            ? Guest::STATUS_FULLY_USED
+            : Guest::STATUS_PARTIALLY_USED;
     }
 
     private function recordScan(

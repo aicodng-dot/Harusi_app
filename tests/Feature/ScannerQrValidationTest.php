@@ -79,6 +79,26 @@ class ScannerQrValidationTest extends TestCase
         ]);
     }
 
+    public function test_malformed_qr_token_is_rejected_and_logged(): void
+    {
+        $scanner = $this->scannerUser();
+
+        $this->actingAs($scanner)
+            ->postJson(route('scanner.validate'), ['qr_token' => 'short-token'])
+            ->assertOk()
+            ->assertExactJson([
+                'status' => 'invalid',
+                'message' => 'This QR code is not registered.',
+            ]);
+
+        $this->assertDatabaseHas('checkins', [
+            'guest_id' => null,
+            'qr_code_id' => null,
+            'user_id' => $scanner->id,
+            'scan_result' => Checkin::RESULT_INVALID,
+        ]);
+    }
+
     public function test_revoked_qr_validation_returns_revoked_and_records_scan(): void
     {
         [$guest, $token] = $this->makeGuest(Guest::PASS_SINGLE, 1, 0);

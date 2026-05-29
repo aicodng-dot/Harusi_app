@@ -1,0 +1,4 @@
+name,phone_number,pass_type,allowed_entries
+John Peter,0712345678,single,1
+Mary Joseph,0755555555,double,2
+Kimaro Family,0788888888,special,6

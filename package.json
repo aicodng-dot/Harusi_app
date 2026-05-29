@@ -4,7 +4,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "https:cert": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/New-LocalHttpsCert.ps1",
+        "https:proxy": "node scripts/https-proxy.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

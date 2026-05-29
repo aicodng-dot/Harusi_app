@@ -10,6 +10,15 @@
             'cancelled', 'revoked', 'invalid', 'error' => 'bg-rose-400 text-white',
             default => 'bg-white/10 text-white',
         };
+        $resultLabel = fn (?string $result) => match ($result) {
+            'valid' => 'VALID PASS',
+            'admitted' => 'ADMITTED SUCCESSFULLY',
+            'already_used' => 'ALREADY FULLY USED',
+            'invalid', 'error' => 'INVALID QR CODE',
+            'cancelled' => 'CANCELLED PASS',
+            'revoked' => 'REVOKED QR CODE',
+            default => 'SCAN RESULT',
+        };
     @endphp
 
     <main class="scanner-shell">
@@ -41,10 +50,10 @@
         </section>
 
         <section class="mt-6 grid gap-3">
-            <a href="{{ route('scanner.scan') }}" class="scanner-primary-action">Start Scanning</a>
+            <a href="{{ route('scanner.scan') }}" class="scanner-primary-action"><span class="scanner-bottom-icon bg-zinc-950/15 text-zinc-950">QR</span> Start Scanning</a>
             <div class="grid grid-cols-2 gap-3">
-                <a href="{{ route('scanner.scan') }}#manual" class="scanner-secondary-action">Manual Search</a>
-                <a href="{{ route('scanner.recent-scans') }}" class="scanner-secondary-action">Recent Scans</a>
+                <a href="{{ route('scanner.manual-search') }}" class="scanner-secondary-action"><span class="scanner-bottom-icon">SR</span> Manual Search</a>
+                <a href="{{ route('scanner.recent-scans') }}" class="scanner-secondary-action"><span class="scanner-bottom-icon">RC</span> Recent Scans</a>
             </div>
         </section>
 
@@ -59,7 +68,7 @@
                     <article class="rounded-lg bg-zinc-950/70 p-3">
                         <div class="flex items-center justify-between gap-3">
                             <p class="min-w-0 truncate font-semibold">{{ $checkin->guest?->name ?? 'Unknown QR' }}</p>
-                            <span class="shrink-0 rounded-md px-2 py-1 text-xs font-bold {{ $resultBadge($checkin->scan_result) }}">{{ str_replace('_', ' ', $checkin->scan_result) }}</span>
+                            <span class="shrink-0 rounded-md px-2 py-1 text-xs font-black {{ $resultBadge($checkin->scan_result) }}">{{ $resultLabel($checkin->scan_result) }}</span>
                         </div>
                         <p class="mt-2 text-sm text-zinc-400">{{ $checkin->entries_added }} admitted &middot; {{ $checkin->checked_in_at?->format('H:i') ?? 'Just now' }}</p>
                     </article>

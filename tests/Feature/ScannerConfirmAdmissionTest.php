@@ -136,6 +136,68 @@ class ScannerConfirmAdmissionTest extends TestCase
         $this->assertSame(1, $guest->fresh()->used_entries);
     }
 
+    public function test_admission_recalculates_remaining_entries_after_stale_validation(): void
+    {
+        [$guest, $token] = $this->makeGuest(Guest::PASS_DOUBLE, 2);
+        $firstScanner = $this->scannerUser('First Gate');
+        $secondScanner = $this->scannerUser('Second Gate');
+
+        $this->actingAs($firstScanner)
+            ->postJson(route('scanner.validate'), ['qr_token' => $token])
+            ->assertOk()
+            ->assertJsonPath('remaining_entries', 2);
+
+        $this->actingAs($secondScanner)
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $guest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 1,
+            ])
+            ->assertOk()
+            ->assertJsonPath('guest.remaining_entries', 1);
+
+        $this->actingAs($firstScanner)
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $guest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 2,
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('status', Checkin::RESULT_ERROR)
+            ->assertJsonPath('message', 'Requested entries exceed the remaining allowance.')
+            ->assertJsonPath('guest.used_entries', 1)
+            ->assertJsonPath('guest.remaining_entries', 1);
+
+        $this->assertSame(1, $guest->fresh()->used_entries);
+        $this->assertDatabaseHas('checkins', [
+            'guest_id' => $guest->id,
+            'user_id' => $firstScanner->id,
+            'scan_result' => Checkin::RESULT_ERROR,
+            'entries_added' => 0,
+            'used_entries_after_scan' => 1,
+            'remaining_entries_after_scan' => 1,
+        ]);
+    }
+
+    public function test_admission_rejects_guest_id_that_does_not_match_qr_token(): void
+    {
+        [$guest, $token] = $this->makeGuest(Guest::PASS_SINGLE, 1);
+        [$otherGuest] = $this->makeGuest(Guest::PASS_SINGLE, 1);
+
+        $this->actingAs($this->scannerUser())
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $otherGuest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 1,
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('status', Checkin::RESULT_INVALID)
+            ->assertJsonPath('message', 'QR code does not match this guest.');
+
+        $this->assertSame(0, $guest->fresh()->used_entries);
+        $this->assertSame(0, $otherGuest->fresh()->used_entries);
+    }
+
     public function test_repeated_qr_usage_after_fully_used_is_rejected(): void
     {
         [$guest, $token] = $this->makeGuest(Guest::PASS_SINGLE, 1, 1);
@@ -179,14 +241,14 @@ class ScannerConfirmAdmissionTest extends TestCase
         return [$guest->fresh('qrCode'), $token];
     }
 
-    private function scannerUser(): User
+    private function scannerUser(string $gateName = 'Main Gate'): User
     {
         return User::query()->create([
             'name' => 'Scanner User',
             'email' => uniqid('scanner', true).'@example.com',
             'password' => Hash::make('password'),
             'role' => User::ROLE_SCANNER,
-            'gate_name' => 'Main Gate',
+            'gate_name' => $gateName,
         ]);
     }
 }

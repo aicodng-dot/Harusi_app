@@ -153,9 +153,9 @@
                                 </td>
                                 <td class="px-5 py-4">
                                     <div class="flex flex-wrap justify-end gap-2">
-                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}">
+                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) data-confirm data-confirm-title="Regenerate QR code" data-confirm-message="The current QR token will stop working immediately." @endif>
                                             @csrf
-                                            <button type="submit" class="table-action" @if ($guest->qrCode) onclick="return confirm('Regenerate this QR code? The old token will stop working.')" @endif>
+                                            <button type="submit" class="table-action">
                                                 {{ $guest->qrCode ? 'Regenerate' : 'Generate QR' }}
                                             </button>
                                         </form>
@@ -169,10 +169,10 @@
                                                     @method('PATCH')
                                                     <button type="submit" class="table-action">Deactivate</button>
                                                 </form>
-                                                <form method="POST" action="{{ route('admin.guests.revoke', $guest) }}">
+                                                <form method="POST" action="{{ route('admin.guests.revoke', $guest) }}" data-confirm data-confirm-title="Revoke QR code" data-confirm-message="This QR code will no longer validate at the scanner.">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" class="table-action table-action-danger" onclick="return confirm('Revoke this QR code? It will no longer validate.')">Revoke</button>
+                                                    <button type="submit" class="table-action table-action-danger">Revoke</button>
                                                 </form>
                                             @else
                                                 <form method="POST" action="{{ route('admin.qr-codes.activate', $guest) }}">

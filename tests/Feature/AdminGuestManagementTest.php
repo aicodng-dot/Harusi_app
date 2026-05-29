@@ -135,6 +135,25 @@ class AdminGuestManagementTest extends TestCase
         $this->assertDatabaseMissing('guests', ['id' => $guest->id]);
     }
 
+    public function test_admin_can_cancel_guest_pass(): void
+    {
+        $guest = Guest::query()->create([
+            'name' => 'Cancelable Guest',
+            'phone_number' => '+255 700 000 556',
+            'pass_type' => Guest::PASS_DOUBLE,
+            'allowed_entries' => 2,
+        ]);
+
+        $this->actingAs($this->adminUser())
+            ->patch(route('admin.guests.cancel', $guest))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('guests', [
+            'id' => $guest->id,
+            'status' => Guest::STATUS_CANCELLED,
+        ]);
+    }
+
     public function test_guest_list_can_search_and_filter(): void
     {
         $admin = $this->adminUser();

@@ -35,7 +35,10 @@
                 <button type="button" class="scanner-primary-action min-h-14" data-start-camera>Start Camera</button>
                 <button type="button" class="scanner-secondary-action min-h-14" data-stop-camera>Stop</button>
             </div>
-            <button type="button" class="scanner-secondary-action mt-3 w-full" data-scan-another hidden>Scan Next</button>
+            <div class="mt-3 grid grid-cols-2 gap-3">
+                <button type="button" class="scanner-secondary-action w-full" data-scan-another hidden>Scan Next</button>
+                <a href="{{ route('scanner.manual-search') }}" class="scanner-secondary-action w-full">Manual Search</a>
+            </div>
         </section>
 
         <section id="manual" class="scanner-card mt-5">
@@ -60,13 +63,13 @@
                 Scan or verify a code to show the latest result.
             </div>
 
-            <div class="mt-3 rounded-lg bg-white p-4 text-zinc-950" data-result-panel hidden>
+            <div class="scanner-result-panel scanner-result-warning" data-result-panel hidden>
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <p class="text-xs font-bold uppercase text-zinc-500" data-result-label>Waiting</p>
                         <h2 class="mt-1 truncate text-2xl font-semibold" data-result-title>Scan a pass</h2>
                     </div>
-                    <span class="shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold" data-result-badge>Idle</span>
+                    <span class="shrink-0 rounded-md px-2.5 py-1 text-xs font-black" data-result-badge>Idle</span>
                 </div>
 
                 <div class="mt-4 grid grid-cols-3 gap-2 text-center">

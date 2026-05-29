@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScannerController;
 use App\Models\User;
@@ -8,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('login.attempt');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:'.User::ROLE_ADMIN])->group(function () {
@@ -28,11 +29,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:'.User::ROLE_A
     Route::get('/reports/export/checked-in-guests', [AdminController::class, 'exportCheckedInGuests'])->name('reports.export.checked-in-guests');
     Route::get('/reports/export/remaining-guests', [AdminController::class, 'exportRemainingGuests'])->name('reports.export.remaining-guests');
     Route::get('/reports/export/invalid-scans', [AdminController::class, 'exportInvalidScans'])->name('reports.export.invalid-scans');
-    Route::get('/scanner-users', [AdminController::class, 'scannerUsers'])->name('scanner-users.index');
+    Route::redirect('/scanner-users', '/admin/users')->name('scanner-users.index');
+    Route::resource('/users', AdminUserController::class)->except(['show']);
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index');
 
     Route::get('/guests/create', [AdminController::class, 'create'])->name('guests.create');
     Route::post('/guests', [AdminController::class, 'store'])->name('guests.store');
+    Route::get('/guests/import', [AdminController::class, 'import'])->name('guests.import');
+    Route::post('/guests/import', [AdminController::class, 'processGuestImport'])->name('guests.import.process');
+    Route::get('/guests/import/sample', [AdminController::class, 'sampleGuestImport'])->name('guests.import.sample');
     Route::get('/guests/{guest}', [AdminController::class, 'show'])->name('guests.show');
     Route::get('/guests/{guest}/edit', [AdminController::class, 'edit'])->name('guests.edit');
     Route::put('/guests/{guest}', [AdminController::class, 'update'])->name('guests.update');
@@ -49,11 +54,13 @@ Route::prefix('scanner')->name('scanner.')->middleware(['auth', 'role:'.User::RO
     Route::redirect('/', '/scanner/dashboard')->name('index');
     Route::get('/dashboard', [ScannerController::class, 'dashboard'])->name('dashboard');
     Route::get('/scan', [ScannerController::class, 'index'])->name('scan');
+    Route::get('/manual-search', [ScannerController::class, 'manualSearch'])->name('manual-search');
+    Route::post('/manual-admit', [ScannerController::class, 'manualAdmit'])->middleware('throttle:60,1')->name('manual-admit');
     Route::get('/recent-scans', [ScannerController::class, 'recentScans'])->name('recent-scans');
 
     Route::get('/ticket/{token}', [ScannerController::class, 'ticket'])->name('ticket');
     Route::get('/verify/{token}', [ScannerController::class, 'ticket'])->name('verify-token');
-    Route::post('/validate', [ScannerController::class, 'validateQr'])->name('validate');
-    Route::post('/verify', [ScannerController::class, 'verify'])->name('verify');
-    Route::post('/admit', [ScannerController::class, 'admit'])->name('admit');
+    Route::post('/validate', [ScannerController::class, 'validateQr'])->middleware('throttle:180,1')->name('validate');
+    Route::post('/verify', [ScannerController::class, 'verify'])->middleware('throttle:180,1')->name('verify');
+    Route::post('/admit', [ScannerController::class, 'admit'])->middleware('throttle:60,1')->name('admit');
 });
