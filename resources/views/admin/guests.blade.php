@@ -23,6 +23,10 @@
             'revoked' => 'bg-rose-100 text-rose-800',
             default => 'bg-zinc-100 text-zinc-700',
         };
+
+        $guestActionButton = 'inline-grid size-9 place-items-center rounded-md border border-stone-200 bg-white text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-950 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70';
+        $guestActionWarning = 'inline-grid size-9 place-items-center rounded-md border border-amber-200 bg-amber-50 text-amber-700 shadow-sm transition hover:bg-amber-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70';
+        $guestActionDanger = 'inline-grid size-9 place-items-center rounded-md border border-rose-200 bg-rose-50 text-rose-700 shadow-sm transition hover:bg-rose-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70';
     @endphp
 
     <section class="space-y-6">
@@ -91,51 +95,95 @@
                             <th class="px-5 py-3">Remaining entries</th>
                             <th class="px-5 py-3">Status</th>
                             <th class="px-5 py-3">QR status</th>
-                            <th class="px-5 py-3 text-right">Actions</th>
+                            <th class="w-px px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
                         @forelse ($guests as $guest)
                             @php($currentQrStatus = $qrStatus($guest))
-                            <tr>
-                                <td class="px-5 py-4 font-semibold text-zinc-950">{{ $guest->name }}</td>
-                                <td class="px-5 py-4">{{ $guest->phone_number }}</td>
-                                <td class="px-5 py-4">{{ $guest->passTypeLabel() }}</td>
-                                <td class="px-5 py-4 font-semibold">{{ $guest->allowed_entries }}</td>
-                                <td class="px-5 py-4 font-semibold">{{ $guest->used_entries }}</td>
-                                <td class="px-5 py-4 font-semibold">{{ $guest->remainingEntries() }}</td>
-                                <td class="px-5 py-4">
+                            <tr class="transition hover:bg-stone-50/70">
+                                <td class="px-5 py-3 font-semibold text-zinc-950">{{ $guest->name }}</td>
+                                <td class="whitespace-nowrap px-5 py-3">{{ $guest->phone_number }}</td>
+                                <td class="whitespace-nowrap px-5 py-3">{{ $guest->passTypeLabel() }}</td>
+                                <td class="whitespace-nowrap px-5 py-3 font-semibold tabular-nums">{{ $guest->allowed_entries }}</td>
+                                <td class="whitespace-nowrap px-5 py-3 font-semibold tabular-nums">{{ $guest->used_entries }}</td>
+                                <td class="whitespace-nowrap px-5 py-3 font-semibold tabular-nums">{{ $guest->remainingEntries() }}</td>
+                                <td class="whitespace-nowrap px-5 py-3">
                                     <span class="status-badge {{ $statusBadge($guest->status) }}">{{ str_replace('_', ' ', $guest->status) }}</span>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="whitespace-nowrap px-5 py-3">
                                     <span class="status-badge {{ $qrBadge($currentQrStatus) }}">{{ $currentQrStatus }}</span>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <div class="flex flex-wrap justify-end gap-2">
-                                        <a href="{{ route('admin.guests.show', $guest) }}" class="table-action">View</a>
-                                        <a href="{{ route('admin.guests.edit', $guest) }}" class="table-action">Edit</a>
+                                <td class="w-px px-4 py-3">
+                                    <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                        <a href="{{ route('admin.guests.show', $guest) }}" class="{{ $guestActionButton }}" title="View guest" aria-label="View guest">
+                                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                                                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                            </svg>
+                                            <span class="sr-only">View guest</span>
+                                        </a>
+                                        <a href="{{ route('admin.guests.edit', $guest) }}" class="{{ $guestActionButton }}" title="Edit guest" aria-label="Edit guest">
+                                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path d="m16.5 3.5 4 4L8 20H4v-4L16.5 3.5Z" />
+                                                <path d="m14 6 4 4" />
+                                            </svg>
+                                            <span class="sr-only">Edit guest</span>
+                                        </a>
 
-                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" @if ($guest->qrCode) data-confirm data-confirm-title="Regenerate QR code" data-confirm-message="The current QR token will stop working immediately." @endif>
+                                        <form method="POST" action="{{ route('admin.guests.qr.generate', $guest) }}" class="inline-flex" @if ($guest->qrCode) data-confirm data-confirm-title="Regenerate QR code" data-confirm-message="The current QR token will stop working immediately." @endif>
                                             @csrf
-                                            <button type="submit" class="table-action">{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}</button>
+                                            <button type="submit" class="{{ $guestActionButton }}" title="{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}" aria-label="{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}">
+                                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                    <path d="M3 3h6v6H3z" />
+                                                    <path d="M15 3h6v6h-6z" />
+                                                    <path d="M3 15h6v6H3z" />
+                                                    <path d="M15 15h2v2h-2z" />
+                                                    <path d="M19 15h2v6h-6v-2h4z" />
+                                                    <path d="M15 19h2v2h-2z" />
+                                                </svg>
+                                                <span class="sr-only">{{ $guest->qrCode ? 'Regenerate QR' : 'Generate QR' }}</span>
+                                            </button>
                                         </form>
 
                                         @if ($guest->qrCode)
-                                            <a href="{{ route('admin.guests.qr.download', $guest) }}" class="table-action">Download QR</a>
+                                            <a href="{{ route('admin.guests.qr.download', $guest) }}" class="{{ $guestActionButton }}" title="Download QR" aria-label="Download QR">
+                                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                    <path d="M12 3v11" />
+                                                    <path d="m7 10 5 5 5-5" />
+                                                    <path d="M5 21h14" />
+                                                </svg>
+                                                <span class="sr-only">Download QR</span>
+                                            </a>
                                         @endif
 
                                         @if ($guest->status !== 'cancelled')
-                                            <form method="POST" action="{{ route('admin.guests.cancel', $guest) }}" data-confirm data-confirm-title="Cancel guest pass" data-confirm-message="This pass will no longer be admitted at the gate.">
+                                            <form method="POST" action="{{ route('admin.guests.cancel', $guest) }}" class="inline-flex" data-confirm data-confirm-title="Cancel guest pass" data-confirm-message="This pass will no longer be admitted at the gate.">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="table-action table-action-danger">Cancel</button>
+                                                <button type="submit" class="{{ $guestActionWarning }}" title="Cancel pass" aria-label="Cancel pass">
+                                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                        <path d="M18 6 6 18" />
+                                                        <path d="m6 6 12 12" />
+                                                    </svg>
+                                                    <span class="sr-only">Cancel pass</span>
+                                                </button>
                                             </form>
                                         @endif
 
-                                        <form method="POST" action="{{ route('admin.guests.destroy', $guest) }}" data-confirm data-confirm-title="Delete guest pass" data-confirm-message="This will delete the guest and linked QR data. This cannot be undone.">
+                                        <form method="POST" action="{{ route('admin.guests.destroy', $guest) }}" class="inline-flex" data-confirm data-confirm-title="Delete guest pass" data-confirm-message="This will delete the guest and linked QR data. This cannot be undone.">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="table-action table-action-danger">Delete</button>
+                                            <button type="submit" class="{{ $guestActionDanger }}" title="Delete guest" aria-label="Delete guest">
+                                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4h8v2" />
+                                                    <path d="m19 6-1 15H6L5 6" />
+                                                    <path d="M10 11v6" />
+                                                    <path d="M14 11v6" />
+                                                </svg>
+                                                <span class="sr-only">Delete guest</span>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>

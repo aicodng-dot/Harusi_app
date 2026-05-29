@@ -22,8 +22,14 @@
             \App\Models\Guest::STATUS_CANCELLED => 'Cancelled passes',
         ];
 
-        $maxGateValue = max(1, ...collect($gateReport)->flatMap(fn ($row) => [$row['admissions'], $row['invalid_attempts']])->all());
-        $maxHourValue = max(1, ...collect($timeReport)->pluck('admissions')->all());
+        $maxGateValue = collect($gateReport)
+            ->flatMap(fn ($row) => [$row['admissions'], $row['invalid_attempts']])
+            ->push(1)
+            ->max();
+        $maxHourValue = collect($timeReport)
+            ->pluck('admissions')
+            ->push(1)
+            ->max();
     @endphp
 
     <section class="space-y-6">

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Checkin;
+use App\Models\Event;
 use App\Models\Guest;
 use App\Models\QrCode;
 use App\Models\User;
@@ -112,6 +113,18 @@ class AdminReportsTest extends TestCase
         $this->assertStringContainsString('already_used', $invalidCsv);
         $this->assertStringContainsString('revoked', $invalidCsv);
         $this->assertStringNotContainsString('admitted', $invalidCsv);
+    }
+
+    public function test_reports_page_renders_when_selected_event_has_no_scan_activity(): void
+    {
+        $admin = $this->adminUser();
+        $event = Event::query()->firstOrFail();
+
+        $this->actingAs($admin)
+            ->withSession(['selected_event_id' => $event->id])
+            ->get(route('admin.reports.index'))
+            ->assertOk()
+            ->assertSee('No gate activity has been recorded yet.');
     }
 
     private function seedReportData(): void
