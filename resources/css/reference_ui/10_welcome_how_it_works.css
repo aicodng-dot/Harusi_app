@@ -1,0 +1,425 @@
+/* Approved reference: reference UI/10_Welcome_How_It_Works.png (863 x 1822 px).
+ *
+ * --rp is one reference pixel. On phones the column is the viewport, so
+ * --rp = column width / 863 (container query units). Tablets keep the phone
+ * column at 34rem; desktops reuse the same scale with a three-card row.
+ * Comments give the measured reference coordinates (y includes the 80 px
+ * simulated status bar, which is not reproduced).
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --welcome-bg: #faf8f4;
+    --welcome-bg-low: #f4f1ea;
+    --welcome-card: #fcfaf6;
+    --welcome-card-border: #efeee8;
+    --welcome-evergreen: #17493e;
+    --welcome-evergreen-hover: #123b32;
+    --welcome-brand-ink: #133f35;
+    --welcome-ink: #0b1714;
+    --welcome-body: #3e4d53;
+    --welcome-muted: #5d726b;
+    --welcome-chip: #edede8;
+    --welcome-number: #e6ebe4;
+    --welcome-dot: #d0d3cb;
+    --welcome-gold: #c99b4a;
+    --rp: calc(100cqw / 863);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, var(--welcome-bg) 0, var(--welcome-bg) calc(100% - 22rem), var(--welcome-bg-low) 100%);
+    background-color: var(--welcome-bg);
+    color: var(--welcome-ink);
+}
+
+.welcome-page {
+    container-type: inline-size;
+    width: min(100%, 34rem);
+    min-height: 100vh;
+    min-height: 100svh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+}
+
+/* Header ---------------------------------------------------------------- */
+
+.welcome-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Chips: SW x686-752, EN x762-821, y100-149 (top 20 below the status bar). */
+.welcome-languages {
+    position: absolute;
+    top: calc(20 * var(--rp));
+    right: calc(42 * var(--rp));
+    display: flex;
+    gap: calc(10 * var(--rp));
+}
+
+.welcome-language {
+    display: inline-flex;
+    min-width: max(2.25rem, calc(62 * var(--rp)));
+    min-height: max(1.875rem, calc(50 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    padding: 0 calc(14 * var(--rp));
+    border-radius: max(.5rem, calc(12 * var(--rp)));
+    background: var(--welcome-chip);
+    color: #1f3a33;
+    font-size: max(.8125rem, calc(26 * var(--rp)));
+    font-weight: 600;
+    letter-spacing: .02em;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.welcome-language:hover {
+    background: #e2e3dc;
+}
+
+.welcome-language.is-active {
+    background: var(--welcome-evergreen);
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Logo y160-309 (149 tall). */
+.welcome-mark {
+    display: block;
+    width: auto;
+    height: calc(149 * var(--rp));
+    margin-top: calc(80 * var(--rp));
+}
+
+/* "PangaEvents" x316-556, cap top y319. */
+.welcome-wordmark {
+    margin: calc(4 * var(--rp)) 0 0;
+    color: var(--welcome-brand-ink);
+    font-size: max(1.0625rem, calc(41 * var(--rp)));
+    font-weight: 720;
+    letter-spacing: -.035em;
+    line-height: 1;
+}
+
+/* Heading and intro ------------------------------------------------------ */
+
+.welcome-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Card 3 ends at y1495; the footer artwork starts at y1500. */
+    padding: 0 calc(46 * var(--rp)) calc(5 * var(--rp));
+    text-align: center;
+}
+
+/* "Karibu PangaEvents" x140-727, cap top y413. */
+.welcome-heading {
+    margin: calc(46 * var(--rp)) 0 0;
+    color: var(--welcome-ink);
+    font-size: max(1.625rem, calc(66 * var(--rp)));
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: 1.1;
+    text-wrap: balance;
+}
+
+/* Intro lines y501-532 / 551-581: 50 px pitch. */
+.welcome-intro {
+    display: flex;
+    flex-direction: column;
+    margin: calc(14 * var(--rp)) 0 0;
+    color: var(--welcome-muted);
+    font-size: max(.875rem, calc(32 * var(--rp)));
+    font-weight: 400;
+    letter-spacing: -.005em;
+    line-height: max(1.3rem, calc(50 * var(--rp)));
+}
+
+/* Cards: x46-817, y641-905 / 937-1201 / 1232-1495; 32 px gap, ~24 px radius. */
+.welcome-steps {
+    display: grid;
+    width: 100%;
+    gap: calc(32 * var(--rp));
+    margin: calc(53 * var(--rp)) 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.welcome-card {
+    display: grid;
+    grid-template-columns: calc(289 * var(--rp)) minmax(0, 1fr);
+    align-items: center;
+    min-height: calc(264 * var(--rp));
+    padding: calc(10 * var(--rp));
+    border: 1px solid var(--welcome-card-border);
+    border-radius: calc(26 * var(--rp));
+    background: var(--welcome-card);
+    box-shadow: 0 calc(6 * var(--rp)) calc(22 * var(--rp)) rgba(64, 58, 40, .045);
+}
+
+/* Illustration crops are 289 x 244 at x56. */
+.welcome-card-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 289 / 244;
+}
+
+/* Number circle x358-425 (68 px); title and body start at x459. */
+.welcome-card-copy {
+    display: grid;
+    grid-template-columns: max(1.75rem, calc(68 * var(--rp))) minmax(0, 1fr);
+    column-gap: calc(33 * var(--rp));
+    align-items: start;
+    padding: calc(27 * var(--rp)) calc(14 * var(--rp)) calc(38 * var(--rp)) calc(13 * var(--rp));
+}
+
+.welcome-card-number {
+    display: grid;
+    width: max(1.75rem, calc(68 * var(--rp)));
+    aspect-ratio: 1;
+    place-items: center;
+    grid-row: 1 / span 2;
+    border-radius: 50%;
+    background: var(--welcome-number);
+    color: #0f2a24;
+    font-size: max(.875rem, calc(32 * var(--rp)));
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Titles cap top 11 px below the circle top, ~38 px type. */
+.welcome-card-title {
+    margin: calc(11 * var(--rp)) 0 0;
+    color: var(--welcome-ink);
+    font-size: max(.9375rem, calc(38 * var(--rp)));
+    font-weight: 750;
+    letter-spacing: -.025em;
+    line-height: 1.2;
+}
+
+/* Body lines 37 px pitch, ~26 px type. */
+.welcome-card-body {
+    grid-column: 2;
+    margin: calc(11 * var(--rp)) 0 0;
+    color: var(--welcome-body);
+    font-size: max(.75rem, calc(26 * var(--rp)));
+    font-weight: 400;
+    line-height: max(1.1rem, calc(37 * var(--rp)));
+}
+
+/* Footer: reference y1500-1822 -------------------------------------------- */
+
+.welcome-footer {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(322 * var(--rp));
+    margin-top: auto;
+    padding: calc(48 * var(--rp)) calc(48 * var(--rp)) max(calc(26 * var(--rp)), env(safe-area-inset-bottom));
+}
+
+/* Botanical layer: same width as the footer so its cleared button area stays
+ * under the real button. */
+.welcome-botanicals {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+    /* Fade the top and bottom crop edges; the cleared button area (40-74%) stays covered. */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+}
+
+/* Dots: 19 px, 39 px pitch, centre y1558. */
+.welcome-dots {
+    display: flex;
+    gap: calc(20 * var(--rp));
+}
+
+.welcome-dot {
+    display: block;
+    width: max(.5rem, calc(19 * var(--rp)));
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--welcome-dot);
+}
+
+.welcome-dot.is-active {
+    background: #174c42;
+}
+
+/* Button x48-815, y1630-1738 (108 tall), ~26 px radius. */
+.welcome-start {
+    display: flex;
+    width: 100%;
+    min-height: max(3rem, calc(108 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    gap: calc(28 * var(--rp));
+    margin-top: calc(62 * var(--rp));
+    border-radius: max(.75rem, calc(26 * var(--rp)));
+    background: var(--welcome-evergreen);
+    color: #fff;
+    font-size: max(1rem, calc(34 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color .15s ease;
+}
+
+.welcome-start:hover {
+    background: var(--welcome-evergreen-hover);
+}
+
+.welcome-start-arrow {
+    width: max(1.25rem, calc(36 * var(--rp)));
+    height: max(1.25rem, calc(36 * var(--rp)));
+    flex: 0 0 auto;
+}
+
+.welcome-login {
+    margin: calc(22 * var(--rp)) 0 0;
+    color: var(--welcome-muted);
+    font-size: max(.875rem, calc(28 * var(--rp)));
+    /* At least a 24 px tall tap target for the link. */
+    line-height: max(1.5rem, calc(39 * var(--rp)));
+    text-align: center;
+}
+
+.welcome-login a {
+    display: inline-block;
+    padding: 0 .125rem;
+    color: var(--welcome-evergreen);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.welcome-login a:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+.welcome-language:focus-visible,
+.welcome-start:focus-visible,
+.welcome-login a:focus-visible {
+    outline: 3px solid var(--welcome-gold);
+    outline-offset: 3px;
+}
+
+[data-single-nav][aria-busy="true"] {
+    cursor: progress;
+}
+
+/* Wider than the phone column: soften where the botanicals meet the page. */
+@media (min-width: 34.01rem) {
+    .welcome-botanicals {
+        -webkit-mask-image:
+            linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%),
+            linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+        -webkit-mask-composite: source-in;
+        mask-image:
+            linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%),
+            linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+        mask-composite: intersect;
+    }
+}
+
+/* Desktop: same scale, three cards in a row. */
+@media (min-width: 60rem) {
+    :root {
+        --rp: calc(34rem / 863);
+    }
+
+    .welcome-page {
+        width: min(100% - 4rem, 72rem);
+    }
+
+    .welcome-languages {
+        top: 1.5rem;
+        right: 0;
+    }
+
+    .welcome-main {
+        padding: 0;
+    }
+
+    .welcome-steps {
+        max-width: 66rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+    }
+
+    .welcome-card {
+        grid-template-columns: 1fr;
+        align-content: start;
+        justify-items: center;
+        padding: 1rem 1rem 1.5rem;
+    }
+
+    .welcome-card-art {
+        width: min(100%, calc(289 * var(--rp)));
+    }
+
+    .welcome-card-copy {
+        width: 100%;
+        padding: .75rem .5rem 0;
+    }
+
+    .welcome-footer {
+        width: 34rem;
+        align-self: center;
+        margin-top: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}

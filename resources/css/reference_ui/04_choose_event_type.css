@@ -1,0 +1,430 @@
+/* Approved reference: reference UI/04_Choose_Event_Type.png (863 x 1822 px with a
+ * simulated phone bezel; the screen spans x13-849 = 836 px). The bezel and the
+ * simulated status bar (to y~105) are not reproduced.
+ *
+ * --rp is one reference pixel of the 836 px screen: on phones the column is the
+ * viewport, from 640px a fixed 28rem phone scale. Comments give measured PNG
+ * coordinates. Minimums keep text >= 12px and touch targets >= 44px.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --et-bg: #fcfaf3;
+    --et-card: #fff;
+    --et-ink: #0f1b26;
+    --et-muted: #4a5368;
+    --et-brand-ink: #133f35;
+    --et-evergreen: #17463a;
+    --et-evergreen-hover: #10372d;
+    --et-chip: #edece6;
+    --et-dot: #dcdad3;
+    --et-error: #b3261e;
+    --et-focus: rgba(23, 70, 58, .22);
+    --rp: calc(100cqw / 836);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: var(--et-bg);
+    color: var(--et-ink);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+:focus-visible {
+    outline: 3px solid var(--et-evergreen);
+    outline-offset: 2px;
+}
+
+.et-page {
+    container-type: inline-size;
+    width: min(100%, 28rem);
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding-bottom: max(24px, calc(60 * var(--rp)) + env(safe-area-inset-bottom));
+}
+
+/* Header: back x64-99 (centre y186), mark x277-342 / y151-222, wordmark x357-592. */
+.et-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: max(10px, calc(30 * var(--rp))) calc(34 * var(--rp)) 0 calc(38 * var(--rp));
+}
+
+.et-back {
+    display: inline-grid;
+    place-items: center;
+    justify-self: start;
+    width: 44px;
+    height: 44px;
+    color: var(--et-ink);
+}
+
+.et-back svg {
+    width: max(22px, calc(40 * var(--rp)));
+    height: max(22px, calc(40 * var(--rp)));
+}
+
+.et-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(14 * var(--rp));
+    color: var(--et-brand-ink);
+    font-size: max(17px, calc(40 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.et-brand img {
+    display: block;
+    width: auto;
+    height: max(1.75rem, calc(72 * var(--rp)));
+}
+
+.et-languages {
+    display: flex;
+    justify-self: end;
+    gap: calc(12 * var(--rp));
+}
+
+.et-language {
+    display: inline-flex;
+    min-width: max(2.25rem, calc(64 * var(--rp)));
+    min-height: max(2.25rem, calc(52 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    border-radius: max(.625rem, calc(14 * var(--rp)));
+    background: var(--et-chip);
+    color: var(--et-ink);
+    font-size: max(.8125rem, calc(26 * var(--rp)));
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.et-language.is-active {
+    background: var(--et-evergreen);
+    color: #fff;
+    font-weight: 650;
+}
+
+/* Title x62 / cap y275 (~59 px), intro cap y359 (~40 px). */
+.et-main {
+    padding: 0 calc(34 * var(--rp)) 0 calc(38 * var(--rp));
+}
+
+.et-heading {
+    margin: max(14px, calc(35 * var(--rp))) 0 0 calc(11 * var(--rp));
+    font-size: max(24px, calc(59 * var(--rp)));
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+    color: var(--et-ink);
+}
+
+.et-intro {
+    margin: calc(20 * var(--rp)) 0 0 calc(11 * var(--rp));
+    font-size: max(14px, calc(36 * var(--rp)));
+    line-height: 1.3;
+    letter-spacing: -.01em;
+    color: var(--et-muted);
+}
+
+.et-alert {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.et-alert-status {
+    border: 1px solid #cfe5d7;
+    background: #edf5f0;
+    color: #173f30;
+}
+
+.et-alert-error {
+    border: 1px solid #f2c9c4;
+    background: #fdf0ee;
+    color: var(--et-error);
+}
+
+.et-error {
+    margin: 10px 0 0;
+    color: var(--et-error);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.et-form {
+    margin: 0;
+}
+
+/* Cards: x51-423 / x455-814, rows y453-886 and y923-1370; image to y790, label band ~96 px. */
+.et-types {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(37 * var(--rp)) calc(32 * var(--rp));
+    min-width: 0;
+    margin: max(18px, calc(56 * var(--rp))) 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.et-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: calc(28 * var(--rp));
+    background: var(--et-card);
+    box-shadow: 0 3px 12px rgba(15, 27, 38, .06), 0 0 0 1px rgba(15, 27, 38, .03);
+    cursor: pointer;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.et-card:hover {
+    box-shadow: 0 6px 18px rgba(15, 27, 38, .1), 0 0 0 1px rgba(23, 70, 58, .2);
+}
+
+.et-card:has(input:focus-visible) {
+    outline: 3px solid var(--et-evergreen);
+    outline-offset: 3px;
+}
+
+.et-card.is-selected,
+.et-card:has(input:checked) {
+    box-shadow: 0 6px 18px rgba(23, 70, 58, .16), 0 0 0 max(3px, calc(6 * var(--rp))) var(--et-evergreen);
+}
+
+.et-card-art {
+    display: block;
+    aspect-ratio: 366 / 337;
+    overflow: hidden;
+    background: #f2ead9;
+}
+
+.et-card-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.et-card-check {
+    position: absolute;
+    top: max(8px, calc(18 * var(--rp)));
+    right: max(8px, calc(18 * var(--rp)));
+    display: grid;
+    place-items: center;
+    width: max(28px, calc(56 * var(--rp)));
+    height: max(28px, calc(56 * var(--rp)));
+    border-radius: 50%;
+    background: var(--et-evergreen);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(15, 27, 38, .25);
+    opacity: 0;
+    transform: scale(.7);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.et-card-check svg {
+    width: 60%;
+    height: 60%;
+}
+
+.et-card.is-selected .et-card-check,
+.et-card:has(input:checked) .et-card-check {
+    opacity: 1;
+    transform: none;
+}
+
+/* Labels: "Harusi" cap y821-848 (~38 px, bold), centred in the band. */
+.et-card-label {
+    display: grid;
+    place-items: center;
+    min-height: max(44px, calc(96 * var(--rp)));
+    padding: 6px 8px;
+    color: var(--et-ink);
+    font-size: max(14px, calc(38 * var(--rp)));
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.et-card.is-selected .et-card-label,
+.et-card:has(input:checked) .et-card-label {
+    color: var(--et-evergreen);
+}
+
+.et-workspaces {
+    display: grid;
+    gap: 8px;
+    margin: 22px 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.et-workspace-legend {
+    padding: 0;
+    color: var(--et-ink);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.et-workspace-hint {
+    margin: 0 0 2px;
+    color: var(--et-muted);
+    font-size: 13px;
+}
+
+.et-workspace {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid #e6e3dc;
+    border-radius: 14px;
+    background: var(--et-card);
+    font-size: 15px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.et-workspace input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--et-evergreen);
+}
+
+.et-workspace:has(input:checked) {
+    border-color: var(--et-evergreen);
+    box-shadow: 0 0 0 2px var(--et-focus);
+}
+
+/* Progress dots: x338-524 / y1438-1466, 28 px dots, 25 px gaps. */
+.et-progress {
+    display: flex;
+    justify-content: center;
+    gap: calc(25 * var(--rp));
+    margin-top: max(24px, calc(68 * var(--rp)));
+}
+
+.et-progress span {
+    width: max(10px, calc(28 * var(--rp)));
+    height: max(10px, calc(28 * var(--rp)));
+    border-radius: 50%;
+    background: var(--et-dot);
+}
+
+.et-progress span.is-active {
+    background: var(--et-evergreen);
+}
+
+/* Continue: x55-808 / y1526-1654 (h129), pill. */
+.et-continue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(32 * var(--rp));
+    width: calc(100% - 4 * var(--rp));
+    min-height: max(52px, calc(129 * var(--rp)));
+    margin: max(22px, calc(60 * var(--rp))) 0 0 calc(4 * var(--rp));
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--et-evergreen);
+    color: #fff;
+    font: inherit;
+    font-size: max(17px, calc(48 * var(--rp)));
+    font-weight: 650;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(23, 70, 58, .18);
+}
+
+.et-continue:hover {
+    background: var(--et-evergreen-hover);
+}
+
+.et-continue svg {
+    width: max(20px, calc(44 * var(--rp)));
+    height: max(20px, calc(44 * var(--rp)));
+}
+
+.et-continue[disabled] {
+    opacity: .75;
+    cursor: progress;
+}
+
+@media (min-width: 640px) {
+    :root {
+        --rp: calc(28rem / 836);
+    }
+
+    .et-page {
+        padding-top: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .et-page {
+        width: 36rem;
+        padding-top: 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .et-card,
+    .et-card-check {
+        transition: none;
+    }
+}

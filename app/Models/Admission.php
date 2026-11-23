@@ -12,6 +12,7 @@ class Admission extends Model
 
     protected $fillable = [
         'event_id',
+        'offline_scanner_imported_log_id',
         'guest_id',
         'quantity',
         'admitted_by',

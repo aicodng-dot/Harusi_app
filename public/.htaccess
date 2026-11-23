@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # Ordinary guest QR images are private (P4-047): never serve old public copies
+    # directly, even when a file exists. Other hosts/aliases/CDNs need equivalent rules.
+    RewriteRule ^storage/qr-codes(/|$) - [F,NC,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

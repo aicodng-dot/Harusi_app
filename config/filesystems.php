@@ -38,6 +38,35 @@ return [
             'report' => false,
         ],
 
+        'offline_scanner' => [
+            'driver' => 'local',
+            'root' => storage_path('app/offline-scanner-secure'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+        ],
+
+        // Fixed private ordinary guest QR images (P4-047). Never web-served: no url,
+        // serve, prefix or storage link. Resolved only through App\Services\GuestQrStorage,
+        // which refuses a missing/unsafe root; there is no public fallback.
+        'guest_qr' => [
+            'driver' => 'local',
+            'root' => storage_path('app/guest-qr-private'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        // Invitation studio (photos, cached renders, generated guest cards). Never
+        // web-served directly: files are streamed by authorized controllers only.
+        'invitations' => [
+            'driver' => 'local',
+            'root' => storage_path('app/invitations-private'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -1,0 +1,624 @@
+/* Approved reference: reference UI/02_Register_Account.png (863 x 1822 px,
+ * phone screen x21-841 = 820 px wide, status bar to y~120; neither the bezel
+ * nor the status bar is reproduced).
+ *
+ * --rp is one reference pixel of that 820 px screen: on phones the column is
+ * the viewport, on wider screens a centred 28rem column. Comments give the
+ * measured PNG coordinates. Minimum sizes keep inputs >= 16px (no iOS zoom)
+ * and touch targets >= 44-48px.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --reg-bg: #fcfaf3;
+    --reg-field: #fff;
+    --reg-border: #e0ded8;
+    --reg-ink: #0f1b26;
+    --reg-text: #1c2433;
+    --reg-muted: #5a5e70;
+    --reg-placeholder: #6b6f80;
+    --reg-evergreen: #134236;
+    --reg-evergreen-hover: #0d3329;
+    --reg-brand-ink: #133f35;
+    --reg-link-gold: #9a6516;
+    --reg-chip: #edebe5;
+    --reg-chip-active: #f8f5ee;
+    --reg-chip-border: #e3e0da;
+    --reg-error: #b3261e;
+    --reg-error-bg: #fdf0ee;
+    --reg-focus: rgba(19, 66, 54, .16);
+    --rp: calc(100cqw / 820);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: var(--reg-bg);
+    color: var(--reg-ink);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.reg-page {
+    container-type: inline-size;
+    width: min(100%, 28rem);
+    margin: 0 auto;
+}
+
+/* Inner padding: fields x66-798 inside the 820 px screen -> 45 / 43 px. */
+.reg-header,
+.reg-main {
+    padding-inline: calc(45 * var(--rp)) calc(43 * var(--rp));
+}
+
+/* Header row y152-220 (32 px below the status bar). --------------------- */
+
+.reg-header {
+    display: flex;
+    align-items: center;
+    gap: calc(16 * var(--rp));
+    padding-top: max(calc(32 * var(--rp)), env(safe-area-inset-top));
+}
+
+/* Back arrow x66-110. */
+.reg-back {
+    display: inline-grid;
+    width: max(2.75rem, calc(66 * var(--rp)));
+    height: max(2.75rem, calc(68 * var(--rp)));
+    flex: 0 0 auto;
+    margin-left: calc(-12 * var(--rp));
+    place-items: center;
+    border-radius: .75rem;
+    color: var(--reg-ink);
+}
+
+.reg-back svg {
+    width: max(1.375rem, calc(46 * var(--rp)));
+    height: auto;
+}
+
+/* Mark x268-330 (62 x 68), wordmark x342-572. */
+.reg-brand {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: calc(12 * var(--rp));
+    color: var(--reg-brand-ink);
+    font-size: max(1.0625rem, calc(38 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.reg-brand img {
+    display: block;
+    width: auto;
+    height: calc(68 * var(--rp));
+    min-height: 1.75rem;
+}
+
+/* Chips: SW x623-705, EN x719-799, y153-216 (63 tall), 14 px gap. */
+.reg-languages {
+    display: flex;
+    flex: 0 0 auto;
+    gap: calc(14 * var(--rp));
+}
+
+.reg-language {
+    display: inline-flex;
+    min-width: max(2.5rem, calc(81 * var(--rp)));
+    min-height: max(2.25rem, calc(63 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: max(.625rem, calc(14 * var(--rp)));
+    background: var(--reg-chip);
+    color: var(--reg-ink);
+    font-size: max(.875rem, calc(30 * var(--rp)));
+    font-weight: 500;
+    letter-spacing: .01em;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.reg-language.is-active {
+    border-color: var(--reg-chip-border);
+    background: var(--reg-chip-active);
+    font-weight: 650;
+}
+
+/* Heading and intro --------------------------------------------------------- */
+
+/* "Jisajili Akaunti Mpya" x66-676, cap top y282. */
+.reg-heading {
+    margin: calc(48 * var(--rp)) 0 0;
+    color: var(--reg-ink);
+    font-size: max(1.5rem, calc(65 * var(--rp)));
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+    text-wrap: balance;
+}
+
+/* Intro cap top y374, ~40 px type. */
+.reg-intro {
+    margin: calc(18 * var(--rp)) 0 0;
+    color: var(--reg-muted);
+    font-size: max(1rem, calc(40 * var(--rp)));
+    font-weight: 400;
+    letter-spacing: -.015em;
+    line-height: 1.35;
+}
+
+.reg-alert {
+    margin: calc(28 * var(--rp)) 0 0;
+    padding: .75rem 1rem;
+    border: 1px solid #f1c5bf;
+    border-radius: max(.75rem, calc(22 * var(--rp)));
+    background: var(--reg-error-bg);
+    color: #7f1d17;
+    font-size: max(.875rem, calc(30 * var(--rp)));
+    line-height: 1.45;
+}
+
+.reg-alert[hidden] {
+    display: none;
+}
+
+/* Form ---------------------------------------------------------------------- */
+
+/* Fields start at y459; heights ~109, gaps 32-33. */
+.reg-form {
+    display: grid;
+    gap: calc(32 * var(--rp));
+    margin-top: calc(44 * var(--rp));
+}
+
+.reg-group {
+    min-width: 0;
+}
+
+.reg-field {
+    display: flex;
+    width: 100%;
+    min-height: max(3rem, calc(109 * var(--rp)));
+    align-items: center;
+    gap: calc(38 * var(--rp));
+    padding: 0 calc(39 * var(--rp)) 0 calc(36 * var(--rp));
+    border: 1px solid var(--reg-border);
+    border-radius: max(.875rem, calc(24 * var(--rp)));
+    background: var(--reg-field);
+    color: var(--reg-ink);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.reg-field:focus-within,
+.reg-select:focus-within {
+    border-color: var(--reg-evergreen);
+    box-shadow: 0 0 0 3px var(--reg-focus);
+}
+
+.reg-field.has-error,
+.reg-select.has-error {
+    border-color: var(--reg-error);
+}
+
+.reg-field.has-error:focus-within,
+.reg-select.has-error:focus-within {
+    box-shadow: 0 0 0 3px rgba(179, 38, 30, .14);
+}
+
+/* Field icons ~38-42 px (user x104-142, mail x103-145, lock x107-140). */
+.reg-icon {
+    width: max(1.25rem, calc(42 * var(--rp)));
+    height: max(1.25rem, calc(42 * var(--rp)));
+    flex: 0 0 auto;
+    stroke-width: 2.2;
+}
+
+.reg-field input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    /* The 1px field border sits outside this box. */
+    min-height: calc(max(3rem, calc(109 * var(--rp))) - 2px);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--reg-text);
+    font: inherit;
+    font-size: max(1rem, calc(34 * var(--rp)));
+    letter-spacing: -.01em;
+}
+
+.reg-field input::placeholder {
+    color: var(--reg-placeholder);
+    opacity: 1;
+}
+
+/* Eye toggle x713-759, 39 px from the field edge. */
+.reg-toggle {
+    display: grid;
+    width: max(2.75rem, calc(64 * var(--rp)));
+    height: max(2.75rem, calc(64 * var(--rp)));
+    flex: 0 0 auto;
+    margin-right: calc(-9 * var(--rp));
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: .625rem;
+    background: transparent;
+    color: var(--reg-ink);
+    cursor: pointer;
+}
+
+.reg-toggle svg {
+    width: max(1.375rem, calc(48 * var(--rp)));
+    height: max(1.375rem, calc(48 * var(--rp)));
+    stroke-width: 2.1;
+}
+
+.reg-toggle .register-eye-slash {
+    display: none;
+}
+
+.reg-toggle[aria-pressed="true"] .register-eye-slash {
+    display: block;
+}
+
+.reg-toggle:focus-visible,
+.reg-back:focus-visible,
+.reg-language:focus-visible,
+.reg-login a:focus-visible,
+.reg-terms-text a:focus-visible {
+    outline: 3px solid #c99b4a;
+    outline-offset: 2px;
+}
+
+/* Phone: flag x101-152 (51 x 38), chevron x172-190, text column x220. */
+.reg-phone {
+    gap: calc(30 * var(--rp));
+    padding-left: calc(35 * var(--rp));
+}
+
+.reg-country {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.reg-country select {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.reg-country-art {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: calc(20 * var(--rp));
+    pointer-events: none;
+}
+
+.reg-flag {
+    display: block;
+    width: max(1.5rem, calc(51 * var(--rp)));
+    height: auto;
+}
+
+.reg-country-chevron {
+    width: max(.875rem, calc(26 * var(--rp)));
+    height: max(.875rem, calc(26 * var(--rp)));
+    stroke-width: 3.4;
+}
+
+.reg-country:focus-within {
+    border-radius: .375rem;
+    outline: 3px solid #c99b4a;
+    outline-offset: 2px;
+}
+
+/* Label y613-640 (~27 px), value y650-690 (~37 px). */
+.reg-phone-input {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: calc(4 * var(--rp));
+    padding: calc(10 * var(--rp)) 0;
+}
+
+.reg-phone-label {
+    color: var(--reg-muted);
+    font-size: max(.75rem, calc(28 * var(--rp)));
+    letter-spacing: -.01em;
+    line-height: 1.15;
+}
+
+.reg-phone-input input {
+    height: auto;
+    min-height: 0;
+    font-size: max(1rem, calc(37 * var(--rp)));
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.reg-hint,
+.reg-error {
+    margin: calc(8 * var(--rp)) calc(8 * var(--rp)) 0;
+    font-size: max(.8125rem, calc(27 * var(--rp)));
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.reg-hint {
+    color: var(--reg-muted);
+}
+
+.reg-error {
+    color: var(--reg-error);
+    font-weight: 500;
+}
+
+.reg-error[hidden] {
+    display: none;
+}
+
+/* Preferred language: label cap top y1189 (~36 px), select y1247-1351. */
+.reg-language-group {
+    margin-top: calc(8 * var(--rp));
+}
+
+.reg-label {
+    display: block;
+    margin-bottom: calc(20 * var(--rp));
+    color: var(--reg-ink);
+    font-size: max(1rem, calc(36 * var(--rp)));
+    line-height: 1.3;
+    letter-spacing: -.015em;
+}
+
+.reg-select {
+    position: relative;
+    border: 1px solid var(--reg-border);
+    border-radius: max(.875rem, calc(24 * var(--rp)));
+    background: var(--reg-field);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.reg-select select {
+    display: block;
+    width: 100%;
+    min-height: calc(max(3rem, calc(104 * var(--rp))) - 2px);
+    padding: 0 calc(100 * var(--rp)) 0 calc(47 * var(--rp));
+    border: 0;
+    border-radius: inherit;
+    outline: 0;
+    appearance: none;
+    background: transparent;
+    color: var(--reg-ink);
+    font: inherit;
+    font-size: max(1rem, calc(38 * var(--rp)));
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.reg-select-chevron {
+    position: absolute;
+    top: 50%;
+    right: calc(43 * var(--rp));
+    width: max(1.25rem, calc(40 * var(--rp)));
+    height: max(1.25rem, calc(40 * var(--rp)));
+    transform: translateY(-50%);
+    stroke-width: 2.6;
+    pointer-events: none;
+}
+
+/* Terms: checkbox x69-121 (52 px), text from x160, link gold underline. */
+.reg-terms-group {
+    margin-top: calc(17 * var(--rp));
+}
+
+.reg-terms {
+    display: flex;
+    align-items: center;
+    gap: calc(39 * var(--rp));
+    padding-left: calc(3 * var(--rp));
+}
+
+.reg-terms input {
+    display: grid;
+    width: max(1.5rem, calc(52 * var(--rp)));
+    height: max(1.5rem, calc(52 * var(--rp)));
+    flex: 0 0 auto;
+    margin: 0;
+    place-content: center;
+    border: 1.5px solid #476a60;
+    border-radius: max(.375rem, calc(9 * var(--rp)));
+    appearance: none;
+    background: #fff;
+    cursor: pointer;
+}
+
+.reg-terms input:checked {
+    border-color: var(--reg-evergreen);
+    background: var(--reg-evergreen) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5.5 12.5 4 4 9-9.5' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 82% no-repeat;
+}
+
+.reg-terms input:focus-visible {
+    outline: 3px solid #c99b4a;
+    outline-offset: 3px;
+}
+
+.reg-terms.has-error input {
+    border-color: var(--reg-error);
+}
+
+.reg-terms-text {
+    min-width: 0;
+    margin: 0;
+    color: var(--reg-ink);
+    font-size: max(.9375rem, calc(34 * var(--rp)));
+    line-height: 1.4;
+    letter-spacing: -.01em;
+}
+
+.reg-terms-text label {
+    cursor: pointer;
+}
+
+.reg-terms-text a {
+    color: var(--reg-link-gold);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .18em;
+}
+
+/* Button y1496-1617 (121 tall), full width, pill. */
+.reg-submit {
+    display: flex;
+    width: 100%;
+    min-height: max(3.25rem, calc(121 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    gap: .625rem;
+    margin-top: calc(13 * var(--rp));
+    padding: 0 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--reg-evergreen);
+    color: #fff;
+    font: inherit;
+    font-size: max(1.125rem, calc(44 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.015em;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.reg-submit:hover {
+    background: var(--reg-evergreen-hover);
+}
+
+.reg-submit:focus-visible {
+    outline: 3px solid #c99b4a;
+    outline-offset: 3px;
+}
+
+.reg-submit[aria-busy="true"] {
+    cursor: progress;
+    opacity: .92;
+}
+
+.reg-spinner {
+    display: none;
+    width: 1.1em;
+    height: 1.1em;
+    border: 2.5px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: reg-spin .8s linear infinite;
+}
+
+.reg-submit[aria-busy="true"] .reg-spinner {
+    display: inline-block;
+}
+
+@keyframes reg-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Login line: cap top y1674, ~34 px, 40 px gap; screen ends y1800. */
+.reg-login {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: calc(40 * var(--rp));
+    margin: calc(46 * var(--rp)) 0 0;
+    padding-bottom: max(calc(80 * var(--rp)), env(safe-area-inset-bottom));
+    color: var(--reg-text);
+    font-size: max(.9375rem, calc(34 * var(--rp)));
+    line-height: 1.4;
+    letter-spacing: -.01em;
+}
+
+.reg-login a {
+    display: inline-block;
+    min-height: 1.5rem;
+    padding: 0 .125rem;
+    color: var(--reg-evergreen);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.reg-login a:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+/* Wider screens: centred column with breathing room. */
+@media (min-width: 48rem) {
+    .reg-page {
+        padding-block: 1.5rem 2.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .reg-spinner {
+        animation: none;
+        border-top-color: rgba(255, 255, 255, .35);
+        border-right-color: #fff;
+    }
+}

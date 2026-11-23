@@ -6,9 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name') }}</title>
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-stone-50 text-zinc-950 antialiased">
@@ -19,7 +16,9 @@
             ['label' => 'Guests', 'route' => 'admin.guests.index', 'active' => 'admin.guests.*', 'marker' => 'bg-sky-500', 'icon' => 'GS'],
             ['label' => 'QR Codes', 'route' => 'admin.qr-codes.index', 'active' => 'admin.qr-codes.*', 'marker' => 'bg-violet-500', 'icon' => 'QR'],
             ['label' => 'Check-ins', 'route' => 'admin.checkins.index', 'active' => 'admin.checkins.*', 'marker' => 'bg-amber-500', 'icon' => 'IN'],
+            ['label' => 'Offline Scanner', 'route' => $selectedEvent ? 'admin.offline-scanner-sessions.create' : 'admin.events.index', 'params' => $selectedEvent ? [$selectedEvent->id] : [], 'active' => 'admin.offline-scanner-sessions.*', 'marker' => 'bg-teal-500', 'icon' => 'OS'],
             ['label' => 'Reports', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*', 'marker' => 'bg-cyan-500', 'icon' => 'RP'],
+            ['label' => 'Customers', 'route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'marker' => 'bg-fuchsia-500', 'icon' => 'CU'],
             ['label' => 'Scanner Users', 'route' => 'admin.users.index', 'active' => 'admin.users.*', 'marker' => 'bg-rose-500', 'icon' => 'SU'],
             ['label' => 'Settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*', 'marker' => 'bg-zinc-500', 'icon' => 'ST'],
         ];
@@ -39,7 +38,7 @@
 
             <nav class="flex-1 space-y-1 px-3 py-5">
                 @foreach ($navItems as $item)
-                    <a href="{{ route($item['route']) }}" @class(['admin-nav-link', 'admin-nav-link-active' => request()->routeIs($item['active'])])>
+                    <a href="{{ route($item['route'], $item['params'] ?? []) }}" @class(['admin-nav-link', 'admin-nav-link-active' => request()->routeIs($item['active'])])>
                         <span @class(['grid size-8 shrink-0 place-items-center rounded-md text-[10px] font-black', 'bg-white/15 text-white' => request()->routeIs($item['active']), 'bg-stone-100 text-zinc-500' => ! request()->routeIs($item['active'])])>{{ $item['icon'] }}</span>
                         <span class="truncate">{{ $item['label'] }}</span>
                     </a>
@@ -82,7 +81,7 @@
                                     </div>
                                     <div class="max-h-72 overflow-y-auto py-2">
                                         @forelse ($eventSwitcherEvents as $eventOption)
-                                            <a href="{{ route('admin.events.select', $eventOption) }}" class="block px-4 py-2 text-sm font-semibold hover:bg-stone-50">
+                                            <a href="{{ route('admin.events.select', $eventOption->id) }}" class="block px-4 py-2 text-sm font-semibold hover:bg-stone-50">
                                                 {{ $eventOption->event_name }}
                                             </a>
                                         @empty
@@ -92,7 +91,9 @@
                                     <a href="{{ route('admin.events.index') }}" class="block border-t border-stone-100 px-4 py-3 text-sm font-bold text-emerald-700 hover:bg-emerald-50">Manage Events</a>
                                 </div>
                             </details>
-                            <a href="{{ route('admin.guests.create') }}" class="hidden secondary-button sm:inline-flex">New invite</a>
+                            @if (! ($activeOfflineScannerSession ?? null))
+                                <a href="{{ route('admin.guests.create') }}" class="hidden secondary-button sm:inline-flex">New invite</a>
+                            @endif
                         @else
                             <a href="{{ route('admin.events.index') }}" class="hidden secondary-button sm:inline-flex">Manage Events</a>
                         @endif
@@ -109,7 +110,7 @@
 
                 <nav class="mt-3 flex gap-2 overflow-x-auto pb-1 md:hidden">
                     @foreach ($navItems as $item)
-                        <a href="{{ route($item['route']) }}" @class(['filter-pill shrink-0', 'is-active' => request()->routeIs($item['active'])])>{{ $item['label'] }}</a>
+                        <a href="{{ route($item['route'], $item['params'] ?? []) }}" @class(['filter-pill shrink-0', 'is-active' => request()->routeIs($item['active'])])>{{ $item['label'] }}</a>
                     @endforeach
                 </nav>
                 @if ($selectedEvent ?? null)
@@ -121,6 +122,35 @@
             </header>
 
             <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+                @if ($activeOfflineScannerSession ?? null)
+                    @php
+                        $packageExportedAt = $activeOfflineScannerSession->package_created_at
+                            ?? $activeOfflineScannerSession->packageExport?->generated_at;
+                    @endphp
+                    <section class="mb-6 border border-amber-300 bg-amber-50 p-4 text-amber-950" role="alert">
+                        <div class="flex flex-wrap items-start justify-between gap-4">
+                            <div>
+                                <p class="font-bold">Offline Android scanner session is active</p>
+                                <p class="mt-1 text-sm font-semibold">This event is currently assigned to an active offline Android scanner session. Admission-sensitive guest records cannot be modified until the scanner results are imported or the session is cancelled.</p>
+                            </div>
+                            <a href="{{ route('admin.offline-scanner-sessions.show', $activeOfflineScannerSession->id) }}" class="secondary-button">View session</a>
+                        </div>
+                        <dl class="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-5">
+                            <div><dt class="font-bold">Session UUID</dt><dd class="mt-1 break-all font-mono">{{ $activeOfflineScannerSession->session_uuid }}</dd></div>
+                            <div><dt class="font-bold">Status</dt><dd class="mt-1">{{ str_replace('_', ' ', ucwords($activeOfflineScannerSession->status, '_')) }}</dd></div>
+                            <div><dt class="font-bold">Package exported</dt><dd class="mt-1">{{ $packageExportedAt?->format('M j, Y g:i A') ?? 'Not recorded' }}</dd></div>
+                            <div><dt class="font-bold">Package expires</dt><dd class="mt-1">{{ $activeOfflineScannerSession->package_expires_at?->format('M j, Y g:i A') ?? 'No expiry recorded' }}</dd></div>
+                            <div><dt class="font-bold">Created by</dt><dd class="mt-1">{{ $activeOfflineScannerSession->createdBy?->name ?? 'Unknown user' }}</dd></div>
+                        </dl>
+                    </section>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
         </div>

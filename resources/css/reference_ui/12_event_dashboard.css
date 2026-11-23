@@ -1,0 +1,685 @@
+/* Approved reference: reference UI/12_Event_Dashboard.png (863 x 1822 px, no bezel;
+ * the simulated status bar to y~70 is not reproduced).
+ *
+ * --rp is one reference pixel of the 863 px screen: on phones the column is the
+ * viewport, from 640px a fixed 28rem phone scale. Comments give measured PNG
+ * coordinates. Minimums keep text >= 11-12px and touch targets >= 44px.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --db-bg: #fbfbf8;
+    --db-card: #fff;
+    --db-border: #e2ebe8;
+    --db-ink: #0f1b26;
+    --db-deep: #123f33;
+    --db-muted: #5d6670;
+    --db-brand: #0b3d33;
+    --db-evergreen: #17463a;
+    --db-evergreen-hover: #10372d;
+    --db-gold: #ba8b5a;
+    --db-gold-ink: #9a6a43;
+    --db-mint: #eaf4ef;
+    --db-serif: Georgia, "Times New Roman", "Noto Serif", serif;
+    --rp: calc(100cqw / 863);
+    --db-tabbar-h: max(64px, calc(134 * var(--rp)));
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: var(--db-bg);
+    color: var(--db-ink);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+:focus-visible {
+    outline: 3px solid var(--db-evergreen);
+    outline-offset: 2px;
+}
+
+.db-page {
+    container-type: inline-size;
+    width: min(100%, 28rem);
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding-bottom: calc(var(--db-tabbar-h) + env(safe-area-inset-bottom) + 20px);
+}
+
+/* Header: back x60-72 (centre y122), spaced wordmark x328-513, SW + EN chip x725-817. */
+.db-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: max(8px, calc(26 * var(--rp))) calc(46 * var(--rp)) 0 calc(40 * var(--rp));
+}
+
+.db-back {
+    display: inline-grid;
+    place-items: center;
+    justify-self: start;
+    width: 44px;
+    height: 44px;
+    color: var(--db-ink);
+}
+
+.db-back svg {
+    width: max(20px, calc(32 * var(--rp)));
+    height: max(20px, calc(32 * var(--rp)));
+}
+
+.db-brand {
+    color: var(--db-brand);
+    font-size: max(12px, calc(27 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: .2em;
+    white-space: nowrap;
+}
+
+.db-languages {
+    display: flex;
+    justify-self: end;
+    align-items: center;
+    gap: calc(6 * var(--rp));
+}
+
+.db-language {
+    display: inline-grid;
+    place-items: center;
+    min-width: max(2.25rem, calc(52 * var(--rp)));
+    min-height: max(2.25rem, calc(46 * var(--rp)));
+    border-radius: max(.5rem, calc(9 * var(--rp)));
+    color: #8b9198;
+    font-size: max(.8125rem, calc(26 * var(--rp)));
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.db-language.is-active {
+    background: var(--db-brand);
+    color: #fff;
+}
+
+/* Title x48 / cap y192 (~52 px); intro cap y268. */
+.db-main {
+    padding: 0 calc(43 * var(--rp)) 0 calc(44 * var(--rp));
+}
+
+.db-heading {
+    margin: max(8px, calc(30 * var(--rp))) 0 0 calc(4 * var(--rp));
+    font-size: max(24px, calc(52 * var(--rp)));
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+    color: #13302a;
+}
+
+.db-intro {
+    margin: calc(18 * var(--rp)) 0 0 calc(4 * var(--rp));
+    color: var(--db-muted);
+    font-size: max(14px, calc(34 * var(--rp)));
+    line-height: 1.3;
+}
+
+.db-alert {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.db-alert-info {
+    border: 1px solid #ecdcc5;
+    background: #fbf4ea;
+    color: #6b4a22;
+}
+
+/* Hero: card x44-821 / y341-701 (cream), art x58-397 / y355-689, text from x438. */
+.db-hero {
+    display: grid;
+    grid-template-columns: calc(340 * var(--rp)) minmax(0, 1fr);
+    gap: calc(40 * var(--rp));
+    margin-top: max(16px, calc(48 * var(--rp)));
+    padding: calc(14 * var(--rp));
+    border: 1px solid #e9e7df;
+    border-radius: max(16px, calc(22 * var(--rp)));
+    background: #fdf9f4;
+    box-shadow: 0 2px 10px rgba(15, 27, 38, .04);
+}
+
+.db-hero-art {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    min-height: calc(334 * var(--rp));
+    overflow: hidden;
+    border-radius: max(12px, calc(16 * var(--rp)));
+    background: #f2ead9;
+}
+
+.db-hero-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.db-hero-art.is-placeholder {
+    background:
+        radial-gradient(circle at 78% 18%, rgba(214, 170, 76, .35), transparent 42%),
+        radial-gradient(circle at 18% 88%, rgba(23, 70, 58, .2), transparent 48%),
+        linear-gradient(145deg, #f7efdc, #efe3c6 55%, #e4efe7);
+}
+
+.db-hero-art .db-hero-mark {
+    width: 34%;
+    height: auto;
+}
+
+.db-hero-body {
+    position: relative;
+    min-width: 0;
+    padding: calc(18 * var(--rp)) calc(4 * var(--rp)) calc(8 * var(--rp)) 0;
+}
+
+.db-sparkle {
+    display: block;
+    width: max(10px, calc(20 * var(--rp)));
+    height: max(10px, calc(20 * var(--rp)));
+    color: var(--db-gold);
+}
+
+.db-hero-label {
+    margin: calc(12 * var(--rp)) 0 0;
+    color: var(--db-gold-ink);
+    font-size: max(9px, calc(16 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.db-hero-name {
+    margin: calc(18 * var(--rp)) 0 0;
+    color: var(--db-deep);
+    font-family: var(--db-serif);
+    font-size: max(15px, calc(38 * var(--rp)));
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.db-amp {
+    color: var(--db-gold);
+}
+
+.db-hero-rule {
+    display: block;
+    width: calc(155 * var(--rp));
+    height: max(1px, calc(2 * var(--rp)));
+    margin-top: calc(20 * var(--rp));
+    background: var(--db-gold);
+}
+
+.db-hero-date {
+    display: flex;
+    align-items: center;
+    gap: calc(20 * var(--rp));
+    margin: calc(22 * var(--rp)) 0 0;
+    color: var(--db-deep);
+}
+
+.db-day {
+    font-family: var(--db-serif);
+    font-size: max(30px, calc(72 * var(--rp)));
+    line-height: 1;
+}
+
+.db-month-year {
+    display: grid;
+    gap: calc(14 * var(--rp));
+    font-size: max(9px, calc(17 * var(--rp)));
+    font-weight: 750;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+}
+
+.db-hero-line,
+.db-hero-missing {
+    margin: calc(10 * var(--rp)) 0 0;
+    color: var(--db-muted);
+    font-size: max(11px, calc(21 * var(--rp)));
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.db-hero-date + .db-hero-line {
+    margin-top: calc(30 * var(--rp));
+}
+
+.db-hero-missing {
+    font-style: italic;
+}
+
+/* Keep the last lines clear of the chevron button. */
+.db-hero-body > .db-hero-line:last-of-type,
+.db-hero-body > .db-status {
+    margin-right: max(42px, calc(70 * var(--rp)));
+}
+
+.db-status {
+    display: inline-block;
+    margin: calc(10 * var(--rp)) 0 0;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #e5f2ea;
+    color: #0f4a32;
+    font-size: max(10px, calc(19 * var(--rp)));
+    font-weight: 650;
+}
+
+.db-status.is-ongoing { background: #e7f2ff; color: #0b4fd0; }
+.db-status.is-completed { background: #f1f0f2; color: #3b4252; }
+.db-status.is-archived { background: #efeafe; color: #3a1a99; }
+.db-status.is-cancelled { background: #fdecea; color: #9f241b; }
+
+/* Chevron circle x742-801 / y617-676. */
+.db-hero-open {
+    position: absolute;
+    right: calc(6 * var(--rp));
+    bottom: calc(10 * var(--rp));
+    display: grid;
+    place-items: center;
+    width: max(36px, calc(60 * var(--rp)));
+    height: max(36px, calc(60 * var(--rp)));
+    border-radius: 50%;
+    background: #e3ece7;
+    color: var(--db-ink);
+}
+
+.db-hero-open svg {
+    width: 50%;
+    height: 50%;
+}
+
+/* Stat cards: x45-419 / x444-819, rows y730-990 and y1016-1296; icon circles ~87 px. */
+.db-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(26 * var(--rp)) calc(25 * var(--rp));
+    margin-top: max(14px, calc(29 * var(--rp)));
+}
+
+.db-stat {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: calc(30 * var(--rp));
+    align-items: start;
+    min-height: calc(260 * var(--rp));
+    padding: calc(32 * var(--rp)) calc(18 * var(--rp)) calc(28 * var(--rp)) calc(31 * var(--rp));
+    border: 1.5px solid var(--db-border);
+    border-radius: max(14px, calc(22 * var(--rp)));
+    background: var(--db-card);
+}
+
+.db-stat-icon {
+    display: grid;
+    place-items: center;
+    width: max(30px, calc(87 * var(--rp)));
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #e6f1ec;
+    color: var(--db-deep);
+}
+
+.db-stat-icon svg {
+    width: 48%;
+    height: 48%;
+}
+
+.db-stat-icon.is-gold { background: #fbefdf; color: #8a4f22; }
+.db-stat-icon.is-lilac { background: #eceef8; color: #1f2f55; }
+
+.db-stat-body,
+.db-entries-body {
+    min-width: 0;
+}
+
+.db-stat-label {
+    margin: calc(10 * var(--rp)) 0 0;
+    font-size: max(12px, calc(24 * var(--rp)));
+    font-weight: 650;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.db-stat-value {
+    margin: calc(20 * var(--rp)) 0 0;
+    color: var(--db-deep);
+    font-size: max(24px, calc(64 * var(--rp)));
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.03em;
+    overflow-wrap: anywhere;
+}
+
+.db-stat-value.is-small {
+    font-size: max(22px, calc(58 * var(--rp)));
+}
+
+.db-stat-value.is-unavailable {
+    color: #6f6990;
+    font-size: max(13px, calc(28 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.2;
+}
+
+.db-stat-flag {
+    margin: calc(10 * var(--rp)) 0 0;
+    color: #156b46;
+    font-size: max(12px, calc(24 * var(--rp)));
+    font-weight: 700;
+}
+
+.db-stat-flag.is-off {
+    color: #8a5a1f;
+}
+
+.db-stat > .db-stat-desc {
+    grid-column: 1 / -1;
+}
+
+.db-stat-desc {
+    margin: calc(18 * var(--rp)) 0 0;
+    color: var(--db-muted);
+    font-size: max(11px, calc(21 * var(--rp)));
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+/* Added: admission entries (guests and entries are counted separately). */
+.db-entries {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: calc(30 * var(--rp));
+    align-items: start;
+    margin-top: calc(26 * var(--rp));
+    padding: calc(28 * var(--rp)) calc(28 * var(--rp)) calc(28 * var(--rp)) calc(31 * var(--rp));
+    border: 1.5px solid var(--db-border);
+    border-radius: max(14px, calc(22 * var(--rp)));
+    background: var(--db-card);
+}
+
+.db-entries-used {
+    margin: calc(10 * var(--rp)) 0 0;
+    color: var(--db-deep);
+    font-size: max(13px, calc(28 * var(--rp)));
+    font-weight: 750;
+}
+
+.db-bar {
+    height: max(6px, calc(12 * var(--rp)));
+    margin-top: calc(14 * var(--rp));
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e0e9e4;
+}
+
+.db-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--db-evergreen);
+}
+
+/* Next step: x44-820 / y1323-1650 (mint), icon ~110 px, button x74-789 / y1533-1621. */
+.db-next {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: calc(30 * var(--rp));
+    margin-top: calc(26 * var(--rp));
+    padding: calc(32 * var(--rp)) calc(30 * var(--rp)) calc(28 * var(--rp));
+    border-radius: max(14px, calc(22 * var(--rp)));
+    background: var(--db-mint);
+}
+
+.db-next-icon {
+    display: grid;
+    place-items: center;
+    width: max(40px, calc(110 * var(--rp)));
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #f5f9f7;
+    color: var(--db-deep);
+}
+
+.db-next-icon svg {
+    width: 44%;
+    height: 44%;
+}
+
+.db-next-body {
+    min-width: 0;
+}
+
+.db-next-label {
+    margin: calc(10 * var(--rp)) 0 0;
+    color: #1d7a52;
+    font-size: max(9px, calc(17 * var(--rp)));
+    font-weight: 750;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+}
+
+.db-next-title {
+    margin: calc(18 * var(--rp)) 0 0;
+    color: var(--db-deep);
+    font-size: max(15px, calc(31 * var(--rp)));
+    font-weight: 750;
+    line-height: 1.25;
+    letter-spacing: -.01em;
+    overflow-wrap: anywhere;
+}
+
+.db-next-desc {
+    margin: calc(12 * var(--rp)) 0 0;
+    color: var(--db-muted);
+    font-size: max(12px, calc(24 * var(--rp)));
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.db-next > .db-continue,
+.db-next > .db-alert,
+.db-next > .db-setup-link {
+    grid-column: 1 / -1;
+}
+
+.db-continue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(22 * var(--rp));
+    width: 100%;
+    min-height: max(50px, calc(89 * var(--rp)));
+    margin-top: calc(10 * var(--rp));
+    padding: 0 20px;
+    border: 0;
+    border-radius: max(14px, calc(22 * var(--rp)));
+    background: var(--db-evergreen);
+    color: #fff;
+    font: inherit;
+    font-size: max(16px, calc(31 * var(--rp)));
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.db-continue:hover {
+    background: var(--db-evergreen-hover);
+}
+
+.db-continue svg {
+    width: max(18px, calc(34 * var(--rp)));
+    height: max(18px, calc(34 * var(--rp)));
+}
+
+.db-setup-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    color: var(--db-evergreen);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.db-error {
+    margin-top: 20px;
+    padding: 24px 20px;
+    border: 1px solid #f2c9c4;
+    border-radius: 18px;
+    background: #fff;
+    text-align: center;
+}
+
+.db-error h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.db-error p {
+    margin: 8px 0 0;
+    color: var(--db-muted);
+}
+
+/* Bottom navigation: rule y1688, icons y1715-1749, labels y1768-1787, active "Matukio". */
+.db-tabbar {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    z-index: 10;
+    width: min(100%, 28rem);
+    transform: translateX(-50%);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid #e6ebe8;
+    background: rgba(253, 253, 251, .97);
+}
+
+.db-tabbar ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: var(--db-tabbar-h);
+    margin: 0;
+    padding: 0 calc(20 * var(--rp));
+    list-style: none;
+}
+
+.db-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: max(3px, calc(14 * var(--rp)));
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #8aa39a;
+    font: inherit;
+    font-size: max(11px, calc(22 * var(--rp)));
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.db-tab svg {
+    width: max(22px, calc(38 * var(--rp)));
+    height: max(22px, calc(38 * var(--rp)));
+}
+
+.db-tab.is-active {
+    color: var(--db-ink);
+    font-weight: 650;
+}
+
+.db-tab.is-active svg {
+    color: var(--db-deep);
+}
+
+.db-tab[aria-disabled="true"] {
+    cursor: default;
+}
+
+.db-tab-note {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: calc(100% + 10px);
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #1c2433;
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    :root {
+        --rp: calc(28rem / 863);
+    }
+
+    .db-page {
+        padding-top: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .db-page {
+        width: 40rem;
+        padding-top: 28px;
+    }
+
+    .db-tabbar {
+        bottom: 16px;
+        width: 28rem;
+        border: 1px solid #e6ebe8;
+        border-radius: 22px;
+        box-shadow: 0 8px 28px rgba(15, 27, 38, .1);
+    }
+}
+
+/* "Your Invitation" entry: same card as the next-step card, placed just above it. */
+.db-invite { margin-bottom: max(12px, calc(22 * var(--rp, 0.45px))); }

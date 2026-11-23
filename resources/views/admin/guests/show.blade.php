@@ -41,6 +41,10 @@
                         <p class="mt-2 font-semibold">{{ $guest->phone_number }}</p>
                     </div>
                     <div>
+                        <p class="text-xs font-bold uppercase text-zinc-500">Manual code</p>
+                        <p class="mt-2 font-mono text-2xl font-semibold">{{ $guest->manual_code }}</p>
+                    </div>
+                    <div>
                         <p class="text-xs font-bold uppercase text-zinc-500">Pass type</p>
                         <p class="mt-2 font-semibold">{{ $guest->passTypeLabel() }}</p>
                     </div>
@@ -77,7 +81,7 @@
 
                 @if ($guest->qrCode)
                     <div class="mt-5 grid place-items-center rounded-lg border border-stone-200 bg-white p-4">
-                        <img src="{{ route('admin.guests.qr', $guest) }}" alt="QR code for {{ $guest->name }}" class="size-56">
+                        <img src="{{ route('admin.guests.qr', $guest) }}" alt="QR code for {{ $guest->name }}" class="h-auto max-h-80 w-full object-contain">
                     </div>
                     <a href="{{ route('admin.guests.qr.download', $guest) }}" class="primary-button mt-4 w-full">Download QR</a>
                 @else

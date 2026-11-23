@@ -1,0 +1,3183 @@
+{
+  "audit_date": "2026-10-30",
+  "source_directory": "reference UI",
+  "png_count": 39,
+  "read_only_scope": "Read-only original PNG inspection. Persisted measurement evidence only; no production CSS or UI acceptance is implied.",
+  "inventory": [
+    {
+      "file": "01_Splash_Screen.png",
+      "bytes": 1798747,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "99cdc55d092422ee8146ae95d93cafdf0dd99e9a3c1bc1a58849f6c1fdb9a484",
+      "sha256_after": "99cdc55d092422ee8146ae95d93cafdf0dd99e9a3c1bc1a58849f6c1fdb9a484",
+      "unchanged": true
+    },
+    {
+      "file": "02_Register_Account.png",
+      "bytes": 1540557,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "12d147e20bcb3ae34674934a6b133aea6cbcfcf364f6b2f2b348ddf51218cb08",
+      "sha256_after": "12d147e20bcb3ae34674934a6b133aea6cbcfcf364f6b2f2b348ddf51218cb08",
+      "unchanged": true
+    },
+    {
+      "file": "03_Login.png",
+      "bytes": 1536499,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "005521a93b19450e0cc9879b83aa79cb6aecec8fcc6c050748b11d8943aead39",
+      "sha256_after": "005521a93b19450e0cc9879b83aa79cb6aecec8fcc6c050748b11d8943aead39",
+      "unchanged": true
+    },
+    {
+      "file": "04_Choose_Event_Type.png",
+      "bytes": 2074337,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "7b3235b0b634c957a1c95e85a9d9becab0d9312580a16c4655026c8e5b4c51f6",
+      "sha256_after": "7b3235b0b634c957a1c95e85a9d9becab0d9312580a16c4655026c8e5b4c51f6",
+      "unchanged": true
+    },
+    {
+      "file": "05_Event_Details.png",
+      "bytes": 1631764,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "862434006d1a433e584a3492c819a8bc10a5deea4491d95beedb14566d98939d",
+      "sha256_after": "862434006d1a433e584a3492c819a8bc10a5deea4491d95beedb14566d98939d",
+      "unchanged": true
+    },
+    {
+      "file": "06_Invitation_Preview.png",
+      "bytes": 2179447,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "67fb0b5d9b6e9d8f3002b64ef47afea832219690597ec00916f418099fcd7abd",
+      "sha256_after": "67fb0b5d9b6e9d8f3002b64ef47afea832219690597ec00916f418099fcd7abd",
+      "unchanged": true
+    },
+    {
+      "file": "07_Guest_List.png",
+      "bytes": 1652474,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "643da3e7dd102fe71800f9c0b84621b5f4107e5f1d3260c432bc6555cc44bb76",
+      "sha256_after": "643da3e7dd102fe71800f9c0b84621b5f4107e5f1d3260c432bc6555cc44bb76",
+      "unchanged": true
+    },
+    {
+      "file": "08_Guest_RSVP_Response.png",
+      "bytes": 2023355,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "1edc89e72a9dcb0e01cfafbb478f45524af44a356ab4ab90b74283bd87c75509",
+      "sha256_after": "1edc89e72a9dcb0e01cfafbb478f45524af44a356ab4ab90b74283bd87c75509",
+      "unchanged": true
+    },
+    {
+      "file": "09_Guest_QR_Ticket.png",
+      "bytes": 1838730,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "e2d3ea0944d3c5223c0b0504e3ed87f7be7a5233e8fe1edc3a86932d179e5ae9",
+      "sha256_after": "e2d3ea0944d3c5223c0b0504e3ed87f7be7a5233e8fe1edc3a86932d179e5ae9",
+      "unchanged": true
+    },
+    {
+      "file": "10_Welcome_How_It_Works.png",
+      "bytes": 1755519,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "9cae9c2036f2fecdb82c015958c7c8f11449098005feb9a53e9a52de2af5549e",
+      "sha256_after": "9cae9c2036f2fecdb82c015958c7c8f11449098005feb9a53e9a52de2af5549e",
+      "unchanged": true
+    },
+    {
+      "file": "11_Forgot_Password.png",
+      "bytes": 1411895,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "649bdee0517604c0e8f8ee4fef83935b50ac6248388c48781efd9dabb5e44463",
+      "sha256_after": "649bdee0517604c0e8f8ee4fef83935b50ac6248388c48781efd9dabb5e44463",
+      "unchanged": true
+    },
+    {
+      "file": "12_Event_Dashboard.png",
+      "bytes": 1771410,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "6049eb039f1491b9f6b7e7f6c50ff36464b6ba22b13bf51a5d5b7e128e6be73d",
+      "sha256_after": "6049eb039f1491b9f6b7e7f6c50ff36464b6ba22b13bf51a5d5b7e128e6be73d",
+      "unchanged": true
+    },
+    {
+      "file": "13_Choose_Invitation_Template.png",
+      "bytes": 2113276,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "ebb4bb8e6fe0caaa1a6d896235a379aad461c3d3203a5647ee907848c61d6a12",
+      "sha256_after": "ebb4bb8e6fe0caaa1a6d896235a379aad461c3d3203a5647ee907848c61d6a12",
+      "unchanged": true
+    },
+    {
+      "file": "14_Edit_Invitation_Card.png",
+      "bytes": 1832758,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "44aabec10479c6cf426302aa7da66b2f3dc0156040df70799b38023dfe3f5863",
+      "sha256_after": "44aabec10479c6cf426302aa7da66b2f3dc0156040df70799b38023dfe3f5863",
+      "unchanged": true
+    },
+    {
+      "file": "15_Add_Guest.png",
+      "bytes": 1418652,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "3c1b7cc8e068cb18f368a0bea2c4d4e006ae6504dd840d435b573c34b2abd0c0",
+      "sha256_after": "3c1b7cc8e068cb18f368a0bea2c4d4e006ae6504dd840d435b573c34b2abd0c0",
+      "unchanged": true
+    },
+    {
+      "file": "16_Import_Guests.png",
+      "bytes": 1591287,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "afdf311a59a0828959872e0412710d46e7c6b49c4cf25c8ab296a3ecc19498e3",
+      "sha256_after": "afdf311a59a0828959872e0412710d46e7c6b49c4cf25c8ab296a3ecc19498e3",
+      "unchanged": true
+    },
+    {
+      "file": "17_Invitation_Sending_Progress.png",
+      "bytes": 1634980,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "6385d9adce5e7908efdfd2435ab7e2c203d2132fbda74009b832a4c37566c2f6",
+      "sha256_after": "6385d9adce5e7908efdfd2435ab7e2c203d2132fbda74009b832a4c37566c2f6",
+      "unchanged": true
+    },
+    {
+      "file": "18_Invitation_Delivery_Summary.png",
+      "bytes": 1688097,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "1a8098f28cfc925d27ae75cc8cce02b42b85c778b663504d346d7d97ba8b9eee",
+      "sha256_after": "1a8098f28cfc925d27ae75cc8cce02b42b85c778b663504d346d7d97ba8b9eee",
+      "unchanged": true
+    },
+    {
+      "file": "19_Scanner_Home.png",
+      "bytes": 1594898,
+      "width_png_px": 863,
+      "height_png_px": 1822,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "4af64e547b58b8a365ee24242affc95512b15b9bc6666dbe1707f26c5f0cb637",
+      "sha256_after": "4af64e547b58b8a365ee24242affc95512b15b9bc6666dbe1707f26c5f0cb637",
+      "unchanged": true
+    },
+    {
+      "file": "20_My_Events_List.png",
+      "bytes": 1960369,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "32f242c8491d43820d0afdee26fcb593015585b8375e03f1bcd37d271e1a700a",
+      "sha256_after": "32f242c8491d43820d0afdee26fcb593015585b8375e03f1bcd37d271e1a700a",
+      "unchanged": true
+    },
+    {
+      "file": "21_Upload_Custom_Invitation_Card.png",
+      "bytes": 1994994,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "2804f1f0d565b467657b60cb07b75fd89671f5b6a704b5efb0bf0a36dba3130d",
+      "sha256_after": "2804f1f0d565b467657b60cb07b75fd89671f5b6a704b5efb0bf0a36dba3130d",
+      "unchanged": true
+    },
+    {
+      "file": "22_Guest_Details.png",
+      "bytes": 1914829,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "f81a0f4399922e9cf4c22310a48477db9ee87c4645cc59607aa1ce2cfffcb84c",
+      "sha256_after": "f81a0f4399922e9cf4c22310a48477db9ee87c4645cc59607aa1ce2cfffcb84c",
+      "unchanged": true
+    },
+    {
+      "file": "23_Manual_Guest_Search.png",
+      "bytes": 1789147,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "d67a6f2a092f9fdd8a711ae52725d4f37af97b93ff85788006178dae35c64518",
+      "sha256_after": "d67a6f2a092f9fdd8a711ae52725d4f37af97b93ff85788006178dae35c64518",
+      "unchanged": true
+    },
+    {
+      "file": "24_Admission_Success.png",
+      "bytes": 1822128,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "1611d510aafbe91198597e739596f009fed9225b606990d1288370f369bb4b23",
+      "sha256_after": "1611d510aafbe91198597e739596f009fed9225b606990d1288370f369bb4b23",
+      "unchanged": true
+    },
+    {
+      "file": "25_Recent_Scans_History.png",
+      "bytes": 1916739,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "193c654f81e468f32ab53049ab38b24b090c4ee777704174c6dc89ebf88b8e9b",
+      "sha256_after": "193c654f81e468f32ab53049ab38b24b090c4ee777704174c6dc89ebf88b8e9b",
+      "unchanged": true
+    },
+    {
+      "file": "26_Reports_and_Analytics.png",
+      "bytes": 1919856,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "510ed7f33216634e1311a772bb64a461d0ab0ed5bc653a8471bf6c4300fcf68f",
+      "sha256_after": "510ed7f33216634e1311a772bb64a461d0ab0ed5bc653a8471bf6c4300fcf68f",
+      "unchanged": true
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "bytes": 1961385,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "fc43bbb629953a4a779232955bbb710257b856903e26f0cde242a6cdb0e31e3a",
+      "sha256_after": "fc43bbb629953a4a779232955bbb710257b856903e26f0cde242a6cdb0e31e3a",
+      "unchanged": true
+    },
+    {
+      "file": "28_Account_and_Settings.png",
+      "bytes": 1894116,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "ee980c668034edf8b10f17c204c32067b9ce24a7c2ed6dc176aa3ae4f4f53536",
+      "sha256_after": "ee980c668034edf8b10f17c204c32067b9ce24a7c2ed6dc176aa3ae4f4f53536",
+      "unchanged": true
+    },
+    {
+      "file": "29_Scanner_Team_Management.png",
+      "bytes": 1815388,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "a964d0fa70956f3f34e73fae3f51c5b08657c563452cbcb1dc1f4ae744fdd7ce",
+      "sha256_after": "a964d0fa70956f3f34e73fae3f51c5b08657c563452cbcb1dc1f4ae744fdd7ce",
+      "unchanged": true
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "bytes": 1517741,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "37974e69289a6613502dd4f7b5948f8683a861159af31910f8eb4a817483efc9",
+      "sha256_after": "37974e69289a6613502dd4f7b5948f8683a861159af31910f8eb4a817483efc9",
+      "unchanged": true
+    },
+    {
+      "file": "31_Select_Invitation_Recipients.png",
+      "bytes": 1536383,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "53b8b6cf5cb3a4095b7bf598d543a560f98c47841ab6ee7760315a65247a48f5",
+      "sha256_after": "53b8b6cf5cb3a4095b7bf598d543a560f98c47841ab6ee7760315a65247a48f5",
+      "unchanged": true
+    },
+    {
+      "file": "32_Message_Delivery_Status.png",
+      "bytes": 1577598,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "a2604358591cd4b423698f59ba9dd1b286d1d80ab5fa12c269614b03e4ee1215",
+      "sha256_after": "a2604358591cd4b423698f59ba9dd1b286d1d80ab5fa12c269614b03e4ee1215",
+      "unchanged": true
+    },
+    {
+      "file": "33_Public_Guest_Invitation.png",
+      "bytes": 1798553,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "3227cfdefb42e5c58c8a3849d895f96adf8b55c50af7aed620c6ad24b33490e5",
+      "sha256_after": "3227cfdefb42e5c58c8a3849d895f96adf8b55c50af7aed620c6ad24b33490e5",
+      "unchanged": true
+    },
+    {
+      "file": "34_RSVP_Summary.png",
+      "bytes": 1587965,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "a36f61a94d4ccf346fb59e81a5b59d047ae99023146904f475f7d3a28fa61bbe",
+      "sha256_after": "a36f61a94d4ccf346fb59e81a5b59d047ae99023146904f475f7d3a28fa61bbe",
+      "unchanged": true
+    },
+    {
+      "file": "35_QR_Scanner_Camera.png",
+      "bytes": 1499556,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "f93861c486eb51aa35cd16b3dd51872998361f49c1b50930e9bf284b53a276d1",
+      "sha256_after": "f93861c486eb51aa35cd16b3dd51872998361f49c1b50930e9bf284b53a276d1",
+      "unchanged": true
+    },
+    {
+      "file": "36_Invalid_or_Used_Ticket.png",
+      "bytes": 1597391,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "95d025b4208bcebd22d16cc213d6cbc25b211147acb91e98956ab8bd4638c01b",
+      "sha256_after": "95d025b4208bcebd22d16cc213d6cbc25b211147acb91e98956ab8bd4638c01b",
+      "unchanged": true
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "bytes": 1502554,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "fc4f39f12e9395e33b198e8de8aca4ec6d0e14562cd80d915c0d37164556b5f8",
+      "sha256_after": "fc4f39f12e9395e33b198e8de8aca4ec6d0e14562cd80d915c0d37164556b5f8",
+      "unchanged": true
+    },
+    {
+      "file": "38_Event_Settings.png",
+      "bytes": 1590967,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "02f33a444a0676bf5d36f61de54bd46675cf16ecdfce11e33065bf2996bb64ca",
+      "sha256_after": "02f33a444a0676bf5d36f61de54bd46675cf16ecdfce11e33065bf2996bb64ca",
+      "unchanged": true
+    },
+    {
+      "file": "39_Subscription_Plans.png",
+      "bytes": 1619738,
+      "width_png_px": 941,
+      "height_png_px": 1672,
+      "bit_depth_per_channel": 8,
+      "color_type": 6,
+      "mode": "RGBA",
+      "interlace": 0,
+      "dpi": null,
+      "pHYs": null,
+      "chunk_types": [
+        "IHDR",
+        "IDAT",
+        "deBG",
+        "IEND"
+      ],
+      "sha256_before": "fe9b05ba0566f80524e7519fde006e4b91592b25a2ec84cc536de45b24e5f4ca",
+      "sha256_after": "fe9b05ba0566f80524e7519fde006e4b91592b25a2ec84cc536de45b24e5f4ca",
+      "unchanged": true
+    }
+  ],
+  "pixel_samples": [
+    {
+      "file": "03_Login.png",
+      "role": "background",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 20,
+      "y_png_px": 1000,
+      "rgba": [
+        254,
+        251,
+        244,
+        255
+      ],
+      "hex": "#FEFBF4",
+      "patch_median_rgb": [
+        253,
+        250,
+        244
+      ],
+      "patch_min_rgb": [
+        253,
+        250,
+        243
+      ],
+      "patch_max_rgb": [
+        254,
+        251,
+        244
+      ]
+    },
+    {
+      "file": "03_Login.png",
+      "role": "primary fill",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 100,
+      "y_png_px": 1100,
+      "rgba": [
+        27,
+        73,
+        59,
+        255
+      ],
+      "hex": "#1B493B",
+      "patch_median_rgb": [
+        27,
+        73,
+        59
+      ],
+      "patch_min_rgb": [
+        27,
+        72,
+        58
+      ],
+      "patch_max_rgb": [
+        28,
+        74,
+        60
+      ]
+    },
+    {
+      "file": "03_Login.png",
+      "role": "surface",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 400,
+      "y_png_px": 580,
+      "rgba": [
+        254,
+        254,
+        254,
+        255
+      ],
+      "hex": "#FEFEFE",
+      "patch_median_rgb": [
+        254,
+        254,
+        254
+      ],
+      "patch_min_rgb": [
+        253,
+        253,
+        253
+      ],
+      "patch_max_rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "file": "03_Login.png",
+      "role": "input border raster edge",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 432,
+      "y_png_px": 556,
+      "rgba": [
+        237,
+        236,
+        230,
+        255
+      ],
+      "hex": "#EDECE6",
+      "patch_median_rgb": [
+        253,
+        250,
+        243
+      ],
+      "patch_min_rgb": [
+        220,
+        220,
+        219
+      ],
+      "patch_max_rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "background",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 400,
+      "y_png_px": 220,
+      "rgba": [
+        252,
+        250,
+        244,
+        255
+      ],
+      "hex": "#FCFAF4",
+      "patch_median_rgb": [
+        252,
+        250,
+        244
+      ],
+      "patch_min_rgb": [
+        251,
+        250,
+        243
+      ],
+      "patch_max_rgb": [
+        253,
+        251,
+        244
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "primary fill",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 200,
+      "y_png_px": 1580,
+      "rgba": [
+        20,
+        65,
+        54,
+        255
+      ],
+      "hex": "#144136",
+      "patch_median_rgb": [
+        19,
+        65,
+        53
+      ],
+      "patch_min_rgb": [
+        19,
+        64,
+        52
+      ],
+      "patch_max_rgb": [
+        20,
+        66,
+        54
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "surface",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 500,
+      "y_png_px": 700,
+      "rgba": [
+        254,
+        254,
+        253,
+        255
+      ],
+      "hex": "#FEFEFD",
+      "patch_median_rgb": [
+        254,
+        253,
+        252
+      ],
+      "patch_min_rgb": [
+        253,
+        253,
+        252
+      ],
+      "patch_max_rgb": [
+        255,
+        254,
+        254
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "sage icon tint",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 120,
+      "y_png_px": 570,
+      "rgba": [
+        238,
+        245,
+        236,
+        255
+      ],
+      "hex": "#EEF5EC",
+      "patch_median_rgb": [
+        238,
+        246,
+        236
+      ],
+      "patch_min_rgb": [
+        236,
+        245,
+        234
+      ],
+      "patch_max_rgb": [
+        239,
+        247,
+        237
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "sage botanical leaf",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 60,
+      "y_png_px": 1610,
+      "rgba": [
+        135,
+        164,
+        130,
+        255
+      ],
+      "hex": "#87A482",
+      "patch_median_rgb": [
+        135,
+        163,
+        130
+      ],
+      "patch_min_rgb": [
+        108,
+        138,
+        107
+      ],
+      "patch_max_rgb": [
+        255,
+        251,
+        232
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "background",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 400,
+      "y_png_px": 100,
+      "rgba": [
+        248,
+        249,
+        246,
+        255
+      ],
+      "hex": "#F8F9F6",
+      "patch_median_rgb": [
+        248,
+        249,
+        246
+      ],
+      "patch_min_rgb": [
+        247,
+        248,
+        245
+      ],
+      "patch_max_rgb": [
+        249,
+        250,
+        247
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "primary fill",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 200,
+      "y_png_px": 1500,
+      "rgba": [
+        22,
+        73,
+        64,
+        255
+      ],
+      "hex": "#164940",
+      "patch_median_rgb": [
+        22,
+        73,
+        64
+      ],
+      "patch_min_rgb": [
+        22,
+        72,
+        63
+      ],
+      "patch_max_rgb": [
+        23,
+        74,
+        64
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "surface",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 600,
+      "y_png_px": 670,
+      "rgba": [
+        254,
+        253,
+        253,
+        255
+      ],
+      "hex": "#FEFDFD",
+      "patch_median_rgb": [
+        255,
+        254,
+        254
+      ],
+      "patch_min_rgb": [
+        253,
+        253,
+        253
+      ],
+      "patch_max_rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "card border raster edge",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 600,
+      "y_png_px": 640,
+      "rgba": [
+        230,
+        238,
+        234,
+        255
+      ],
+      "hex": "#E6EEEA",
+      "patch_median_rgb": [
+        249,
+        249,
+        247
+      ],
+      "patch_min_rgb": [
+        228,
+        235,
+        230
+      ],
+      "patch_max_rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "sage event-card tint",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 500,
+      "y_png_px": 480,
+      "rgba": [
+        236,
+        243,
+        240,
+        255
+      ],
+      "hex": "#ECF3F0",
+      "patch_median_rgb": [
+        235,
+        243,
+        239
+      ],
+      "patch_min_rgb": [
+        232,
+        240,
+        236
+      ],
+      "patch_max_rgb": [
+        241,
+        249,
+        245
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "gold progress fill",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 200,
+      "y_png_px": 596,
+      "rgba": [
+        199,
+        160,
+        115,
+        255
+      ],
+      "hex": "#C7A073",
+      "patch_median_rgb": [
+        199,
+        160,
+        115
+      ],
+      "patch_min_rgb": [
+        198,
+        159,
+        112
+      ],
+      "patch_max_rgb": [
+        199,
+        161,
+        117
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "background",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 400,
+      "y_png_px": 100,
+      "rgba": [
+        248,
+        249,
+        247,
+        255
+      ],
+      "hex": "#F8F9F7",
+      "patch_median_rgb": [
+        249,
+        249,
+        247
+      ],
+      "patch_min_rgb": [
+        248,
+        248,
+        246
+      ],
+      "patch_max_rgb": [
+        249,
+        250,
+        248
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "primary fill",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 500,
+      "y_png_px": 1520,
+      "rgba": [
+        23,
+        76,
+        65,
+        255
+      ],
+      "hex": "#174C41",
+      "patch_median_rgb": [
+        23,
+        77,
+        66
+      ],
+      "patch_min_rgb": [
+        22,
+        75,
+        65
+      ],
+      "patch_max_rgb": [
+        24,
+        78,
+        67
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "surface",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 600,
+      "y_png_px": 400,
+      "rgba": [
+        255,
+        254,
+        255,
+        255
+      ],
+      "hex": "#FFFEFF",
+      "patch_median_rgb": [
+        254,
+        254,
+        254
+      ],
+      "patch_min_rgb": [
+        253,
+        253,
+        253
+      ],
+      "patch_max_rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "card border raster edge",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 600,
+      "y_png_px": 373,
+      "rgba": [
+        228,
+        236,
+        233,
+        255
+      ],
+      "hex": "#E4ECE9",
+      "patch_median_rgb": [
+        248,
+        250,
+        248
+      ],
+      "patch_min_rgb": [
+        228,
+        236,
+        233
+      ],
+      "patch_max_rgb": [
+        254,
+        254,
+        254
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "sage information tint",
+      "method": "Exact center pixel, plus per-channel statistics of centered 9x9 PNG-pixel patch; median is a derived patch statistic, not necessarily one observed triplet.",
+      "x_png_px": 100,
+      "y_png_px": 1050,
+      "rgba": [
+        226,
+        236,
+        229,
+        255
+      ],
+      "hex": "#E2ECE5",
+      "patch_median_rgb": [
+        230,
+        240,
+        234
+      ],
+      "patch_min_rgb": [
+        15,
+        58,
+        47
+      ],
+      "patch_max_rgb": [
+        242,
+        252,
+        245
+      ]
+    },
+    {
+      "file": "03_Login.png",
+      "role": "headline text ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        50,
+        272,
+        810,
+        331
+      ],
+      "filter": "dark",
+      "qualifying_pixels": 16496,
+      "selected_triplet_count": 78,
+      "x_png_px": 249,
+      "y_png_px": 286,
+      "rgba": [
+        4,
+        32,
+        45,
+        255
+      ],
+      "hex": "#04202D"
+    },
+    {
+      "file": "03_Login.png",
+      "role": "secondary text ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        50,
+        379,
+        750,
+        480
+      ],
+      "filter": "gray",
+      "qualifying_pixels": 9117,
+      "selected_triplet_count": 19,
+      "x_png_px": 628,
+      "y_png_px": 382,
+      "rgba": [
+        76,
+        82,
+        97,
+        255
+      ],
+      "hex": "#4C5261"
+    },
+    {
+      "file": "03_Login.png",
+      "role": "gold logo ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        250,
+        132,
+        321,
+        200
+      ],
+      "filter": "gold",
+      "qualifying_pixels": 1011,
+      "selected_triplet_count": 4,
+      "x_png_px": 276,
+      "y_png_px": 180,
+      "rgba": [
+        210,
+        151,
+        52,
+        255
+      ],
+      "hex": "#D29734"
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "headline text ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        70,
+        240,
+        745,
+        290
+      ],
+      "filter": "dark",
+      "qualifying_pixels": 13585,
+      "selected_triplet_count": 61,
+      "x_png_px": 227,
+      "y_png_px": 248,
+      "rgba": [
+        0,
+        0,
+        16,
+        255
+      ],
+      "hex": "#000010"
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "role": "gold logo ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        310,
+        110,
+        381,
+        188
+      ],
+      "filter": "gold",
+      "qualifying_pixels": 1289,
+      "selected_triplet_count": 3,
+      "x_png_px": 329,
+      "y_png_px": 139,
+      "rgba": [
+        203,
+        144,
+        27,
+        255
+      ],
+      "hex": "#CB901B"
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "role": "headline text ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        95,
+        208,
+        550,
+        250
+      ],
+      "filter": "dark",
+      "qualifying_pixels": 7313,
+      "selected_triplet_count": 36,
+      "x_png_px": 276,
+      "y_png_px": 225,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "hex": "#000000"
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "role": "headline text ink",
+      "method": "Most frequent qualifying exact RGBA triplet in half-open ROI; ties resolved lexically by channel string. Coordinate is first row-major occurrence. This is raster ink evidence, not a declared CSS token.",
+      "roi_png_px": [
+        50,
+        201,
+        451,
+        249
+      ],
+      "filter": "dark",
+      "qualifying_pixels": 8135,
+      "selected_triplet_count": 80,
+      "x_png_px": 288,
+      "y_png_px": 209,
+      "rgba": [
+        26,
+        49,
+        46,
+        255
+      ],
+      "hex": "#1A312E"
+    }
+  ],
+  "coordinate_convention": "Zero-based PNG pixels. Bounding boxes are [left,top,right,bottom], with right/bottom excluded. Approximate visual bounds include edge antialiasing unless specified. PNG pixels are not CSS pixels.",
+  "metadata_limits": [
+    "All 39 are 8-bit-per-channel, noninterlaced RGBA PNGs. All parsed PNG chunk-type sets are IHDR/IDAT/deBG/IEND.",
+    "No pHYs chunk or authoritative DPR/CSS viewport metadata was found; dpi=null means absent, not 96 DPI. The private deBG chunk was not interpreted as CSS or device metadata.",
+    "Exact font family, font weight numbers, CSS font sizes, CSS border radii, CSS shadow offsets/blur/spread/opacity, responsive breakpoints and browser behavior cannot be established from these rasters alone.",
+    "Texture, gradients, antialiasing and resampling mean one sampled hex is not proof of a flat CSS fill. Colors below are observed image pixels; they are not guessed CSS tokens.",
+    "No app implementation was changed or run, and no implementation tests or pixel-perfect comparison were performed."
+  ],
+  "sampling_method": {
+    "pixel_reader": "Windows System.Drawing.Bitmap.GetPixel at original intrinsic resolution; no resize or image rewrite.",
+    "point_method": "Exact RGBA center pixel plus 9x9 centered patch per-channel median/min/max. Border patches cross adjacent fills; their patch median is not a border estimate.",
+    "modal_method": "Count exact RGBA triplets satisfying a filter inside the specified half-open ROI; select highest count, ties by lexicographic channel-string order; record first row-major coordinate.",
+    "filters": {
+      "dark": "R < 80 and G < 100 and B < 100",
+      "gray": "55 < R < 150 and 55 < G < 150 and 55 < B < 160",
+      "gold": "R > 140 and R > G+15 and G > 70 and B < 145"
+    },
+    "alpha_note": "All recorded sample pixels have A=255. This does not assert every source pixel is opaque."
+  },
+  "layout_groups": [
+    {
+      "files": "01?19",
+      "size_png_px": [
+        863,
+        1822
+      ],
+      "representative": "03_Login.png",
+      "observed_structure": "Full-bleed portrait raster with synthetic iOS-style status graphics and full brand logo/wordmark header. No drawn phone bezel in representative.",
+      "crop_caution": "Only representative 03 was measured in this quantitative pass; do not automatically apply its crop to every member."
+    },
+    {
+      "files": "20?29",
+      "size_png_px": [
+        941,
+        1672
+      ],
+      "representative": "27_Messages_and_Reminders.png",
+      "observed_structure": "Representative includes black/metallic drawn phone bezel, rounded display corners, synthetic iOS-style status graphics, full brand header and botanical footer.",
+      "crop_caution": "Bezel/display geometry can vary by image; 27 coordinates are not a universal mask for all 10 files."
+    },
+    {
+      "files": "30?39",
+      "size_png_px": [
+        941,
+        1672
+      ],
+      "representatives": [
+        "30_Event_Setup_Progress.png",
+        "37_Confirm_Guest_Admission.png"
+      ],
+      "observed_structure": "Minimal spaced PangaEvents wordmark with synthetic 4G status graphics. 30 has an inset rounded panel and external shadow; 37 is full bleed.",
+      "crop_caution": "One crop for all 30?39 is unsupported: measured 30 panel width and measured 37 full-bleed width differ."
+    }
+  ],
+  "representative_layouts": [
+    {
+      "file": "03_Login.png",
+      "app_or_display_envelope_png_px": [
+        0,
+        0,
+        863,
+        1822
+      ],
+      "comparison_crop_png_px": [
+        0,
+        96,
+        863,
+        1822
+      ],
+      "comparison_crop_width_png_px": 863,
+      "comparison_width_css_px_assumed": 390,
+      "normalization_scale_assumed_css_per_png_px": 0.4519119351100811,
+      "comparison_height_css_px_assumed": 780.0,
+      "content_bounds_approx_png_px": [
+        50,
+        132,
+        818,
+        1574
+      ],
+      "exclusion_regions": [
+        {
+          "bounds_png_px": [
+            0,
+            0,
+            863,
+            96
+          ],
+          "reason": "Chosen comparison exclusion for synthetic status graphics; the artwork has no visible horizontal app/status boundary."
+        }
+      ],
+      "notes": [
+        "Full-image app envelope is unambiguous; y=96 comparison cut is an explicit audit choice, not measured browser safe-area metadata.",
+        "Input outlines have roughly 2?3 raster pixels of antialias/edge transition; no CSS border width is recoverable."
+      ],
+      "elements": [
+        {
+          "element": "main brand/navigation header",
+          "bounds_png_px": [
+            50,
+            132,
+            818,
+            200
+          ],
+          "width_png_px": 768,
+          "height_png_px": 68,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            16.27,
+            369.66,
+            47.0
+          ],
+          "normalized_size_css_px_assumed": [
+            347.07,
+            30.73
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "headline ink region",
+          "bounds_png_px": [
+            50,
+            271,
+            809,
+            332
+          ],
+          "width_png_px": 759,
+          "height_png_px": 61,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            79.08,
+            365.6,
+            106.65
+          ],
+          "normalized_size_css_px_assumed": [
+            343.0,
+            27.57
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "email/phone input outer outline",
+          "bounds_png_px": [
+            50,
+            556,
+            815,
+            698
+          ],
+          "width_png_px": 765,
+          "height_png_px": 142,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            207.88,
+            368.31,
+            272.05
+          ],
+          "normalized_size_css_px_assumed": [
+            345.71,
+            64.17
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        },
+        {
+          "element": "password input outer outline",
+          "bounds_png_px": [
+            50,
+            736,
+            815,
+            878
+          ],
+          "width_png_px": 765,
+          "height_png_px": 142,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            289.22,
+            368.31,
+            353.4
+          ],
+          "normalized_size_css_px_assumed": [
+            345.71,
+            64.17
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "primary login button",
+          "bounds_png_px": [
+            50,
+            1048,
+            815,
+            1175
+          ],
+          "width_png_px": 765,
+          "height_png_px": 127,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            430.22,
+            368.31,
+            487.61
+          ],
+          "normalized_size_css_px_assumed": [
+            345.71,
+            57.39
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        },
+        {
+          "element": "Google sign-in button",
+          "bounds_png_px": [
+            50,
+            1320,
+            815,
+            1460
+          ],
+          "width_png_px": 765,
+          "height_png_px": 140,
+          "normalized_bounds_css_px_assumed": [
+            22.6,
+            553.14,
+            368.31,
+            616.41
+          ],
+          "normalized_size_css_px_assumed": [
+            345.71,
+            63.27
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        }
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "app_or_display_envelope_png_px": [
+        30,
+        16,
+        912,
+        1657
+      ],
+      "comparison_crop_png_px": [
+        31,
+        96,
+        911,
+        1657
+      ],
+      "comparison_crop_width_png_px": 880,
+      "comparison_width_css_px_assumed": 390,
+      "normalization_scale_assumed_css_per_png_px": 0.4431818181818182,
+      "comparison_height_css_px_assumed": 691.8068181818181,
+      "content_bounds_approx_png_px": [
+        64,
+        110,
+        880,
+        1634
+      ],
+      "exclusion_regions": [
+        {
+          "region": "Outside approximate display envelope [30,16,912,1657], including rounded corners",
+          "reason": "Drawn phone body/bezel and surrounding canvas, not app UI."
+        },
+        {
+          "bounds_png_px": [
+            30,
+            16,
+            912,
+            96
+          ],
+          "reason": "Synthetic iOS-style status graphics; y=96 cut is an explicit comparison choice."
+        }
+      ],
+      "notes": [
+        "Envelope bounds are supported by display/bezel pixel transitions at y=200 and x=470; rounded corners do not fill the whole enclosing rectangle.",
+        "Comparison crop removes one more pixel at each side than the envelope to avoid blended bezel edges.",
+        "Botanical leaves/gold waves belong to visible app artwork and remain in the comparison crop.",
+        "No text input is visible on this screen."
+      ],
+      "elements": [
+        {
+          "element": "main brand/navigation header",
+          "bounds_png_px": [
+            69,
+            110,
+            880,
+            187
+          ],
+          "width_png_px": 811,
+          "height_png_px": 77,
+          "normalized_bounds_css_px_assumed": [
+            16.84,
+            6.2,
+            376.26,
+            40.33
+          ],
+          "normalized_size_css_px_assumed": [
+            359.42,
+            34.12
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "headline ink region",
+          "bounds_png_px": [
+            69,
+            241,
+            747,
+            291
+          ],
+          "width_png_px": 678,
+          "height_png_px": 50,
+          "normalized_bounds_css_px_assumed": [
+            16.84,
+            64.26,
+            317.32,
+            86.42
+          ],
+          "normalized_size_css_px_assumed": [
+            300.48,
+            22.16
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "channel segmented control",
+          "bounds_png_px": [
+            68,
+            399,
+            879,
+            496
+          ],
+          "width_png_px": 811,
+          "height_png_px": 97,
+          "normalized_bounds_css_px_assumed": [
+            16.4,
+            134.28,
+            375.82,
+            177.27
+          ],
+          "normalized_size_css_px_assumed": [
+            359.42,
+            42.99
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "first message card",
+          "bounds_png_px": [
+            64,
+            521,
+            879,
+            711
+          ],
+          "width_png_px": 815,
+          "height_png_px": 190,
+          "normalized_bounds_css_px_assumed": [
+            14.62,
+            188.35,
+            375.82,
+            272.56
+          ],
+          "normalized_size_css_px_assumed": [
+            361.19,
+            84.2
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 4
+        },
+        {
+          "element": "second message card",
+          "bounds_png_px": [
+            64,
+            727,
+            879,
+            918
+          ],
+          "width_png_px": 815,
+          "height_png_px": 191,
+          "normalized_bounds_css_px_assumed": [
+            14.62,
+            279.65,
+            375.82,
+            364.3
+          ],
+          "normalized_size_css_px_assumed": [
+            361.19,
+            84.65
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 4
+        },
+        {
+          "element": "third message card",
+          "bounds_png_px": [
+            64,
+            934,
+            879,
+            1126
+          ],
+          "width_png_px": 815,
+          "height_png_px": 192,
+          "normalized_bounds_css_px_assumed": [
+            14.62,
+            371.39,
+            375.82,
+            456.48
+          ],
+          "normalized_size_css_px_assumed": [
+            361.19,
+            85.09
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 4
+        },
+        {
+          "element": "fourth message card",
+          "bounds_png_px": [
+            64,
+            1141,
+            879,
+            1331
+          ],
+          "width_png_px": 815,
+          "height_png_px": 190,
+          "normalized_bounds_css_px_assumed": [
+            14.62,
+            463.12,
+            375.82,
+            547.33
+          ],
+          "normalized_size_css_px_assumed": [
+            361.19,
+            84.2
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 4
+        },
+        {
+          "element": "fifth message card",
+          "bounds_png_px": [
+            64,
+            1347,
+            879,
+            1531
+          ],
+          "width_png_px": 815,
+          "height_png_px": 184,
+          "normalized_bounds_css_px_assumed": [
+            14.62,
+            554.42,
+            375.82,
+            635.97
+          ],
+          "normalized_size_css_px_assumed": [
+            361.19,
+            81.55
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 4
+        },
+        {
+          "element": "primary send-reminders button",
+          "bounds_png_px": [
+            121,
+            1546,
+            820,
+            1634
+          ],
+          "width_png_px": 699,
+          "height_png_px": 88,
+          "normalized_bounds_css_px_assumed": [
+            39.89,
+            642.61,
+            349.67,
+            681.61
+          ],
+          "normalized_size_css_px_assumed": [
+            309.78,
+            39.0
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        }
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "app_or_display_envelope_png_px": [
+        54,
+        35,
+        888,
+        1630
+      ],
+      "comparison_crop_png_px": [
+        55,
+        112,
+        886,
+        1629
+      ],
+      "comparison_crop_width_png_px": 831,
+      "comparison_width_css_px_assumed": 390,
+      "normalization_scale_assumed_css_per_png_px": 0.4693140794223827,
+      "comparison_height_css_px_assumed": 711.9494584837545,
+      "content_bounds_approx_png_px": [
+        82,
+        132,
+        863,
+        1572
+      ],
+      "exclusion_regions": [
+        {
+          "region": "Outside approximate inset panel envelope [54,35,888,1630], plus rounded corners",
+          "reason": "Presentation margin and diffuse external panel shadow; not app viewport evidence."
+        },
+        {
+          "bounds_png_px": [
+            54,
+            35,
+            888,
+            112
+          ],
+          "reason": "Synthetic 4G status graphics; y=112 comparison cut is an audit choice."
+        }
+      ],
+      "notes": [
+        "Panel transition at y=500 is x=54?55 on the left and x=886?888 on the right. Top at x=470 transitions y=35?36; bottom y=1629?1630. Envelope uncertainty is approximately 2 PNG px.",
+        "Comparison crop uses a conservative light-panel interior width of 831 PNG px.",
+        "This inset panel does not prove a real phone/device CSS viewport.",
+        "No text input is visible on this screen."
+      ],
+      "elements": [
+        {
+          "element": "main minimal wordmark/navigation header",
+          "bounds_png_px": [
+            98,
+            132,
+            848,
+            179
+          ],
+          "width_png_px": 750,
+          "height_png_px": 47,
+          "normalized_bounds_css_px_assumed": [
+            20.18,
+            9.39,
+            372.17,
+            31.44
+          ],
+          "normalized_size_css_px_assumed": [
+            351.99,
+            22.06
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "headline ink region",
+          "bounds_png_px": [
+            94,
+            209,
+            548,
+            250
+          ],
+          "width_png_px": 454,
+          "height_png_px": 41,
+          "normalized_bounds_css_px_assumed": [
+            18.3,
+            45.52,
+            231.37,
+            64.77
+          ],
+          "normalized_size_css_px_assumed": [
+            213.07,
+            19.24
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "event summary card",
+          "bounds_png_px": [
+            82,
+            343,
+            860,
+            512
+          ],
+          "width_png_px": 778,
+          "height_png_px": 169,
+          "normalized_bounds_css_px_assumed": [
+            12.67,
+            108.41,
+            377.8,
+            187.73
+          ],
+          "normalized_size_css_px_assumed": [
+            365.13,
+            79.31
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "progress track",
+          "bounds_png_px": [
+            89,
+            589,
+            853,
+            603
+          ],
+          "width_png_px": 764,
+          "height_png_px": 14,
+          "normalized_bounds_css_px_assumed": [
+            15.96,
+            223.86,
+            374.51,
+            230.43
+          ],
+          "normalized_size_css_px_assumed": [
+            358.56,
+            6.57
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 2
+        },
+        {
+          "element": "first setup card",
+          "bounds_png_px": [
+            146,
+            639,
+            863,
+            754
+          ],
+          "width_png_px": 717,
+          "height_png_px": 115,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            247.33,
+            379.21,
+            301.3
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            53.97
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        },
+        {
+          "element": "second setup card",
+          "bounds_png_px": [
+            146,
+            771,
+            863,
+            887
+          ],
+          "width_png_px": 717,
+          "height_png_px": 116,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            309.28,
+            379.21,
+            363.72
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            54.44
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "third setup card",
+          "bounds_png_px": [
+            146,
+            905,
+            863,
+            1021
+          ],
+          "width_png_px": 717,
+          "height_png_px": 116,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            372.17,
+            379.21,
+            426.61
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            54.44
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "fourth setup card",
+          "bounds_png_px": [
+            146,
+            1038,
+            863,
+            1157
+          ],
+          "width_png_px": 717,
+          "height_png_px": 119,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            434.58,
+            379.21,
+            490.43
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            55.85
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "fifth setup card",
+          "bounds_png_px": [
+            146,
+            1175,
+            863,
+            1295
+          ],
+          "width_png_px": 717,
+          "height_png_px": 120,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            498.88,
+            379.21,
+            555.2
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            56.32
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "sixth setup card",
+          "bounds_png_px": [
+            146,
+            1318,
+            863,
+            1440
+          ],
+          "width_png_px": 717,
+          "height_png_px": 122,
+          "normalized_bounds_css_px_assumed": [
+            42.71,
+            565.99,
+            379.21,
+            623.25
+          ],
+          "normalized_size_css_px_assumed": [
+            336.5,
+            57.26
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "primary continue button",
+          "bounds_png_px": [
+            89,
+            1480,
+            852,
+            1572
+          ],
+          "width_png_px": 763,
+          "height_png_px": 92,
+          "normalized_bounds_css_px_assumed": [
+            15.96,
+            642.02,
+            374.04,
+            685.2
+          ],
+          "normalized_size_css_px_assumed": [
+            358.09,
+            43.18
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        }
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "app_or_display_envelope_png_px": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "comparison_crop_png_px": [
+        0,
+        80,
+        941,
+        1672
+      ],
+      "comparison_crop_width_png_px": 941,
+      "comparison_width_css_px_assumed": 390,
+      "normalization_scale_assumed_css_per_png_px": 0.41445270988310307,
+      "comparison_height_css_px_assumed": 659.8087141339,
+      "content_bounds_approx_png_px": [
+        49,
+        105,
+        894,
+        1618
+      ],
+      "exclusion_regions": [
+        {
+          "bounds_png_px": [
+            0,
+            0,
+            941,
+            80
+          ],
+          "reason": "Synthetic 4G status graphics; y=80 comparison cut is an audit choice."
+        }
+      ],
+      "notes": [
+        "Full-bleed artwork has no visible phone bezel or inset panel in this representative.",
+        "First card edge is supported at x=49?51 / x=891?893, y=372?374 / y=680?682.",
+        "The minus/plus quantity control is not a text input. No text input is visible."
+      ],
+      "elements": [
+        {
+          "element": "main minimal wordmark/navigation header",
+          "bounds_png_px": [
+            61,
+            105,
+            893,
+            156
+          ],
+          "width_png_px": 832,
+          "height_png_px": 51,
+          "normalized_bounds_css_px_assumed": [
+            25.28,
+            10.36,
+            370.11,
+            31.5
+          ],
+          "normalized_size_css_px_assumed": [
+            344.82,
+            21.14
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "headline ink region",
+          "bounds_png_px": [
+            49,
+            202,
+            451,
+            249
+          ],
+          "width_png_px": 402,
+          "height_png_px": 47,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            50.56,
+            186.92,
+            70.04
+          ],
+          "normalized_size_css_px_assumed": [
+            166.61,
+            19.48
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "guest summary card",
+          "bounds_png_px": [
+            49,
+            372,
+            894,
+            683
+          ],
+          "width_png_px": 845,
+          "height_png_px": 311,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            121.02,
+            370.52,
+            249.91
+          ],
+          "normalized_size_css_px_assumed": [
+            350.21,
+            128.89
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        },
+        {
+          "element": "quantity control card",
+          "bounds_png_px": [
+            49,
+            782,
+            894,
+            966
+          ],
+          "width_png_px": 845,
+          "height_png_px": 184,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            290.95,
+            370.52,
+            367.21
+          ],
+          "normalized_size_css_px_assumed": [
+            350.21,
+            76.26
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "information banner",
+          "bounds_png_px": [
+            49,
+            1000,
+            894,
+            1104
+          ],
+          "width_png_px": 845,
+          "height_png_px": 104,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            381.3,
+            370.52,
+            424.4
+          ],
+          "normalized_size_css_px_assumed": [
+            350.21,
+            43.1
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "after-admission preview card",
+          "bounds_png_px": [
+            49,
+            1136,
+            894,
+            1405
+          ],
+          "width_png_px": 845,
+          "height_png_px": 269,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            437.66,
+            370.52,
+            549.15
+          ],
+          "normalized_size_css_px_assumed": [
+            350.21,
+            111.49
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "secondary cancel button",
+          "bounds_png_px": [
+            49,
+            1503,
+            428,
+            1618
+          ],
+          "width_png_px": 379,
+          "height_png_px": 115,
+          "normalized_bounds_css_px_assumed": [
+            20.31,
+            589.77,
+            177.39,
+            637.43
+          ],
+          "normalized_size_css_px_assumed": [
+            157.08,
+            47.66
+          ],
+          "measurement_method": "Original image inspection; bounded visible artwork, not a DOM box.",
+          "edge_uncertainty_png_px": 3
+        },
+        {
+          "element": "primary confirm-admission button",
+          "bounds_png_px": [
+            452,
+            1503,
+            894,
+            1618
+          ],
+          "width_png_px": 442,
+          "height_png_px": 115,
+          "normalized_bounds_css_px_assumed": [
+            187.33,
+            589.77,
+            370.52,
+            637.43
+          ],
+          "normalized_size_css_px_assumed": [
+            183.19,
+            47.66
+          ],
+          "measurement_method": "Original image inspection supported by sampled row/column transitions; includes antialias edge, excludes diffuse shadow.",
+          "edge_uncertainty_png_px": 2
+        }
+      ]
+    }
+  ],
+  "normalization": {
+    "status": "Explicit proposed comparison convention only; not measured CSS dimensions.",
+    "assumed_comparison_width_css_px": 390,
+    "formula": "For chosen crop [L,T,R,B], s=390/(R-L); x_css=(x_png-L)*s; y_css=(y_png-T)*s; width_css=width_png*s; height_css=height_png*s.",
+    "scope": "Use each representative crop independently; preserve aspect ratio. Do not normalize all 941-wide files with the same crop when their drawn app viewport differs.",
+    "uncertainties": [
+      "DPR unknown; exported image may have been resized independently of any browser.",
+      "Inset frame/bezel and synthetic status artwork are not authoritative viewport or safe-area dimensions.",
+      "Edges have approximately 2?4 PNG px visual/antialias uncertainty as recorded; y status cutoffs are explicit editorial comparison choices.",
+      "Normalized dimensions are hypothetical CSS comparison units and must be checked against real implementation screenshots before any fidelity claim."
+    ]
+  },
+  "scanline_evidence": [
+    {
+      "file": "03_Login.png",
+      "method": "GetPixel scan; border transition at x=432",
+      "pixels": [
+        {
+          "xy": [
+            432,
+            555
+          ],
+          "rgb": [
+            255,
+            252,
+            245
+          ]
+        },
+        {
+          "xy": [
+            432,
+            556
+          ],
+          "rgb": [
+            237,
+            236,
+            230
+          ]
+        },
+        {
+          "xy": [
+            432,
+            557
+          ],
+          "rgb": [
+            220,
+            220,
+            220
+          ]
+        },
+        {
+          "xy": [
+            432,
+            558
+          ],
+          "rgb": [
+            240,
+            240,
+            240
+          ]
+        },
+        {
+          "xy": [
+            432,
+            559
+          ],
+          "rgb": [
+            254,
+            254,
+            254
+          ]
+        },
+        {
+          "xy": [
+            432,
+            694
+          ],
+          "rgb": [
+            241,
+            241,
+            241
+          ]
+        },
+        {
+          "xy": [
+            432,
+            695
+          ],
+          "rgb": [
+            225,
+            224,
+            223
+          ]
+        },
+        {
+          "xy": [
+            432,
+            696
+          ],
+          "rgb": [
+            237,
+            236,
+            232
+          ]
+        },
+        {
+          "xy": [
+            432,
+            697
+          ],
+          "rgb": [
+            252,
+            250,
+            244
+          ]
+        }
+      ]
+    },
+    {
+      "file": "03_Login.png",
+      "method": "Green fill predicate R<70, R<G<135, B<120; text splits interior runs. At y=1110, first qualifying x=51 and last x=813 inside button ROI; at x=432, first y=1049 and last y=1173 in y=1030..1200.",
+      "qualifying_envelope_png_px": [
+        51,
+        1049,
+        814,
+        1174
+      ]
+    },
+    {
+      "file": "27_Messages_and_Reminders.png",
+      "method": "Display/bezel transition samples",
+      "pixels": [
+        {
+          "xy": [
+            28,
+            200
+          ],
+          "rgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "xy": [
+            29,
+            200
+          ],
+          "rgb": [
+            127,
+            126,
+            124
+          ]
+        },
+        {
+          "xy": [
+            30,
+            200
+          ],
+          "rgb": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "xy": [
+            31,
+            200
+          ],
+          "rgb": [
+            251,
+            250,
+            247
+          ]
+        },
+        {
+          "xy": [
+            910,
+            200
+          ],
+          "rgb": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "xy": [
+            911,
+            200
+          ],
+          "rgb": [
+            179,
+            179,
+            177
+          ]
+        },
+        {
+          "xy": [
+            912,
+            200
+          ],
+          "rgb": [
+            9,
+            10,
+            9
+          ]
+        },
+        {
+          "xy": [
+            470,
+            14
+          ],
+          "rgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "xy": [
+            470,
+            15
+          ],
+          "rgb": [
+            111,
+            117,
+            112
+          ]
+        },
+        {
+          "xy": [
+            470,
+            16
+          ],
+          "rgb": [
+            248,
+            249,
+            247
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1656
+          ],
+          "rgb": [
+            241,
+            241,
+            236
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1657
+          ],
+          "rgb": [
+            60,
+            60,
+            57
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1658
+          ],
+          "rgb": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "file": "30_Event_Setup_Progress.png",
+      "method": "Inset panel transition samples; diffuse shadow is not included in the envelope.",
+      "pixels": [
+        {
+          "xy": [
+            53,
+            500
+          ],
+          "rgb": [
+            226,
+            230,
+            226
+          ]
+        },
+        {
+          "xy": [
+            54,
+            500
+          ],
+          "rgb": [
+            235,
+            238,
+            235
+          ]
+        },
+        {
+          "xy": [
+            55,
+            500
+          ],
+          "rgb": [
+            250,
+            250,
+            248
+          ]
+        },
+        {
+          "xy": [
+            885,
+            500
+          ],
+          "rgb": [
+            248,
+            248,
+            246
+          ]
+        },
+        {
+          "xy": [
+            886,
+            500
+          ],
+          "rgb": [
+            241,
+            244,
+            242
+          ]
+        },
+        {
+          "xy": [
+            887,
+            500
+          ],
+          "rgb": [
+            229,
+            233,
+            230
+          ]
+        },
+        {
+          "xy": [
+            470,
+            35
+          ],
+          "rgb": [
+            242,
+            243,
+            241
+          ]
+        },
+        {
+          "xy": [
+            470,
+            36
+          ],
+          "rgb": [
+            253,
+            253,
+            252
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1628
+          ],
+          "rgb": [
+            250,
+            249,
+            246
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1629
+          ],
+          "rgb": [
+            238,
+            241,
+            236
+          ]
+        },
+        {
+          "xy": [
+            470,
+            1630
+          ],
+          "rgb": [
+            221,
+            225,
+            221
+          ]
+        }
+      ]
+    },
+    {
+      "file": "37_Confirm_Guest_Admission.png",
+      "method": "First card outline transition samples",
+      "pixels": [
+        {
+          "xy": [
+            49,
+            500
+          ],
+          "rgb": [
+            236,
+            243,
+            238
+          ]
+        },
+        {
+          "xy": [
+            50,
+            500
+          ],
+          "rgb": [
+            232,
+            239,
+            236
+          ]
+        },
+        {
+          "xy": [
+            51,
+            500
+          ],
+          "rgb": [
+            247,
+            251,
+            250
+          ]
+        },
+        {
+          "xy": [
+            52,
+            500
+          ],
+          "rgb": [
+            254,
+            254,
+            254
+          ]
+        },
+        {
+          "xy": [
+            891,
+            500
+          ],
+          "rgb": [
+            242,
+            246,
+            244
+          ]
+        },
+        {
+          "xy": [
+            892,
+            500
+          ],
+          "rgb": [
+            230,
+            237,
+            234
+          ]
+        },
+        {
+          "xy": [
+            893,
+            500
+          ],
+          "rgb": [
+            243,
+            245,
+            243
+          ]
+        },
+        {
+          "xy": [
+            894,
+            500
+          ],
+          "rgb": [
+            250,
+            251,
+            248
+          ]
+        },
+        {
+          "xy": [
+            600,
+            372
+          ],
+          "rgb": [
+            232,
+            238,
+            234
+          ]
+        },
+        {
+          "xy": [
+            600,
+            373
+          ],
+          "rgb": [
+            228,
+            236,
+            233
+          ]
+        },
+        {
+          "xy": [
+            600,
+            374
+          ],
+          "rgb": [
+            248,
+            251,
+            249
+          ]
+        },
+        {
+          "xy": [
+            600,
+            375
+          ],
+          "rgb": [
+            254,
+            254,
+            254
+          ]
+        },
+        {
+          "xy": [
+            600,
+            680
+          ],
+          "rgb": [
+            241,
+            245,
+            244
+          ]
+        },
+        {
+          "xy": [
+            600,
+            681
+          ],
+          "rgb": [
+            231,
+            239,
+            235
+          ]
+        },
+        {
+          "xy": [
+            600,
+            682
+          ],
+          "rgb": [
+            243,
+            247,
+            243
+          ]
+        },
+        {
+          "xy": [
+            600,
+            683
+          ],
+          "rgb": [
+            249,
+            250,
+            248
+          ]
+        }
+      ]
+    }
+  ],
+  "integrity": {
+    "method": "Read full bytes and SHA-256 each of 39 originals before continued audit/sampling, then independently reread and SHA-256 all originals after measurements.",
+    "verified_file_count": 39,
+    "all_unchanged": true,
+    "mismatches": [],
+    "after_verification_utc": "2026-10-30T11:19:36.236178+00:00"
+  }
+}

@@ -1,0 +1,53 @@
+# Dormant workspace backfill preparation
+
+## IMPLEMENTED — P3-005 source/tests (2026-10-18)
+
+Full isolated regression passed **656 tests / 6,689 assertions** (101.487276s). Focused backfill/schema checks passed **75 tests / 1,290 assertions** (10.530528s). Five new PHP files passed Pint and syntax checks. All 97 HTTP routes, unchanged read-only command options and the 31-table empty-schema CLI smoke passed; source whitespace, zero application callers and baseline preservation checks passed.
+
+## CURRENT — source-only boundary
+
+[LegacyWorkspaceBackfill](../app/Services/Tenancy/LegacyWorkspaceBackfill.php) is an internal service with no command, route, job, listener or application caller. Only isolated fixtures invoke it. It does not verify human ownership, approved platform access, restored backups or maintenance fencing. Source verification does not authorize real execution. [Task contract](phases/PHASE_03_WORKSPACES.md), [evidence](PHASE_03_REPORT.md).
+
+Its apply(Connection, OwnershipManifest) API requires an explicit connection and validated private proposal. Platform targets must be empty: silently ignoring platform intent would misrepresent the exact proposal. Platform grants and capability enforcement remain separate work. Existing staff/scanner authority is unchanged and prepared owners stay inactive.
+
+## CURRENT — prerequisites and complete precheck
+
+[OwnershipBackfillSchema](../app/Services/Tenancy/OwnershipBackfillSchema.php) performs reads only. It rejects ambient transactions so every group owns a real commit boundary. It requires the six known tables/columns, compatible integer nonnull id primary keys, generated-ID allocation for inserted tables, exact full-column unique constraints and restrictive same-schema foreign keys. SQLite FK enforcement must be enabled; MySQL/MariaDB require enabled session FK checks and InnoDB for all six tables. It does not install, alter or repair missing prerequisites.
+
+Partial/expression/prefix indexes cannot replace the required full-column unique constraints. SQLite INTEGER PRIMARY KEY DESC and WITHOUT ROWID definitions are not accepted as rowid allocators. Generated plan/workspace IDs are checked from the uncoerced driver value before Laravel's numeric processor result is trusted; values outside PHP's positive integer range refuse within the allocation transaction.
+
+Before inserting even a plan row, the service checks every selected owner exists, is canonically active and has an exact legacy admin/scanner role. Every selected event must exist and be unowned, or already belong to this exact proposal/reference's verified workspace. Every currently unowned event, including default/archived/cancelled events, must be explicitly covered. Unknown resolution rows, ownership conflicts and committed-state drift refuse rather than adopt or repair data. A changed proposal cannot reuse existing owned targets as a retry; a distinct proposal covering only new unowned work can be structurally eligible and still requires separate explicit review.
+
+## CURRENT — one workspace per commit
+
+Private identity uses the [canonical proposal protocol](OWNERSHIP_LEDGER.md), never names or global roles. References use byte ordering; selected owner/event IDs are sorted exactly and queried in batches of at most 500. A private plan row may commit before any group.
+
+Within each group transaction, the service locks/rechecks the plan and resolution, selected owners/events in ascending order, then the target/member state. A new exact-name workspace, its exact inactive owner memberships, listed event assignments and reference mapping commit together. Event updates require workspace_id still null and an exact affected-row count. Stored workspace/member/event state and the mapping are reread before commit. Failure rolls back the entire current group.
+
+An existing mapping for the same exact proposal must match the workspace's exact name, exact inactive owner membership set/roles and exact event set/ownership. Extra, missing, active or changed data requires explicit reconciliation. Verifying an already committed group writes nothing and preserves timestamps. A partial same-proposal retry can create the remaining groups; a fully applied exact retry creates no records. Earlier committed groups remain after a later failure and can be verified on retry; the service does not repair mismatches or merge changed proposals.
+
+Only listed events.workspace_id changes among existing records. Existing event timestamps, user/scanner assignments/roles/credentials/platform flags, guests, QR tokens, manual codes, admissions and offline data remain outside its write set. New records use explicit query-builder writes, without Eloquent hooks, default events, membership activation or account grants.
+
+## CURRENT — safe outcomes and retained progress
+
+Success returns schema_version=1, status=complete and aggregate workspaces_created, workspaces_verified, memberships_created and events_assigned. It always returns platform_grants=0, rollout_ready=false and all four real ownership/platform/restore/engine gates unverified. It exposes no proposal names, IDs, references, hashes or database paths.
+
+[OwnershipBackfillException](../app/Services/Tenancy/OwnershipBackfillException.php) has a fixed safe message and allowlisted reason(): platform_proposal_unsupported, invalid_prerequisites, eligibility_changed, coverage_conflict, ledger_conflict or database_unavailable. Original query/driver exceptions are discarded without previous context or logs. A failure may leave the private plan row and earlier groups; review those outcomes rather than interpreting failure as a plan-wide rollback.
+
+## REQUIRES VERIFICATION — actual execution
+
+Initial, between-group and final coverage checks are observations, not a global write fence. Listed-row/plan locks and conditional updates cannot prevent unrelated writers creating events. A final conflict can retain earlier commits. Actual execution requires verified maintenance controls or cooperation from every relevant writer, reviewed legitimate owners, current inventory, database/file restore and real-engine rehearsal.
+
+SQLite fixtures cannot prove MySQL row/gap locks, deadlocks, DDL, collation or concurrent recovery. Local metadata/raw-ID/interleaving simulations are explicitly limited. This ledger is not a complete audit/outcome journal. No reachable writer or actual rollout is introduced here; customer access, tenant policies and platform enforcement remain separate gates. Follow the [migration plan](SAAS_MIGRATION_PLAN.md) and [backup/rollback rules](BACKUP_AND_ROLLBACK.md).
+
+## IMPLEMENTED — P3-006 synthetic MySQL evidence (2026-10-18)
+
+Actual MySQL 8.4.11 Community (Oracle-signed Win64 distribution) applied all 27 repository migrations on a fresh synthetic schema. The fixture passed 108 checks, conserved 39 legacy rows, rejected seven unique/FK violations and verified eight historical offline-index transitions. It proved current-group rollback/earlier-group retention, partial retry and zero-write completed retry, independent-connection row-lock timeout/release, exact-name drift rejection under a case-insensitive SQL collation, and real unsigned plan/workspace IDs above PHP_INT_MAX refusing without accidental target adoption. The same server identity and every fixture row survived restart. A scoped-account mysqldump/mysql restore into the second fresh owned schema matched all rows across 31 tables and passed the backfill schema guard. After clean shutdown, the connection failed safely with driver code 2002/exit 2; port 43484 was free and task-created plaintext profile/client/bootstrap credentials were removed. Existing simulation-only statements above describe P3-005; P3-006 now adds these bounded actual-engine results. The dormant service/output gates are unchanged. This is bounded synthetic MySQL 8.4.11 evidence. Configured/customer database identity/schema/inventory, representative customer database and private-file restoration, legitimate owners/platform approval, maintenance fencing, comprehensive races/deadlocks and MariaDB remain unverified. No configured database, XAMPP, other project data/service, runtime writer, grant, frontend/dependency change or deployment occurred. Phase 3 remains IN PROGRESS. [Rehearsal scope and evidence](MYSQL_REHEARSAL.md).
+
+## IMPLEMENTED — P3-007 read-only progress inspection (2026-10-19)
+
+The new read-only inspector reuses exact current-state checks and can observe partial/completed proposals without calling apply. It neither starts transactions nor locks or repairs data. The writer stays unreachable. Results are multi-query observations, not a consistent snapshot, retry guarantee, legitimate-owner approval, backup evidence or maintenance fence. All four external gates stay unverified and rollout_ready=false. No configured/customer database, actual owner/platform grant, runtime writer, HTTP/API/UI/dependency/Android change or deployment was involved. Phase 3 remains IN PROGRESS. [Scope and usage](BACKFILL_PROGRESS_INSPECTION.md).
+
+## IMPLEMENTED — P3-009 selected MySQL worker evidence (2026-10-19)
+
+Existing-plan workers produced one created workspace and a waiting verifier with zero DML. The fresh missing-plan race produced one successful creator and one sanitized engine conflict; exact retry wrote nothing and no duplicate target committed. Competing single-group proposals produced one exact winner and an observed MySQL1213 deadlock sanitized as database_unavailable; the losing retry refused ledger_conflict with zero DML, reassignment or name adoption, retaining one empty losing plan. Terminating only the verified owned PHP worker during group2 caused InnoDB to discard the entire unfinished group while preserving group1; inspector partial, remaining-group resume and zero-DML exact retry all passed. The selected actual-engine source paths now have this additional evidence. Existing external output gates intentionally remain unverified. This verifies selected service interleavings and a worker disconnect on the recorded synthetic MySQL build, not complete crash/durability/deadlock/race coverage, another hosting engine, maintenance fencing, customer backup/file restoration or legitimate owner/platform approval. Competing multi-group proposals may retain different committed groups; no single complete winning proposal is guaranteed in general. No automatic retry/global mutex, runtime writer, platform grant, membership activation, XAMPP/configured database change or deployment occurred. Phase3 remains IN PROGRESS. [Scope and evidence](MYSQL_CONCURRENCY_REHEARSAL.md).

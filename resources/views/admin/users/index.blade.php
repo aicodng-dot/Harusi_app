@@ -69,6 +69,9 @@
                                 </td>
                                 <td class="px-5 py-4">
                                     {{ $userRecord->event?->event_name ?? ($userRecord->role === \App\Models\User::ROLE_SCANNER ? 'Default event' : '--') }}
+                                    @if ($userRecord->event?->workspace_id !== null)
+                                        <span class="block text-xs font-semibold text-zinc-500">Customer: {{ $userRecord->event->workspace?->name }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-4">
                                     <span class="status-badge {{ $gateBadge($userRecord->gate_name) }}">
@@ -76,7 +79,9 @@
                                     </span>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <span class="status-badge bg-emerald-100 text-emerald-800">Active</span>
+                                    <span class="status-badge {{ $userRecord->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-700' }}">
+                                        {{ $userRecord->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
                                 </td>
                                 <td class="px-5 py-4 font-semibold text-zinc-600">{{ $userRecord->created_at?->format('M j, Y') }}</td>
                                 <td class="px-5 py-4">

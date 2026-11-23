@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CoreModelRelationshipTest extends TestCase
@@ -58,6 +59,29 @@ class CoreModelRelationshipTest extends TestCase
         $this->assertTrue($checkin->user->is($user));
     }
 
+    #[DataProvider('largeSpecialAllowances')]
+    public function test_special_pass_allowance_above_ten_survives_saving_usage(int $capacity): void
+    {
+        $guest = Guest::query()->create([
+            'name' => 'Large Family',
+            'phone_number' => '+255700000005',
+            'pass_type' => Guest::PASS_SPECIAL,
+            'allowed_entries' => $capacity,
+        ]);
+
+        $guest->used_entries = 1;
+        $guest->save();
+
+        $this->assertSame($capacity, $guest->fresh()->allowed_entries);
+        $this->assertSame(1, $guest->fresh()->used_entries);
+        $this->assertSame($capacity - 1, $guest->fresh()->remainingEntries());
+    }
+
+    public static function largeSpecialAllowances(): array
+    {
+        return ['eleven entries' => [11], 'one hundred entries' => [100]];
+    }
+
     public function test_pass_entry_rules_are_enforced_by_the_model(): void
     {
         $single = Guest::query()->create([
@@ -78,12 +102,12 @@ class CoreModelRelationshipTest extends TestCase
             'name' => 'Special',
             'phone_number' => '+255 700 000 003',
             'pass_type' => Guest::PASS_SPECIAL,
-            'allowed_entries' => 12,
+            'allowed_entries' => 101,
         ]);
 
         $this->assertSame(1, $single->allowed_entries);
         $this->assertSame(2, $double->allowed_entries);
-        $this->assertSame(10, $special->allowed_entries);
+        $this->assertSame(100, $special->allowed_entries);
 
         $this->expectException(InvalidArgumentException::class);
 

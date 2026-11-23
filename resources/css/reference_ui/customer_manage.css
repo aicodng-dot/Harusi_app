@@ -1,0 +1,24 @@
+/* Customer self-service pages (profile, edit event, edit guest).
+ * Loaded after invitation_studio.css and reuses its variables and form classes. */
+.cm-section { margin: 28px 0 0; padding: 20px; border: 1px solid var(--is-border); border-radius: 18px; background: var(--is-card); }
+.cm-section h2 { margin: 0 0 6px; color: var(--is-brand); font-size: 18px; font-weight: 800; }
+.cm-section > p { margin: 0 0 16px; color: var(--is-muted); font-size: 14px; line-height: 1.45; }
+.cm-danger { border-color: #efc4c4; background: #fffafa; }
+.cm-danger h2 { color: var(--is-red); }
+.cm-stack { display: grid; gap: 16px; }
+.cm-select, .cm-plain {
+    width: 100%; min-height: 52px; padding: 0 16px; border: 1.5px solid #d5dcd9; border-radius: 14px;
+    background: #fff; color: var(--is-ink); font: inherit; font-size: 16px;
+}
+.cm-select:focus, .cm-plain:focus { border-color: var(--is-green); outline: 0; box-shadow: 0 0 0 3px rgba(23, 70, 58, .14); }
+.cm-hint { margin: 6px 0 0; color: var(--is-muted); font-size: 13px; }
+.cm-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; }
+.cm-check input { width: 20px; height: 20px; accent-color: var(--is-red); }
+.cm-danger-button {
+    display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 0 18px;
+    border: 0; border-radius: 14px; background: var(--is-red); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+}
+.cm-danger-button:hover { background: #7f1515; }
+.cm-stat { margin: 4px 0 0; color: var(--is-muted); font-size: 14px; font-weight: 600; }
+.cm-links { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 0; }
+.cm-inline-edit { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: var(--is-brand); font-size: 13px; font-weight: 700; text-decoration: underline; }

@@ -9,6 +9,7 @@
         "https:proxy": "node scripts/https-proxy.mjs"
     },
     "devDependencies": {
+        "@fontsource-variable/inter": "^5.1.1",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",

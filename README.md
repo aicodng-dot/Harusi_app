@@ -16,7 +16,8 @@ The system gives wedding administrators a desktop dashboard for guest invitation
 - Prevent duplicate use
 - Check-in history
 - Reports
-- CSV import/export
+- Excel guest import and QR-list export
+- CSV report export
 - Scanner user roles
 
 ## Tech Stack
@@ -26,10 +27,12 @@ The system gives wedding administrators a desktop dashboard for guest invitation
 - Blade
 - Tailwind CSS
 - Vanilla JavaScript
+- PhpSpreadsheet (`phpoffice/phpspreadsheet`) for XLSX import and export
 
 ## Requirements
 
 - PHP 8.2+
+- PHP extensions required by PhpSpreadsheet: `gd` and `zip`
 - Composer
 - MySQL 8+ or MariaDB
 - Node.js and npm
@@ -85,6 +88,29 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
+### WhatsApp Business API Credentials
+
+The app is prepared for Meta WhatsApp Cloud API only. Add real WhatsApp Business credentials to your local or production `.env` file, not to `.env.example`, README files, source code, or the admin UI.
+
+```env
+WHATSAPP_PROVIDER=meta
+WHATSAPP_API_BASE_URL=https://graph.facebook.com
+WHATSAPP_API_VERSION=v21.0
+WHATSAPP_ACCESS_TOKEN=your_meta_access_token
+WHATSAPP_PHONE_NUMBER_ID=your_meta_phone_number_id
+WHATSAPP_BUSINESS_ACCOUNT_ID=your_meta_business_account_id
+WHATSAPP_WEBHOOK_VERIFY_TOKEN=your_private_webhook_verify_token
+WHATSAPP_APP_SECRET=your_meta_app_secret
+```
+
+These values come from your Meta developer app and WhatsApp Business account setup. Leave them blank while testing if you do not want real WhatsApp messages to be sent. When credentials are missing, the system uses the null WhatsApp provider and records skipped notification logs instead of sending messages.
+
+After changing WhatsApp values in production, clear cached config:
+
+```bash
+php artisan config:clear
+```
+
 7. Create the MySQL database:
 
 ```sql
@@ -97,13 +123,13 @@ CREATE DATABASE wedding_qr_admission CHARACTER SET utf8mb4 COLLATE utf8mb4_unico
 php artisan migrate
 ```
 
-9. Run seeders:
+9. Optional: create local/testing demo data on six empty target tables:
 
 ```bash
 php artisan db:seed
 ```
 
-The seeder creates default users and sample guest data. Do not run the sample seeder on a production database that already contains real event data.
+The default seeder runs only when the configured environment is exactly `local` or `testing`. It refuses staging/production and other labels even with `--force`. The six sample-data target tables (users, guests, QR codes, admissions, checkins and scan logs) must all be empty. Existing rows are never reset or deleted; rerunning the seeder refuses instead. Sample inserts share one transaction. This environment/target check does not verify database identity or whole-database emptiness. See [demo seeding scope](docs/DEMO_SEEDING.md).
 
 10. Create the public storage link:
 
@@ -170,6 +196,14 @@ C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8000
 npm run https:proxy
 ```
 
+If port `8000` is already occupied or the app does not respond, start Laravel on another port and point the proxy to it:
+
+```powershell
+C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8001
+$env:HARUSI_HTTPS_TARGET = 'http://127.0.0.1:8001'
+npm run https:proxy
+```
+
 6. Open the scanner on the phone:
 
 ```text
@@ -178,7 +212,7 @@ https://192.168.100.114:8443/scanner/scan
 
 For generated QR verification links, set `APP_URL=https://192.168.100.114:8443` in `.env` and clear Laravel config cache.
 
-## Default Users
+## Local/testing demo users
 
 Admin:
 
@@ -190,7 +224,7 @@ Scanner:
 - Email: `scanner@example.com`
 - Password: `password`
 
-Change these passwords before using the system for a real event.
+These are disposable local/testing fixtures, not production account setup. The default-seeder guard does not revoke demo credentials already present in an existing installation. The separate recovery --apply writer also has its own exact local/testing environment guard. It remains legacy recovery tooling; real administrator setup/revocation requires a separate reviewed workflow. See [recovery script scope](docs/RECOVERY_SCRIPT_SAFETY.md).
 
 ## Folder Structure
 
@@ -217,7 +251,6 @@ docs/
   README.md               Extra project notes
 screenshots/
   README.md               Placeholder for app screenshots
-sample_guests.csv         CSV template for guest imports
 ```
 
 ## QR Code Security
@@ -244,7 +277,7 @@ Security behavior:
 
 - Single pass = admits 1 person
 - Double pass = admits 2 people
-- Special / Family pass = admits 3 to 10 people
+- Special / Family pass = admits 3 to 100 people
 - Maximum admissions per QR code = 10
 - `used_entries` can never exceed `allowed_entries`
 - Cancelled passes cannot be admitted
@@ -274,32 +307,41 @@ If camera scanning fails, scanner users can use Manual Search to find a guest by
 ## Admin Flow
 
 1. Admin logs in and opens `/admin/dashboard`.
-2. Admin creates guests manually or imports guests from CSV.
+2. Admin creates guests manually or imports guests from an Excel `.xlsx` workbook.
 3. Admin assigns pass type and allowed entries.
 4. Admin generates QR codes.
-5. Admin downloads QR PNG files individually or as a ZIP.
+5. Admin downloads QR PNG files individually or as a ZIP, or exports the QR list as an Excel workbook.
 6. Admin monitors check-ins, invalid attempts, cancelled/revoked scans, and reports.
 7. Admin manages scanner users and gate names.
 8. Admin can cancel passes, revoke QR codes, regenerate QR codes, and export CSV reports.
 
-## CSV Import
+## Excel Guest Import (XLSX)
 
-Admins can import guests from CSV at:
+Admins can import guests from a Microsoft Excel `.xlsx` workbook at:
 
 ```text
 /admin/guests/import
 ```
 
-Required columns:
+Use **Download Excel Template** on the import page to get a correctly formatted workbook. The first worksheet must contain these required logical columns:
 
-```csv
-name,phone_number,pass_type,allowed_entries
-John Peter,0712345678,single,1
-Mary Joseph,0755555555,double,2
-Kimaro Family,0788888888,special,6
-```
+| name | phone_number | pass_type | allowed_entries |
+| --- | --- | --- | --- |
+| John Peter | 0712345678 | single | 1 |
+| Mary Joseph | 0755555555 | double | 2 |
+| Kimaro Family | 0788888888 | special | 6 |
 
-A sample file is included at [sample_guests.csv](sample_guests.csv).
+Header matching is case-insensitive and normalizes spaces to underscores, so headers such as `Phone Number`, `Pass Type`, and `Allowed Entries` are accepted. Phone numbers are read as text before the existing phone normalization and validation run, which protects leading zeroes. `allowed_entries` is validated as an integer under the existing pass rules.
+
+PhpSpreadsheet reads the workbook, converts worksheet rows into the existing guest-import pipeline, and reports the Excel row number for invalid entries.
+
+## QR List Excel Export
+
+On `/admin/qr-codes`, use **Export QR list Excel** to download every guest in the currently selected event as an `.xlsx` workbook. Page search and QR-status filter parameters are intentionally not applied. The export preserves these 11 columns: `Guest ID`, `Guest name`, `Phone number`, `Pass type`, `Allowed entries`, `Used entries`, `Guest status`, `QR status`, `Generated at`, `Revoked at`, and `Download file name`.
+
+Phone numbers and every other text cell are written explicitly as text, including `Download file name`, whose QR PNG filename contains the four-digit admission code. This preserves leading zeroes and makes formula-like text inert. Full QR tokens and standalone manual admission codes remain undisclosed.
+
+PhpSpreadsheet generates both the downloadable guest template and QR-list workbook. QR image downloads, **Download all ZIP**, **Export selected ZIP**, and the Kadify offline-scanner ZIP format remain unchanged.
 
 ## Deployment Notes
 

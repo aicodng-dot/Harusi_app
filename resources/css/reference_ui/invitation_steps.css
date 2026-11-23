@@ -1,0 +1,113 @@
+/* Shared five-stage invitation indicator (partials/invitation_steps.blade.php).
+ * Orientation only: current stage is solid, completed stages are ticked links,
+ * future stages stay subtle. Works from 320px upward. */
+.inv-steps {
+    margin: 16px 0 0;
+    padding: 12px 14px 10px;
+    border: 1px solid #e3e8e6;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.inv-steps-label {
+    margin: 0;
+    color: #0b3d33;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.inv-steps-hint {
+    margin: 2px 0 0;
+    color: #5d6670;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.inv-steps-track {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.inv-step {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+    color: #98a2a8;
+    text-align: center;
+}
+
+.inv-step > a {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Connector to the previous stage. */
+.inv-step + .inv-step::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: calc(50% + 15px);
+    width: calc(100% - 30px);
+    height: 2px;
+    background: #e1e7e4;
+}
+
+.inv-step.is-done + .inv-step::before {
+    background: #17463a;
+}
+
+.inv-step-dot {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid #d5dcd9;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.inv-step-dot svg {
+    width: 14px;
+    height: 14px;
+}
+
+.inv-step-name {
+    max-width: 100%;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.inv-step.is-done {
+    color: #17463a;
+}
+
+.inv-step.is-done .inv-step-dot {
+    border-color: #17463a;
+    background: #17463a;
+    color: #fff;
+}
+
+.inv-step.is-current {
+    color: #0f1b26;
+}
+
+.inv-step.is-current .inv-step-dot {
+    border-color: #17463a;
+    color: #17463a;
+    box-shadow: 0 0 0 3px #e5efea;
+}

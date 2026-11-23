@@ -32,7 +32,7 @@ class AdminCheckinHistoryTest extends TestCase
             ->get(route('admin.checkins.index'))
             ->assertOk()
             ->assertSee('Logged Admission Guest')
-            ->assertSee('0712111000')
+            ->assertSee('+255712111000')
             ->assertSee('Double pass')
             ->assertSee('Main Gate')
             ->assertSee('Scanner User')
@@ -119,7 +119,7 @@ class AdminCheckinHistoryTest extends TestCase
         $csv = $response->streamedContent();
         $this->assertStringContainsString('Guest name', $csv);
         $this->assertStringContainsString('CSV Match Guest', $csv);
-        $this->assertStringContainsString('0712666000', $csv);
+        $this->assertStringContainsString('+255712666000', $csv);
         $this->assertStringContainsString('admitted', $csv);
         $this->assertStringNotContainsString('CSV Other Guest', $csv);
     }

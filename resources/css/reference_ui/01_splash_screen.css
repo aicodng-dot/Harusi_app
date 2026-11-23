@@ -1,0 +1,259 @@
+/* Approved reference: reference UI/01_Splash_Screen.png (863 x 1822 px).
+ *
+ * Layout model: the reference content area runs from y=100 (below the
+ * simulated status bar) to y=1822, i.e. 863 x 1722 reference pixels.
+ * --rp is one reference pixel, scaled so the full composition always fits
+ * the viewport (width-bound on tall phones, height-bound on short screens
+ * and desktops). Vertical anchors are percentages of that 1722 px height;
+ * every size is expressed in --rp so proportions never collapse.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: dark;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    --splash-bg: #03241a;
+    --splash-gold: #fbd37b;
+    --splash-ink: #fffefb;
+    --splash-muted: #5b7162;
+    --splash-vh: 100vh;
+    --splash-height: max(var(--splash-vh), 32rem);
+    --rp: min(calc(100vw / 863), calc(var(--splash-height) / 1722));
+}
+
+@supports (height: 100svh) {
+    :root {
+        --splash-vh: 100svh;
+    }
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: var(--splash-bg);
+    color: var(--splash-ink);
+}
+
+.splash-screen,
+.splash-action {
+    min-height: var(--splash-height);
+}
+
+.splash-screen {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 14% 32%, rgba(51, 101, 52, .42), transparent 29%),
+        radial-gradient(circle at 83% 68%, rgba(28, 81, 50, .38), transparent 30%),
+        radial-gradient(circle at 53% 90%, rgba(4, 60, 40, .62), transparent 38%),
+        linear-gradient(145deg, #062f21 0%, #001f18 46%, #052a1c 100%);
+}
+
+.splash-action {
+    position: relative;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.splash-action::before {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(0, 18, 13, .08), rgba(0, 16, 12, .02) 44%, rgba(0, 17, 12, .24)),
+        radial-gradient(ellipse at center, transparent 41%, rgba(0, 18, 13, .28) 100%);
+    content: "";
+    pointer-events: none;
+}
+
+.splash-action[aria-busy="true"] {
+    cursor: progress;
+}
+
+.splash-action:focus-visible {
+    outline: 4px solid var(--splash-gold);
+    outline-offset: -4px;
+}
+
+.splash-canvas {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: var(--splash-height);
+    overflow: hidden;
+}
+
+/* Botanical crops: true crop sizes, anchored to the viewport edges they touch
+ * in the reference (crop boxes are listed in the asset README). */
+.splash-art {
+    position: absolute;
+    z-index: -1;
+    display: block;
+    max-width: none;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+}
+
+.splash-art-top {
+    top: 4.07%;
+    right: 0;
+    width: calc(253 * var(--rp));
+    -webkit-mask-image: radial-gradient(68% 44% at 66% 46%, #000 48%, transparent 100%);
+    mask-image: radial-gradient(68% 44% at 66% 46%, #000 48%, transparent 100%);
+}
+
+.splash-art-left {
+    top: 13.36%;
+    left: 0;
+    width: calc(300 * var(--rp));
+    -webkit-mask-image: radial-gradient(80% 48% at 30% 56%, #000 45%, transparent 100%);
+    mask-image: radial-gradient(80% 48% at 30% 56%, #000 45%, transparent 100%);
+}
+
+.splash-art-right {
+    top: 41.81%;
+    right: 0;
+    width: calc(173 * var(--rp));
+    -webkit-mask-image: radial-gradient(85% 47% at 70% 52%, #000 45%, transparent 100%);
+    mask-image: radial-gradient(85% 47% at 70% 52%, #000 45%, transparent 100%);
+}
+
+.splash-art-bottom {
+    bottom: 4.18%;
+    left: 0;
+    width: calc(240 * var(--rp));
+    -webkit-mask-image: radial-gradient(78% 46% at 34% 58%, #000 48%, transparent 100%);
+    mask-image: radial-gradient(78% 46% at 34% 58%, #000 48%, transparent 100%);
+}
+
+.splash-brand,
+.splash-tagline,
+.splash-features,
+.splash-progress,
+.splash-continue {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    width: min(calc(100% - 2rem), calc(760 * var(--rp)));
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+/* Logo top: y=406 -> (406-100)/1722 */
+.splash-brand {
+    top: 17.77%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Logo crop is 206 x 296 reference px. */
+.splash-mark {
+    display: block;
+    width: calc(206 * var(--rp));
+    height: auto;
+}
+
+/* "PangaEvents" spans x=167..708 (541 px) in the reference. */
+.splash-wordmark {
+    margin: calc(13 * var(--rp)) 0 0;
+    color: #fff;
+    font-size: max(1.75rem, calc(93 * var(--rp)));
+    font-weight: 760;
+    letter-spacing: -.045em;
+    line-height: 1;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, .22);
+}
+
+/* Tagline line centres y=908 / 980: 72 px pitch, first line box top y=872. */
+.splash-tagline {
+    top: 44.83%;
+    display: flex;
+    flex-direction: column;
+    font-size: max(1.1rem, calc(62 * var(--rp)));
+    font-weight: 400;
+    letter-spacing: -.025em;
+    line-height: max(1.4rem, calc(72 * var(--rp)));
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .32);
+}
+
+/* Feature line centres y=1263 / 1326 / 1389: 63 px pitch, first box top y=1231. */
+.splash-features {
+    top: 65.68%;
+    display: flex;
+    flex-direction: column;
+    font-size: max(.9rem, calc(42 * var(--rp)));
+    font-weight: 400;
+    line-height: max(1.3rem, calc(63 * var(--rp)));
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .36);
+}
+
+/* Dots: 32 px diameter, centres 58.5 px apart, centre y=1548. */
+.splash-progress {
+    top: 83.16%;
+    display: flex;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    gap: max(.5rem, calc(26.5 * var(--rp)));
+}
+
+.splash-dot {
+    display: block;
+    width: max(.6rem, calc(32 * var(--rp)));
+    aspect-ratio: 1;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--splash-muted);
+}
+
+.splash-dot.is-active {
+    background: var(--splash-gold);
+    box-shadow: 0 0 0 1px rgba(251, 211, 123, .18);
+}
+
+.splash-continue {
+    bottom: max(.7rem, env(safe-area-inset-bottom));
+    color: rgba(255, 255, 255, .76);
+    font-size: clamp(.68rem, 2.7vw, .78rem);
+    font-weight: 600;
+    letter-spacing: .055em;
+    line-height: 1.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .splash-action,
+    .splash-action * {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

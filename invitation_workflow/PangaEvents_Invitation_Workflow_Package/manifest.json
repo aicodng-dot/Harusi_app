@@ -1,0 +1,13 @@
+{
+  "package": "PangaEvents Invitation Workflow",
+  "version": "1.0",
+  "contains": [
+    "product/design specification",
+    "10 sequential AI IDE workflow prompts"
+  ],
+  "does_not_contain": [
+    "premium image/SVG template artwork binaries",
+    "generated QR credentials"
+  ],
+  "instruction": "Reuse premium template assets already present in the PangaEvents project."
+}

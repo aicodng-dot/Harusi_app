@@ -21,6 +21,12 @@ class Checkin extends Model
 
     protected $fillable = [
         'event_id',
+        'offline_scanner_imported_log_id',
+        'offline_log_uuid',
+        'offline_request_uuid',
+        'offline_device_id',
+        'offline_admission_method',
+        'offline_master_sequence_number',
         'guest_id',
         'qr_code_id',
         'user_id',

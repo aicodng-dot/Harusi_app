@@ -57,17 +57,33 @@ class ScannerInterfaceTest extends TestCase
             ->get(route('scanner.scan'))
             ->assertOk()
             ->assertSee('Start Camera')
-            ->assertSee('Manual code')
+            ->assertSee('Manual Search')
             ->assertSee('Recent result')
+            ->assertSee('Scan a QR code to show the latest result.')
             ->assertSee('Scan Next')
             ->assertSee('Confirm Admission')
-            ->assertSee('Home');
+            ->assertSee('Home')
+            ->assertDontSee('Manual code')
+            ->assertDontSee('Token or verification URL')
+            ->assertDontSee('Verify pass');
 
         $this->actingAs($scanner)
             ->get(route('scanner.recent-scans'))
             ->assertOk()
             ->assertSee('Recent Scans')
             ->assertSee('Start Scanning');
+    }
+
+    public function test_scanner_lan_http_requests_redirect_to_configured_https_url(): void
+    {
+        config(['app.url' => 'https://192.168.100.109:8443']);
+
+        $this->withServerVariables([
+            'HTTP_HOST' => '192.168.100.109:8000',
+            'HTTPS' => 'off',
+        ])
+            ->get('/scanner/scan?gate=main')
+            ->assertRedirect('https://192.168.100.109:8443/scanner/scan?gate=main');
     }
 
     private function scannerUser(): User

@@ -32,6 +32,9 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('admin.guests.create') }}" class="primary-button">Add invite</a>
+                @can('create', \App\Models\OfflineScannerSession::class)
+                    <a href="{{ route('admin.offline-scanner-sessions.create', $event->id) }}" class="secondary-button">Offline Android Scanner</a>
+                @endcan
                 <a href="{{ route('admin.checkins.index') }}" class="secondary-button">View check-ins</a>
             </div>
         </div>

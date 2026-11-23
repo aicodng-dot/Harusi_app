@@ -1,0 +1,388 @@
+/* Approved reference: reference UI/05_Event_Details.png (863 x 1822 px with a
+ * simulated phone bezel; the screen spans x10-852 = 842 px). The bezel and the
+ * simulated status bar (to y~100) are not reproduced.
+ *
+ * --rp is one reference pixel of the 842 px screen: on phones the column is the
+ * viewport, from 640px a fixed 28rem phone scale. Comments give measured PNG
+ * coordinates. Minimums keep input text >= 16px and touch targets >= 44px.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --ed-bg: #fbf8f0;
+    --ed-field: #fff;
+    --ed-border: #e7e3dc;
+    --ed-ink: #0f1b26;
+    --ed-text: #121a2e;
+    --ed-muted: #4a5368;
+    --ed-label: #4d5568;
+    --ed-brand-ink: #133f35;
+    --ed-evergreen: #17463a;
+    --ed-evergreen-hover: #10372d;
+    --ed-error: #b3261e;
+    --ed-error-bg: #fdf0ee;
+    --ed-focus: rgba(23, 70, 58, .18);
+    --rp: calc(100cqw / 842);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    position: relative;
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background: var(--ed-bg);
+    color: var(--ed-ink);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+:focus-visible {
+    outline: 3px solid var(--ed-evergreen);
+    outline-offset: 2px;
+}
+
+/* Footer botanicals: reference y1442-1742, behind the content at the page bottom. */
+.ed-art {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    z-index: 0;
+    width: min(100%, 40rem);
+    transform: translateX(-50%);
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 38%);
+    mask-image: linear-gradient(to bottom, transparent, #000 38%);
+}
+
+.ed-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ed-page {
+    position: relative;
+    z-index: 1;
+    container-type: inline-size;
+    width: min(100%, 28rem);
+    margin: 0 auto;
+    padding-bottom: max(150px, calc(330 * var(--rp)));
+}
+
+/* Header: back x58-96 (centre y165), mark x271-338 / y133-208, wordmark x354-606. */
+.ed-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: max(10px, calc(28 * var(--rp))) calc(43 * var(--rp)) 0 calc(38 * var(--rp));
+}
+
+.ed-back {
+    display: inline-grid;
+    place-items: center;
+    justify-self: start;
+    width: 44px;
+    height: 44px;
+    color: var(--ed-ink);
+}
+
+.ed-back svg {
+    width: max(22px, calc(40 * var(--rp)));
+    height: max(22px, calc(40 * var(--rp)));
+}
+
+.ed-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(14 * var(--rp));
+    color: var(--ed-brand-ink);
+    font-size: max(17px, calc(42 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.ed-brand img {
+    display: block;
+    width: auto;
+    height: max(1.75rem, calc(76 * var(--rp)));
+}
+
+.ed-header-spacer {
+    width: 44px;
+    height: 44px;
+}
+
+/* Title x60 / cap y278 (~60 px); intro cap y365. */
+.ed-main {
+    padding: 0 calc(43 * var(--rp)) 0 calc(47 * var(--rp));
+}
+
+.ed-heading {
+    margin: max(14px, calc(40 * var(--rp))) 0 0 calc(3 * var(--rp));
+    font-size: max(24px, calc(60 * var(--rp)));
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+    color: var(--ed-ink);
+}
+
+.ed-intro {
+    margin: calc(20 * var(--rp)) 0 0 calc(3 * var(--rp));
+    font-size: max(14px, calc(38 * var(--rp)));
+    line-height: 1.3;
+    letter-spacing: -.01em;
+    color: var(--ed-muted);
+}
+
+.ed-type {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 12px 0 0 calc(3 * var(--rp));
+    color: var(--ed-muted);
+    font-size: 13px;
+}
+
+.ed-type strong {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #e5f2ea;
+    color: #0f4a32;
+    font-weight: 650;
+}
+
+.ed-type a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ed-evergreen);
+    font-weight: 650;
+}
+
+.ed-type-workspace {
+    flex-basis: 100%;
+    overflow-wrap: anywhere;
+}
+
+.ed-alert {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border: 1px solid #f2c9c4;
+    border-radius: 14px;
+    background: var(--ed-error-bg);
+    color: var(--ed-error);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.ed-form {
+    margin: max(14px, calc(48 * var(--rp))) 0 0;
+}
+
+/* Field rows: icon circle x57-175, box x183-809 (h~121, r~24); labels cap y509/770/1026. */
+.ed-field {
+    display: grid;
+    grid-template-columns: calc(118 * var(--rp)) minmax(0, 1fr);
+    column-gap: calc(8 * var(--rp));
+    align-items: start;
+}
+
+.ed-field + .ed-field {
+    margin-top: max(16px, calc(64 * var(--rp)));
+}
+
+.ed-field-icon {
+    display: grid;
+    place-items: center;
+    width: calc(118 * var(--rp));
+    aspect-ratio: 1;
+    margin-top: calc(-4 * var(--rp));
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(15, 27, 38, .05);
+    color: var(--ed-ink);
+}
+
+.ed-field-icon svg {
+    width: max(16px, calc(46 * var(--rp)));
+    height: max(16px, calc(46 * var(--rp)));
+}
+
+.ed-field-body {
+    min-width: 0;
+}
+
+.ed-label {
+    display: block;
+    margin: 0 0 0 calc(12 * var(--rp));
+    color: var(--ed-label);
+    font-size: max(13px, calc(37 * var(--rp)));
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.ed-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-top: max(6px, calc(18 * var(--rp)));
+}
+
+.ed-control input {
+    width: 100%;
+    min-width: 0;
+    height: max(48px, calc(121 * var(--rp)));
+    padding: 0 calc(30 * var(--rp)) 0 calc(40 * var(--rp));
+    border: 1px solid var(--ed-border);
+    border-radius: max(14px, calc(24 * var(--rp)));
+    background: var(--ed-field);
+    box-shadow: 0 2px 6px rgba(15, 27, 38, .035);
+    color: var(--ed-text);
+    font: inherit;
+    font-size: max(16px, calc(40 * var(--rp)));
+    font-weight: 500;
+    letter-spacing: -.01em;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.ed-control input::placeholder {
+    color: #8a8f9c;
+    font-weight: 400;
+    opacity: 1;
+}
+
+.ed-control:has(.ed-trailing) input {
+    padding-right: max(44px, calc(100 * var(--rp)));
+}
+
+.ed-control input:focus {
+    border-color: var(--ed-evergreen);
+    outline: none;
+    box-shadow: 0 0 0 4px var(--ed-focus);
+}
+
+.ed-field.has-error input {
+    border-color: var(--ed-error);
+}
+
+.ed-trailing {
+    position: absolute;
+    right: calc(33 * var(--rp));
+    width: max(20px, calc(42 * var(--rp)));
+    height: max(20px, calc(42 * var(--rp)));
+    color: var(--ed-ink);
+    pointer-events: none;
+}
+
+/* The native picker stays usable: its indicator sits invisibly over the calendar icon. */
+.ed-control-datetime input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: calc(20 * var(--rp));
+    width: max(32px, calc(68 * var(--rp)));
+    height: max(32px, calc(68 * var(--rp)));
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.ed-control-datetime input::-webkit-datetime-edit {
+    padding: 0;
+}
+
+.ed-error {
+    margin: 6px 0 0 calc(12 * var(--rp));
+    color: var(--ed-error);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Primary button: x57-806 / y1300-1435 (h135, r~40). */
+.ed-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: max(52px, calc(135 * var(--rp)));
+    margin-top: max(28px, calc(99 * var(--rp)));
+    padding: 0 20px;
+    border: 0;
+    border-radius: max(18px, calc(40 * var(--rp)));
+    background: var(--ed-evergreen);
+    color: #fff;
+    font: inherit;
+    font-size: max(17px, calc(48 * var(--rp)));
+    font-weight: 600;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(23, 70, 58, .2);
+}
+
+.ed-submit:hover {
+    background: var(--ed-evergreen-hover);
+}
+
+.ed-submit[disabled] {
+    opacity: .8;
+    cursor: progress;
+}
+
+@media (min-width: 640px) {
+    :root {
+        --rp: calc(28rem / 842);
+    }
+
+    .ed-page {
+        padding-top: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .ed-page {
+        width: 34rem;
+        padding-top: 32px;
+    }
+}

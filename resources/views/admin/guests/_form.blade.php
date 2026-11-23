@@ -28,6 +28,14 @@
             @enderror
         </label>
 
+        @if ($isEdit)
+            <label class="field-label">
+                Manual code
+                <input value="{{ $guest->manual_code }}" class="input-control bg-stone-100 font-mono" readonly>
+                <span class="text-xs font-semibold text-zinc-500">Used only for scanner manual fallback. QR codes use a separate secure token.</span>
+            </label>
+        @endif
+
         <label class="field-label">
             Pass type
             <select name="pass_type" class="input-control" data-pass-type required>
@@ -42,9 +50,9 @@
 
         <label class="field-label">
             Number of guests allowed
-            <input type="number" name="allowed_entries" value="{{ $allowedEntries }}" min="1" max="10" class="input-control" data-allowed-admissions data-used-entries="{{ $usedEntries }}" required>
+            <input type="number" name="allowed_entries" value="{{ $allowedEntries }}" min="1" max="{{ \App\Models\Guest::MAX_ALLOWED_ENTRIES }}" class="input-control" data-allowed-admissions data-used-entries="{{ $usedEntries }}" required>
             <span class="text-xs font-semibold text-zinc-500">
-                Single = 1, Double = 2, Special / Family = 3 to 10.
+                Single = 1, Double = 2, Special / Family = {{ \App\Models\Guest::MIN_SPECIAL_ENTRIES }} to {{ \App\Models\Guest::MAX_ALLOWED_ENTRIES }}.
                 @if ($usedEntries > 0)
                     This pass already has {{ $usedEntries }} used {{ $usedEntries === 1 ? 'entry' : 'entries' }}.
                 @endif

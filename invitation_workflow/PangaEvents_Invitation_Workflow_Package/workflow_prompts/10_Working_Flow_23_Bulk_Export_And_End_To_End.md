@@ -1,0 +1,3 @@
+# Working Flow 23 — Bulk Export & End-to-End Verification
+
+Implement selected/all guest card export as individual high-resolution files and a ZIP, with safe filenames that do not leak sensitive identifiers. Handle large events through queued/chunked processing if the application architecture supports it. Prevent duplicate jobs and ensure each output uses the correct guest's existing QR. Enforce authorization on download. Verify sample exported QR codes with the existing scanner and confirm admission counters remain unchanged after export. Test failures, retries, partial jobs and cleanup. Report production limitations honestly. Stop.

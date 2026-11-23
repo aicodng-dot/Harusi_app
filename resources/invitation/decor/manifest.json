@@ -1,0 +1,122 @@
+{
+    "lily_white_tl": {
+        "width": 330,
+        "height": 470,
+        "tone": "light",
+        "source": "Elegant Emerald and Gold Wedding Invitation-1.png"
+    },
+    "lily_white_br": {
+        "width": 346,
+        "height": 588,
+        "tone": "light",
+        "source": "Elegant Emerald and Gold Wedding Invitation-1.png"
+    },
+    "gold_leaf_left": {
+        "width": 175,
+        "height": 330,
+        "tone": "light",
+        "source": "Elegant Emerald and Gold Wedding Invitation-1.png"
+    },
+    "gold_leaf_right": {
+        "width": 196,
+        "height": 330,
+        "tone": "light",
+        "source": "Elegant Emerald and Gold Wedding Invitation-1.png"
+    },
+    "sprig_cream_bl": {
+        "width": 290,
+        "height": 290,
+        "tone": "light",
+        "source": "ChatGPT Image Nov 14, 2026, 11_57_20 PM-1.png"
+    },
+    "rose_blush_br": {
+        "width": 290,
+        "height": 450,
+        "tone": "light",
+        "source": "ChatGPT Image Nov 14, 2026, 11_57_25 PM-3.png"
+    },
+    "hibiscus_tl": {
+        "width": 330,
+        "height": 500,
+        "tone": "light",
+        "source": "ChatGPT Image Nov 14, 2026, 11_57_31 PM-5.png"
+    },
+    "hibiscus_bl": {
+        "width": 225,
+        "height": 618,
+        "tone": "light",
+        "source": "ChatGPT Image Nov 14, 2026, 11_57_31 PM-5.png"
+    },
+    "pampas_br": {
+        "width": 326,
+        "height": 508,
+        "tone": "light",
+        "source": "ChatGPT Image Nov 14, 2026, 11_57_31 PM-5.png"
+    },
+    "peony_tl": {
+        "width": 305,
+        "height": 830,
+        "tone": "light",
+        "source": "Elegant Forest Green Wedding Invitation-5.png"
+    },
+    "peony_br": {
+        "width": 266,
+        "height": 578,
+        "tone": "light",
+        "source": "Elegant Forest Green Wedding Invitation-5.png"
+    },
+    "gold_sprig_tr": {
+        "width": 190,
+        "height": 240,
+        "tone": "light",
+        "source": "Elegant Forest Green Wedding Invitation-5.png"
+    },
+    "rose_garden_tl": {
+        "width": 255,
+        "height": 330,
+        "tone": "light",
+        "source": "Elegant English Garden Wedding Invitation-7.png"
+    },
+    "lavender_right": {
+        "width": 180,
+        "height": 600,
+        "tone": "light",
+        "source": "Elegant English Garden Wedding Invitation-7.png"
+    },
+    "rose_garden_br": {
+        "width": 296,
+        "height": 448,
+        "tone": "light",
+        "source": "Elegant English Garden Wedding Invitation-7.png"
+    },
+    "lavender_bl": {
+        "width": 250,
+        "height": 398,
+        "tone": "light",
+        "source": "Elegant English Garden Wedding Invitation-7.png"
+    },
+    "lily_band_bl": {
+        "width": 420,
+        "height": 348,
+        "tone": "light",
+        "source": "Elegant Swahili Wedding Invitation Template-8.png"
+    },
+    "rose_band_br": {
+        "width": 446,
+        "height": 338,
+        "tone": "light",
+        "source": "Elegant Swahili Wedding Invitation Template-8.png"
+    },
+    "rose_burgundy_tl": {
+        "width": 205,
+        "height": 600,
+        "tone": "dark",
+        "source": "Luxurious Burgundy Wedding Invitation-9.png"
+    },
+    "rose_burgundy_br": {
+        "width": 326,
+        "height": 648,
+        "tone": "dark",
+        "source": "Luxurious Burgundy Wedding Invitation-9.png"
+    }
+}

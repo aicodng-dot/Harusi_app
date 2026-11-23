@@ -1,0 +1,540 @@
+/* Approved reference: reference UI/03_Login.png (863 x 1822 px, no bezel;
+ * simulated status bar to y~95 is not reproduced).
+ *
+ * --rp is one reference pixel of the 863 px screen: on phones the column is
+ * the viewport, on wider screens a centred 28rem column (as on Registration).
+ * Comments give measured PNG coordinates. Minimums keep input text >= 16px,
+ * the button >= 48px and touch targets >= 44px.
+ */
+@font-face {
+    font-family: "PangaEvents Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+    color-scheme: light;
+    font-family: "PangaEvents Inter", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    --lg-bg: #fcfaf3;
+    --lg-field: #fff;
+    --lg-border: #dfdfdc;
+    --lg-ink: #0f1b26;
+    --lg-text: #1c2433;
+    --lg-muted: #4a4e5e;
+    --lg-placeholder: #63677a;
+    --lg-evergreen: #1c4a3c;
+    --lg-evergreen-hover: #133a2f;
+    --lg-brand-ink: #133f35;
+    --lg-chip: #edece6;
+    --lg-chip-active: #f8f5ee;
+    --lg-chip-border: #e3e0da;
+    --lg-error: #b3261e;
+    --lg-error-bg: #fdf0ee;
+    --lg-status-bg: #edf5f0;
+    --lg-focus: rgba(28, 74, 60, .16);
+    --rp: calc(100cqw / 863);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 0;
+    overflow-x: hidden;
+    background: var(--lg-bg);
+    color: var(--lg-ink);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.lg-page {
+    container-type: inline-size;
+    width: min(100%, 28rem);
+    margin: 0 auto;
+}
+
+/* Content x51-814 -> 51 / 49 px insets. */
+.lg-header,
+.lg-main {
+    padding-inline: calc(51 * var(--rp)) calc(49 * var(--rp));
+}
+
+/* Header row y132-199 (~37 px below the status bar). ------------------- */
+
+.lg-header {
+    display: flex;
+    align-items: center;
+    gap: calc(16 * var(--rp));
+    padding-top: max(calc(37 * var(--rp)), env(safe-area-inset-top));
+}
+
+/* Back arrow x52-92. */
+.lg-back {
+    display: inline-grid;
+    width: max(2.75rem, calc(64 * var(--rp)));
+    height: max(2.75rem, calc(67 * var(--rp)));
+    flex: 0 0 auto;
+    margin-left: calc(-12 * var(--rp));
+    place-items: center;
+    border-radius: .75rem;
+    color: var(--lg-ink);
+}
+
+.lg-back svg {
+    width: max(1.375rem, calc(44 * var(--rp)));
+    height: auto;
+}
+
+/* Mark x255-318 (63 x 67), wordmark x330-570. */
+.lg-brand {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: calc(12 * var(--rp));
+    color: var(--lg-brand-ink);
+    font-size: max(1.0625rem, calc(40 * var(--rp)));
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.lg-brand img {
+    display: block;
+    width: auto;
+    height: calc(67 * var(--rp));
+    min-height: 1.75rem;
+}
+
+/* Chips: SW x642-723, EN x740-817, ~55 tall, 17 px gap. */
+.lg-languages {
+    display: flex;
+    flex: 0 0 auto;
+    gap: calc(17 * var(--rp));
+}
+
+.lg-language {
+    display: inline-flex;
+    min-width: max(2.5rem, calc(79 * var(--rp)));
+    min-height: max(2.25rem, calc(55 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: max(.625rem, calc(14 * var(--rp)));
+    background: var(--lg-chip);
+    color: var(--lg-ink);
+    font-size: max(.875rem, calc(30 * var(--rp)));
+    font-weight: 500;
+    letter-spacing: .01em;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.lg-language.is-active {
+    border-color: var(--lg-chip-border);
+    background: var(--lg-chip-active);
+    font-weight: 650;
+}
+
+/* Heading and intro --------------------------------------------------------- */
+
+/* "Ingia kwenye Akaunti" x55-803, cap top y271, ~74 px type. */
+.lg-heading {
+    margin: calc(56 * var(--rp)) 0 0;
+    color: var(--lg-ink);
+    font-size: max(1.5rem, calc(74 * var(--rp)));
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+    text-wrap: balance;
+}
+
+/* Intro lines y380-421 / 442-483: 62 px pitch, ~42 px type. */
+.lg-intro {
+    margin: calc(24 * var(--rp)) 0 0;
+    color: var(--lg-muted);
+    font-size: max(1rem, calc(42 * var(--rp)));
+    font-weight: 400;
+    letter-spacing: -.012em;
+    line-height: max(1.4rem, calc(62 * var(--rp)));
+}
+
+.lg-alert {
+    margin: calc(36 * var(--rp)) 0 0;
+    padding: .75rem 1rem;
+    border: 1px solid #f1c5bf;
+    border-radius: max(.75rem, calc(24 * var(--rp)));
+    background: var(--lg-error-bg);
+    color: #7f1d17;
+    font-size: max(.875rem, calc(32 * var(--rp)));
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.lg-alert:focus {
+    outline: none;
+}
+
+.lg-alert[hidden] {
+    display: none;
+}
+
+.lg-alert-status {
+    border-color: #bcd9c7;
+    background: var(--lg-status-bg);
+    color: #14422f;
+}
+
+/* Form ---------------------------------------------------------------------- */
+
+/* Fields y556-695 / 737-876: 139 tall, 42 px gap; top 68 below the intro. */
+.lg-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: calc(68 * var(--rp));
+}
+
+.lg-group {
+    min-width: 0;
+}
+
+.lg-group + .lg-group {
+    margin-top: calc(42 * var(--rp));
+}
+
+.lg-field {
+    display: flex;
+    width: 100%;
+    min-height: max(3rem, calc(139 * var(--rp)));
+    align-items: center;
+    gap: calc(46 * var(--rp));
+    padding: 0 calc(38 * var(--rp)) 0 calc(46 * var(--rp));
+    border: 1px solid var(--lg-border);
+    border-radius: max(.875rem, calc(30 * var(--rp)));
+    background: var(--lg-field);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.lg-field:focus-within {
+    border-color: var(--lg-evergreen);
+    box-shadow: 0 0 0 3px var(--lg-focus);
+}
+
+.lg-field.has-error {
+    border-color: var(--lg-error);
+}
+
+.lg-field.has-error:focus-within {
+    box-shadow: 0 0 0 3px rgba(179, 38, 30, .14);
+}
+
+/* Icons: user x97-142 (45 px), lock similar. */
+.lg-icon {
+    width: max(1.25rem, calc(46 * var(--rp)));
+    height: max(1.25rem, calc(46 * var(--rp)));
+    flex: 0 0 auto;
+    color: var(--lg-ink);
+    stroke-width: 2.2;
+}
+
+/* Placeholder from x188, ~40 px type. */
+.lg-field input {
+    width: 100%;
+    min-width: 0;
+    min-height: calc(max(3rem, calc(139 * var(--rp))) - 2px);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--lg-text);
+    font: inherit;
+    font-size: max(1rem, calc(40 * var(--rp)));
+    letter-spacing: -.012em;
+}
+
+.lg-field input::placeholder {
+    color: var(--lg-placeholder);
+    opacity: 1;
+}
+
+/* Eye x725-775, 39 px from the field edge. */
+.lg-toggle {
+    display: grid;
+    width: max(2.75rem, calc(68 * var(--rp)));
+    height: max(2.75rem, calc(68 * var(--rp)));
+    flex: 0 0 auto;
+    margin-right: calc(-9 * var(--rp));
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: .625rem;
+    background: transparent;
+    color: var(--lg-ink);
+    cursor: pointer;
+}
+
+.lg-toggle svg {
+    width: max(1.375rem, calc(52 * var(--rp)));
+    height: max(1.375rem, calc(52 * var(--rp)));
+    stroke-width: 2.1;
+}
+
+.lg-toggle .register-eye-slash {
+    display: none;
+}
+
+.lg-toggle[aria-pressed="true"] .register-eye-slash {
+    display: block;
+}
+
+.lg-error {
+    margin: calc(10 * var(--rp)) calc(8 * var(--rp)) 0;
+    color: var(--lg-error);
+    font-size: max(.8125rem, calc(30 * var(--rp)));
+    font-weight: 500;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.lg-error[hidden] {
+    display: none;
+}
+
+/* Remember / forgot row: checkbox x53-101 (48 px) y941-989, ~36 px type. */
+.lg-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem calc(24 * var(--rp));
+    /* Checkbox centre sits 89 px below the password field; the row is 2.75rem tall. */
+    margin-top: max(.25rem, calc(89 * var(--rp) - 1.375rem));
+    font-size: max(.9375rem, calc(36 * var(--rp)));
+    line-height: 1.35;
+}
+
+.lg-remember {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: calc(34 * var(--rp));
+    padding-left: calc(2 * var(--rp));
+    color: var(--lg-ink);
+    cursor: pointer;
+}
+
+.lg-remember input {
+    display: grid;
+    width: max(1.5rem, calc(48 * var(--rp)));
+    height: max(1.5rem, calc(48 * var(--rp)));
+    flex: 0 0 auto;
+    margin: 0;
+    place-content: center;
+    border: 1.5px solid #476a60;
+    border-radius: max(.375rem, calc(8 * var(--rp)));
+    appearance: none;
+    background: #fff;
+    cursor: pointer;
+}
+
+.lg-remember input:checked {
+    border-color: var(--lg-evergreen);
+    background: var(--lg-evergreen) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5.5 12.5 4 4 9-9.5' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 82% no-repeat;
+}
+
+/* "Umesahau Nenosiri?" right-aligned to x813, evergreen. */
+.lg-forgot {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    margin-left: auto;
+    color: var(--lg-evergreen);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    text-decoration: none;
+}
+
+.lg-forgot:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+/* Button y1048-1174 (126 tall), full width, pill. */
+.lg-submit {
+    display: flex;
+    width: 100%;
+    min-height: max(3.25rem, calc(126 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    gap: .625rem;
+    /* Button top sits 83 px below the checkbox centre. */
+    margin-top: max(.5rem, calc(83 * var(--rp) - 1.375rem));
+    padding: 0 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--lg-evergreen);
+    color: #fff;
+    font: inherit;
+    font-size: max(1.125rem, calc(46 * var(--rp)));
+    font-weight: 600;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.lg-submit:hover {
+    background: var(--lg-evergreen-hover);
+}
+
+.lg-submit[aria-busy="true"] {
+    cursor: progress;
+    opacity: .92;
+}
+
+.lg-spinner {
+    display: none;
+    width: 1.1em;
+    height: 1.1em;
+    border: 2.5px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: lg-spin .8s linear infinite;
+}
+
+.lg-submit[aria-busy="true"] .lg-spinner {
+    display: inline-block;
+}
+
+@keyframes lg-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Optional Google section (shown only when a real OAuth route exists). */
+.lg-divider {
+    display: flex;
+    align-items: center;
+    gap: calc(34 * var(--rp));
+    margin-top: calc(60 * var(--rp));
+    color: var(--lg-muted);
+    font-size: max(.9375rem, calc(38 * var(--rp)));
+}
+
+.lg-divider::before,
+.lg-divider::after {
+    height: 2px;
+    flex: 1 1 auto;
+    background: #d0d2cf;
+    content: "";
+}
+
+.lg-google {
+    display: flex;
+    min-height: max(3.25rem, calc(137 * var(--rp)));
+    align-items: center;
+    justify-content: center;
+    gap: calc(40 * var(--rp));
+    margin-top: calc(52 * var(--rp));
+    border: 1px solid var(--lg-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--lg-ink);
+    font-size: max(1rem, calc(40 * var(--rp)));
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.lg-google svg {
+    width: max(1.5rem, calc(58 * var(--rp)));
+    height: auto;
+}
+
+/* Registration line: ~40 px type, bold evergreen link (y1537 in the reference,
+ * which also holds the Google section above it). */
+.lg-register {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: calc(34 * var(--rp));
+    margin: calc(64 * var(--rp)) 0 0;
+    padding-bottom: max(calc(80 * var(--rp)), env(safe-area-inset-bottom));
+    color: #343d4b;
+    font-size: max(.9375rem, calc(40 * var(--rp)));
+    line-height: 1.4;
+    letter-spacing: -.01em;
+}
+
+.lg-register a {
+    display: inline-block;
+    min-height: 1.5rem;
+    padding: 0 .125rem;
+    color: var(--lg-evergreen);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lg-register a:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+.lg-back:focus-visible,
+.lg-language:focus-visible,
+.lg-toggle:focus-visible,
+.lg-forgot:focus-visible,
+.lg-register a:focus-visible,
+.lg-google:focus-visible,
+.lg-submit:focus-visible,
+.lg-remember input:focus-visible {
+    outline: 3px solid #c99b4a;
+    outline-offset: 3px;
+}
+
+@media (min-width: 48rem) {
+    .lg-page {
+        padding-block: 1.5rem 2.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .lg-spinner {
+        animation: none;
+        border-right-color: #fff;
+    }
+}

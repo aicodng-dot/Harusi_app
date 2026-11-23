@@ -39,6 +39,38 @@
         </label>
 
         <label class="field-label">
+            Phone number (optional)
+            <input type="tel" name="phone_number" value="{{ old('phone_number', $userRecord->phone_number) }}" class="input-control" autocomplete="tel" placeholder="0712345678">
+            <span class="text-xs font-semibold text-zinc-500">The account can use this number or its email to sign in.</span>
+            @error('phone_number')
+                <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field-label">
+            Preferred language
+            <select name="preferred_language" class="input-control" required>
+                <option value="sw" @selected(old('preferred_language', $userRecord->preferred_language ?? 'sw') === 'sw')>Kiswahili</option>
+                <option value="en" @selected(old('preferred_language', $userRecord->preferred_language ?? 'sw') === 'en')>English</option>
+            </select>
+            @error('preferred_language')
+                <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <div class="field-label">
+            <input type="hidden" name="is_active" value="0">
+            <label class="inline-flex items-center gap-2">
+                <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $userRecord->is_active ?? true))>
+                Account active
+            </label>
+            <span class="text-xs font-semibold text-zinc-500">Inactive accounts cannot sign in or continue using the website.</span>
+            @error('is_active')
+                <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <label class="field-label">
             Gate name
             <input name="gate_name" value="{{ old('gate_name', $userRecord->gate_name) }}" class="input-control" autocomplete="off" data-gate-name>
             <span class="text-xs font-semibold text-zinc-500">Required for scanner users. Admin users do not need a gate.</span>
@@ -50,12 +82,12 @@
         <label class="field-label">
             Assigned event
             <select name="event_id" class="input-control">
-                <option value="">Default active event</option>
+                <option value="">Choose an event</option>
                 @foreach ($activeEvents as $event)
-                    <option value="{{ $event->id }}" @selected((string) $selectedEventId === (string) $event->id)>{{ $event->event_name }}</option>
+                    <option value="{{ $event->id }}" @selected((string) $selectedEventId === (string) $event->id)>{{ $event->event_name }}@if ($event->workspace_id !== null) — Customer: {{ $event->workspace?->name ?? 'workspace #'.$event->workspace_id }}@endif</option>
                 @endforeach
             </select>
-            <span class="text-xs font-semibold text-zinc-500">Scanner users scan and admit guests for this event.</span>
+            <span class="text-xs font-semibold text-zinc-500">Scanner users scan and admit guests for this event. If only one event is available, it is selected automatically.</span>
             @error('event_id')
                 <span class="text-xs font-bold text-rose-700">{{ $message }}</span>
             @enderror

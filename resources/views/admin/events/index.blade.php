@@ -66,6 +66,9 @@
                                 <td class="px-5 py-4">
                                     <div class="flex flex-wrap justify-end gap-2">
                                         <a href="{{ route('admin.events.select', $event) }}" class="table-action">Manage Event</a>
+                                        @can('create', \App\Models\OfflineScannerSession::class)
+                                            <a href="{{ route('admin.events.select', ['event' => $event, 'redirect_to' => 'offline_scanner']) }}" class="table-action">Offline Android Scanner</a>
+                                        @endcan
                                         <a href="{{ route('admin.events.edit', $event) }}" class="table-action">Edit</a>
 
                                         @if ($event->status !== \App\Models\Event::STATUS_ARCHIVED)

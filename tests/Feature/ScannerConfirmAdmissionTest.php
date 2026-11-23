@@ -119,6 +119,80 @@ class ScannerConfirmAdmissionTest extends TestCase
         ]);
     }
 
+    public function test_special_pass_can_admit_one_hundred_entries_in_one_request(): void
+    {
+        [$guest, $token] = $this->makeGuest(Guest::PASS_SPECIAL, 100);
+
+        $this->actingAs($this->scannerUser())
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $guest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 100,
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'admitted')
+            ->assertJsonPath('guest.allowed_entries', 100)
+            ->assertJsonPath('guest.used_entries', 100)
+            ->assertJsonPath('guest.remaining_entries', 0)
+            ->assertJsonPath('guest.system_status', Guest::STATUS_FULLY_USED);
+
+        $this->assertSame(100, $guest->fresh()->allowed_entries);
+        $this->assertSame(100, $guest->fresh()->used_entries);
+        $this->assertDatabaseHas('checkins', [
+            'guest_id' => $guest->id,
+            'entries_added' => 100,
+            'used_entries_after_scan' => 100,
+            'remaining_entries_after_scan' => 0,
+            'scan_result' => Checkin::RESULT_ADMITTED,
+        ]);
+    }
+
+    public function test_large_special_pass_validation_and_admission_preserve_the_remaining_limit(): void
+    {
+        [$guest, $token] = $this->makeGuest(Guest::PASS_SPECIAL, 100, 89);
+        $scanner = $this->scannerUser();
+
+        $this->actingAs($scanner)
+            ->postJson(route('scanner.validate'), ['qr_token' => $token])
+            ->assertOk()
+            ->assertJsonPath('allowed_entries', 100)
+            ->assertJsonPath('used_entries', 89)
+            ->assertJsonPath('remaining_entries', 11);
+
+        $this->actingAs($scanner)
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $guest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 12,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Requested entries exceed the remaining allowance.');
+
+        $this->assertSame(100, $guest->fresh()->allowed_entries);
+        $this->assertSame(89, $guest->fresh()->used_entries);
+
+        $this->actingAs($scanner)
+            ->postJson(route('scanner.admit'), [
+                'guest_id' => $guest->id,
+                'qr_token' => $token,
+                'entries_to_admit' => 11,
+            ])
+            ->assertOk()
+            ->assertJsonPath('guest.used_entries', 100)
+            ->assertJsonPath('guest.remaining_entries', 0)
+            ->assertJsonPath('guest.system_status', Guest::STATUS_FULLY_USED);
+
+        $this->assertSame(100, $guest->fresh()->allowed_entries);
+        $this->assertSame(100, $guest->fresh()->used_entries);
+        $this->assertDatabaseHas('checkins', [
+            'guest_id' => $guest->id,
+            'entries_added' => 11,
+            'used_entries_after_scan' => 100,
+            'remaining_entries_after_scan' => 0,
+            'scan_result' => Checkin::RESULT_ADMITTED,
+        ]);
+    }
+
     public function test_admission_rejects_more_than_remaining_entries(): void
     {
         [$guest, $token] = $this->makeGuest(Guest::PASS_DOUBLE, 2, 1);

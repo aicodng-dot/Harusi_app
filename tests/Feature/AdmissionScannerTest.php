@@ -8,15 +8,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\FakesGuestQrDisk;
 use Tests\TestCase;
 
 class AdmissionScannerTest extends TestCase
 {
+    use FakesGuestQrDisk;
     use RefreshDatabase;
 
     public function test_qr_code_does_not_expose_guest_name_or_phone(): void
     {
         Storage::fake('public');
+        $this->fakeGuestQrDisk();
 
         [$guest] = $this->makeGuest('Asha Private', '+255 700 100 200', Guest::PASS_DOUBLE, 2);
 
@@ -38,7 +41,7 @@ class AdmissionScannerTest extends TestCase
         $this->actingAs($scanner)
             ->postJson(route('scanner.verify'), ['token' => $token])
             ->assertOk()
-            ->assertJsonPath('guest.phone_number', '+255 700 300 400')
+            ->assertJsonPath('guest.phone_number', '+255700300400')
             ->assertJsonPath('guest.allowed_entries', 3)
             ->assertJsonPath('guest.used_entries', 0)
             ->assertJsonPath('guest.remaining_admissions', 3);

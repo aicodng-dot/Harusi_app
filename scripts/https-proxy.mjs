@@ -90,11 +90,12 @@ function rewriteLocationHeader(location, publicHost) {
 
     try {
         const parsed = new URL(location, target);
+        const isSamePublicHost = parsed.protocol === 'http:' && parsed.host === publicHost;
         const targetPort = target.port || (target.protocol === 'https:' ? '443' : '80');
         const parsedPort = parsed.port || (parsed.protocol === 'https:' ? '443' : '80');
         const isTargetLocation = parsed.hostname === target.hostname && parsedPort === targetPort;
 
-        if (!isTargetLocation) {
+        if (!isSamePublicHost && !isTargetLocation) {
             return location;
         }
 

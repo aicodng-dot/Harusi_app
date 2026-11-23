@@ -8,6 +8,10 @@ use App\Models\Event;
 use App\Models\Guest;
 use App\Models\QrCode;
 use App\Models\ScanLog;
+use App\Models\User;
+use App\Services\OfflineEventLockService;
+use App\Services\PhoneNumberService;
+use App\Services\QrTokenCanonicalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -79,41 +83,67 @@ class ScannerController extends Controller
 
     public function manualSearch(Request $request): View
     {
+        // Same Event rule as admit(): an explicit assigned/selected Event must
+        // exist and be active now; it never falls back to the default Event.
+        $eventId = ($request->user()->event_id === null ? null : (int) $request->user()->event_id)
+            ?? $request->session()->get('selected_event_id')
+            ?? Event::defaultEvent()->getKey();
+        abort_unless((is_int($eventId) || is_string($eventId))
+            && filter_var($eventId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false, 403);
+        $event = Event::query()->useWritePdo()->whereKey($eventId)->first();
+        abort_unless($event && $event->status === Event::STATUS_ACTIVE, 403);
+
         $search = trim((string) $request->query('q', ''));
         $guests = collect();
+        $manualSearchError = null;
 
         if ($search !== '') {
-            $guests = Guest::query()
+            $guestsQuery = Guest::query()
                 ->with('qrCode')
-                ->where('event_id', $this->scannerEvent($request)->id)
-                ->where(function (Builder $query) use ($search): void {
-                    $query->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('phone_number', 'like', '%'.$search.'%');
-                })
-                ->orderBy('name')
-                ->take(12)
-                ->get();
+                ->where('event_id', $event->id);
+
+            if (preg_match('/^\d{4}$/', $search)) {
+                $guestsQuery->where('manual_code', $search);
+            } else {
+                $phoneNumber = app(PhoneNumberService::class)->normalize($search);
+
+                if ($phoneNumber === null) {
+                    $manualSearchError = PhoneNumberService::INVALID_MESSAGE;
+                } else {
+                    $guestsQuery->where('phone_number', $phoneNumber);
+                }
+            }
+
+            if ($manualSearchError === null) {
+                $guests = $guestsQuery
+                    ->orderBy('name')
+                    ->take(12)
+                    ->get();
+            }
         }
 
         return view('scanner.manual-search', [
             'search' => $search,
             'guests' => $guests,
-            'assignedEvent' => $this->scannerEvent($request),
+            'manualSearchError' => $manualSearchError,
+            'assignedEvent' => $event,
         ]);
     }
 
-    public function manualAdmit(Request $request): RedirectResponse
+    public function manualAdmit(Request $request, OfflineEventLockService $locks): RedirectResponse
     {
         $validated = $request->validate([
             'guest_id' => ['required', 'integer', 'min:1'],
-            'entries_to_admit' => ['required', 'integer', 'min:1', 'max:10'],
+            'entries_to_admit' => ['required', 'integer', 'min:1', 'max:'.Guest::MAX_ALLOWED_ENTRIES],
             'search' => ['nullable', 'string', 'max:120'],
         ]);
 
         $quantity = (int) $validated['entries_to_admit'];
         $search = trim((string) ($validated['search'] ?? ''));
 
-        $result = DB::transaction(function () use ($request, $validated, $quantity) {
+        $result = DB::transaction(function () use ($request, $validated, $quantity, $locks) {
+            $locks->assertLaravelAdmissionAllowed($this->scannerEvent($request), true);
+
             $guest = Guest::query()
                 ->with('qrCode')
                 ->whereKey((int) $validated['guest_id'])
@@ -125,6 +155,13 @@ class ScannerController extends Controller
                 return [
                     'ok' => false,
                     'message' => 'Guest was not found.',
+                ];
+            }
+
+            if ($guest->qrCode && (! $guest->qrCode->is_active || $guest->qrCode->revoked_at)) {
+                return [
+                    'ok' => false,
+                    'message' => 'This QR code has been revoked. Admission was not recorded.',
                 ];
             }
 
@@ -143,10 +180,10 @@ class ScannerController extends Controller
                 ];
             }
 
-            if ($guest->allowed_entries > 10) {
+            if ($guest->allowed_entries > Guest::MAX_ALLOWED_ENTRIES) {
                 return [
                     'ok' => false,
-                    'message' => 'Allowed entries may not exceed 10.',
+                    'message' => 'Allowed entries may not exceed '.Guest::MAX_ALLOWED_ENTRIES.'.',
                 ];
             }
 
@@ -193,6 +230,14 @@ class ScannerController extends Controller
 
     public function validateQr(Request $request): JsonResponse
     {
+        // The offline middleware may already have cached the Event relation.
+        // Check its current status before reading a QR or recording a scan,
+        // while retaining the existing scanner assignment/fallback resolution.
+        $eventStatus = Event::query()->useWritePdo()
+            ->whereKey($this->scannerEvent($request)->getKey())
+            ->value('status');
+        abort_unless($eventStatus === Event::STATUS_ACTIVE, 403);
+
         $validated = $request->validate([
             'qr_token' => ['nullable', 'string', 'max:2048', 'required_without:scanned_url'],
             'scanned_url' => ['nullable', 'string', 'max:2048', 'required_without:qr_token'],
@@ -301,6 +346,12 @@ class ScannerController extends Controller
 
     public function verify(Request $request): JsonResponse
     {
+        // Recheck the current status even when offline middleware cached the Event.
+        $eventStatus = Event::query()->useWritePdo()
+            ->whereKey($this->scannerEvent($request)->getKey())
+            ->value('status');
+        abort_unless($eventStatus === Event::STATUS_ACTIVE, 403);
+
         $validated = $request->validate([
             'token' => ['required', 'string', 'max:2048'],
         ]);
@@ -354,14 +405,14 @@ class ScannerController extends Controller
         ]);
     }
 
-    public function admit(Request $request): JsonResponse
+    public function admit(Request $request, OfflineEventLockService $locks): JsonResponse
     {
         $validated = $request->validate([
             'guest_id' => ['nullable', 'integer', 'min:1'],
             'qr_token' => ['nullable', 'string', 'max:2048', 'required_without:token'],
             'token' => ['nullable', 'string', 'max:2048', 'required_without:qr_token'],
-            'entries_to_admit' => ['nullable', 'integer', 'min:1', 'max:10', 'required_without:quantity'],
-            'quantity' => ['nullable', 'integer', 'min:1', 'max:10', 'required_without:entries_to_admit'],
+            'entries_to_admit' => ['nullable', 'integer', 'min:1', 'max:'.Guest::MAX_ALLOWED_ENTRIES, 'required_without:quantity'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:'.Guest::MAX_ALLOWED_ENTRIES, 'required_without:entries_to_admit'],
             'admitted_by' => ['nullable', 'string', 'max:80'],
             'device_label' => ['nullable', 'string', 'max:80'],
         ]);
@@ -370,18 +421,40 @@ class ScannerController extends Controller
         $quantity = (int) ($validated['entries_to_admit'] ?? $validated['quantity'] ?? 0);
         $guestId = isset($validated['guest_id']) ? (int) $validated['guest_id'] : null;
 
-        if ($token === '') {
-            $this->recordScan(null, null, $quantity, Checkin::RESULT_INVALID, 'QR token was empty.', $request);
+        $scannerId = $request->user()->getAuthIdentifier();
+        $assignedEventId = $request->user()->event_id === null ? null : (int) $request->user()->event_id;
+        $eventId = $assignedEventId
+            ?? $request->session()->get('selected_event_id')
+            ?? Event::defaultEvent()->getKey();
 
-            return response()->json([
-                'ok' => false,
-                'status' => Checkin::RESULT_INVALID,
-                'result' => Checkin::RESULT_INVALID,
-                'message' => 'Invalid QR code. Scan again.',
-            ], 422);
-        }
+        $result = DB::transaction(function () use ($request, $validated, $token, $quantity, $guestId, $locks, $scannerId, $assignedEventId, $eventId) {
+            // Keep authority locked through admission, ahead of Session/QR/Guest.
+            // A missing explicit Event must never resolve to the default Event.
+            abort_unless((is_int($eventId) || is_string($eventId))
+                && filter_var($eventId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false, 403);
+            $event = Event::query()->useWritePdo()->whereKey($eventId)->lockForUpdate()->first();
+            abort_unless($event && $event->status === Event::STATUS_ACTIVE, 403);
 
-        $result = DB::transaction(function () use ($request, $validated, $token, $quantity, $guestId) {
+            $scanner = User::query()->useWritePdo()->whereKey($scannerId)->lockForUpdate()->first();
+            abort_unless($scanner && $scanner->canAuthenticate() && $scanner->role === User::ROLE_SCANNER
+                && ($scanner->event_id === null ? null : (int) $scanner->event_id) === $assignedEventId, 403);
+
+            $locks->assertLaravelAdmissionAllowed($event, true);
+
+            if ($token === '') {
+                $this->recordScan(null, null, $quantity, Checkin::RESULT_INVALID, 'QR token was empty.', $request);
+
+                return [
+                    'status' => 422,
+                    'payload' => [
+                        'ok' => false,
+                        'status' => Checkin::RESULT_INVALID,
+                        'result' => Checkin::RESULT_INVALID,
+                        'message' => 'Invalid QR code. Scan again.',
+                    ],
+                ];
+            }
+
             $qrCode = QrCode::query()
                 ->where('qr_token', $token)
                 ->lockForUpdate()
@@ -419,9 +492,9 @@ class ScannerController extends Controller
 
             $qrCode->setRelation('guest', $guest);
 
-            if (! $this->guestBelongsToScannerEvent($guest, $request)) {
+            if ((int) $guest->event_id !== (int) $event->id) {
                 $message = 'This QR code belongs to a different event.';
-                $this->recordScan(null, null, $quantity, Checkin::RESULT_WRONG_EVENT, $message, $request, $this->scannerEvent($request));
+                $this->recordScan(null, null, $quantity, Checkin::RESULT_WRONG_EVENT, $message, $request, $event);
 
                 return [
                     'status' => 409,
@@ -499,8 +572,8 @@ class ScannerController extends Controller
                 ];
             }
 
-            if ($guest->allowed_entries > 10) {
-                $message = 'Allowed entries may not exceed 10.';
+            if ($guest->allowed_entries > Guest::MAX_ALLOWED_ENTRIES) {
+                $message = 'Allowed entries may not exceed '.Guest::MAX_ALLOWED_ENTRIES.'.';
                 $this->recordScan($guest, $qrCode, $quantity, Checkin::RESULT_ERROR, $message, $request);
 
                 return [
@@ -604,6 +677,13 @@ class ScannerController extends Controller
             return Event::query()->find($user->event_id) ?? Event::defaultEvent();
         }
 
+        $selectedEventId = $request->session()->get('selected_event_id');
+        $selectedEvent = $selectedEventId ? Event::query()->find($selectedEventId) : null;
+
+        if ($selectedEvent) {
+            return $selectedEvent;
+        }
+
         return Event::defaultEvent();
     }
 
@@ -624,27 +704,7 @@ class ScannerController extends Controller
 
     private function extractToken(string $value): string
     {
-        $value = trim($value);
-
-        if ($value === '') {
-            return '';
-        }
-
-        $query = parse_url($value, PHP_URL_QUERY);
-        if (is_string($query)) {
-            parse_str($query, $params);
-            if (! empty($params['token']) && is_string($params['token'])) {
-                return trim($params['token']);
-            }
-        }
-
-        $path = parse_url($value, PHP_URL_PATH);
-        if (is_string($path) && str_contains($path, '/')) {
-            $segments = array_values(array_filter(explode('/', $path)));
-            return trim((string) end($segments));
-        }
-
-        return $value;
+        return app(QrTokenCanonicalizer::class)->canonicalize($value);
     }
 
     private function resultFor(QrCode $qrCode): array
@@ -686,14 +746,14 @@ class ScannerController extends Controller
 
     private function applyAdmissionToLockedGuest(Guest $guest, int $quantity): ?Guest
     {
-        if ($quantity < 1 || $quantity > 10) {
+        if ($quantity < 1 || $quantity > Guest::MAX_ALLOWED_ENTRIES) {
             return null;
         }
 
         $allowedEntries = (int) $guest->allowed_entries;
         $usedEntries = (int) $guest->used_entries;
 
-        if ($allowedEntries > 10 || $quantity > max(0, $allowedEntries - $usedEntries)) {
+        if ($allowedEntries > Guest::MAX_ALLOWED_ENTRIES || $quantity > max(0, $allowedEntries - $usedEntries)) {
             return null;
         }
 
@@ -702,7 +762,7 @@ class ScannerController extends Controller
             ->whereKey($guest->id)
             ->where('event_id', $guest->event_id)
             ->where('status', '<>', Guest::STATUS_CANCELLED)
-            ->where('allowed_entries', '<=', 10)
+            ->where('allowed_entries', '<=', Guest::MAX_ALLOWED_ENTRIES)
             ->whereRaw('(used_entries + ?) <= allowed_entries', [$quantity])
             ->update([
                 'used_entries' => DB::raw('used_entries + '.(int) $quantity),

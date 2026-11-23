@@ -42,18 +42,6 @@
             </div>
         </section>
 
-        <section id="manual" class="scanner-card mt-5">
-            <div class="flex items-center justify-between gap-3">
-                <h2 class="text-base font-semibold">Manual code</h2>
-                <span class="rounded-md bg-white/10 px-2 py-1 text-xs font-bold text-zinc-300">Backup</span>
-            </div>
-            <label class="mt-3 grid gap-2 text-sm font-semibold text-zinc-300">
-                Token or verification URL
-                <input class="scanner-input" data-manual-token value="{{ $initialToken }}" autocomplete="off" inputmode="text" placeholder="Paste or type code">
-            </label>
-            <button type="button" class="scanner-primary-action mt-3 w-full" data-verify-token>Verify Pass</button>
-        </section>
-
         <section class="scanner-card mt-5">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-base font-semibold">Recent result</h2>
@@ -61,7 +49,7 @@
             </div>
 
             <div class="mt-3 rounded-lg border border-dashed border-white/10 p-4 text-sm font-semibold text-zinc-400" data-idle-result>
-                Scan or verify a code to show the latest result.
+                Scan a QR code to show the latest result.
             </div>
 
             <div class="scanner-result-panel scanner-result-warning" data-result-panel hidden>
@@ -106,7 +94,7 @@
                         <p class="text-sm font-semibold text-zinc-700">Admit count</p>
                         <div class="flex items-center rounded-md border border-zinc-300">
                             <button type="button" class="quantity-button" data-quantity-minus>-</button>
-                            <input type="number" class="w-16 border-x border-zinc-300 py-2 text-center text-lg font-semibold outline-none" min="1" max="10" value="1" data-admit-quantity>
+                            <input type="number" class="w-16 border-x border-zinc-300 py-2 text-center text-lg font-semibold outline-none" min="1" max="{{ \App\Models\Guest::MAX_ALLOWED_ENTRIES }}" value="1" data-admit-quantity>
                             <button type="button" class="quantity-button" data-quantity-plus>+</button>
                         </div>
                     </div>

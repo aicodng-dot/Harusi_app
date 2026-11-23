@@ -10,15 +10,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\FakesGuestQrDisk;
 use Tests\TestCase;
 
 class MultiEventSupportTest extends TestCase
 {
+    use FakesGuestQrDisk;
     use RefreshDatabase;
 
     public function test_admin_can_switch_events_and_guest_lists_are_isolated(): void
     {
         Storage::fake('public');
+        $this->fakeGuestQrDisk();
 
         $admin = $this->adminUser();
 

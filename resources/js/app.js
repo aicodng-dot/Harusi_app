@@ -1,6 +1,8 @@
 import './bootstrap';
 import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
+const MAX_ALLOWED_ENTRIES = 100;
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || min));
 
 const jsonRequest = async (url, csrf, payload) => {
@@ -45,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const minSpecialEntries = Math.max(3, usedEntries);
             allowedAdmissions.min = minSpecialEntries;
-            allowedAdmissions.max = 10;
+            allowedAdmissions.max = MAX_ALLOWED_ENTRIES;
             allowedAdmissions.readOnly = false;
-            allowedAdmissions.value = clamp(allowedAdmissions.value, minSpecialEntries, 10);
+            allowedAdmissions.value = clamp(allowedAdmissions.value, minSpecialEntries, MAX_ALLOWED_ENTRIES);
         }
     };
 
@@ -128,7 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('[data-disable-on-submit]').forEach((form) => {
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', (event) => {
+            if (event.defaultPrevented) return;
+
             form.querySelectorAll('button[type="submit"]').forEach((button) => {
                 button.disabled = true;
                 button.classList.add('opacity-70', 'cursor-not-allowed');
@@ -137,6 +141,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     button.textContent = button.dataset.submittingText;
                 }
             });
+        });
+    });
+    document.querySelectorAll('[data-copy-text]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const text = button.dataset.copyText || '';
+            if (!text) return;
+
+            const originalText = button.textContent;
+            const copiedText = button.dataset.copiedText || 'Copied';
+
+            const markCopied = () => {
+                button.textContent = copiedText;
+                window.setTimeout(() => {
+                    button.textContent = originalText;
+                }, 1800);
+            };
+
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    markCopied();
+                    return;
+                }
+            } catch (error) {
+                // Fall through to the textarea fallback below.
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+            markCopied();
         });
     });
 
@@ -158,6 +199,47 @@ document.addEventListener('DOMContentLoaded', () => {
     qrDialog?.addEventListener('click', (event) => {
         if (event.target === qrDialog) qrDialog.close();
     });
+
+    const qrSelectionForm = document.querySelector('[data-qr-selection-form]');
+
+    if (qrSelectionForm) {
+        const qrSelectAll = document.querySelector('[data-qr-select-all]');
+        const qrCheckboxes = Array.from(document.querySelectorAll('[data-qr-select]'));
+        const qrSelectionCount = qrSelectionForm.querySelector('[data-qr-selection-count]');
+        const qrExportButton = qrSelectionForm.querySelector('[data-qr-export-button]');
+
+        const syncQrSelection = () => {
+            const selected = qrCheckboxes.filter((checkbox) => checkbox.checked);
+
+            if (qrSelectionCount) qrSelectionCount.textContent = String(selected.length);
+            if (qrExportButton) qrExportButton.disabled = selected.length === 0;
+
+            if (qrSelectAll) {
+                qrSelectAll.disabled = qrCheckboxes.length === 0;
+                qrSelectAll.checked = qrCheckboxes.length > 0 && selected.length === qrCheckboxes.length;
+                qrSelectAll.indeterminate = selected.length > 0 && selected.length < qrCheckboxes.length;
+            }
+
+            qrCheckboxes.forEach((checkbox) => {
+                checkbox.closest('[data-qr-row]')?.classList.toggle('bg-emerald-50/60', checkbox.checked);
+            });
+        };
+
+        qrSelectAll?.addEventListener('change', () => {
+            qrCheckboxes.forEach((checkbox) => {
+                checkbox.checked = qrSelectAll.checked;
+            });
+            syncQrSelection();
+        });
+
+        qrCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', syncQrSelection));
+        qrSelectionForm.addEventListener('submit', (event) => {
+            if (!qrCheckboxes.some((checkbox) => checkbox.checked)) {
+                event.preventDefault();
+            }
+        });
+        syncQrSelection();
+    }
 
     const scanner = document.querySelector('[data-scanner]');
     document.querySelectorAll('[data-manual-admit-card]').forEach((card) => {
@@ -185,8 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const startCameraButton = scanner.querySelector('[data-start-camera]');
     const stopCameraButton = scanner.querySelector('[data-stop-camera]');
     const scanAnotherButton = scanner.querySelector('[data-scan-another]');
-    const manualToken = scanner.querySelector('[data-manual-token]');
-    const verifyButton = scanner.querySelector('[data-verify-token]');
     const idleResult = scanner.querySelector('[data-idle-result]');
     const panel = scanner.querySelector('[data-result-panel]');
     const resultLabel = scanner.querySelector('[data-result-label]');
@@ -225,6 +305,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const setCameraStatus = (message) => {
         if (cameraStatus) cameraStatus.textContent = message;
+    };
+
+    const stopMediaStream = (stream) => {
+        stream?.getTracks().forEach((track) => track.stop());
+    };
+
+    const cameraErrorText = (error) => `${error?.name || ''} ${error?.message || error || ''}`.toLowerCase();
+
+    const setCameraErrorStatus = (error) => {
+        const errorText = cameraErrorText(error);
+
+        if (errorText.includes('permission') || errorText.includes('notallowed') || errorText.includes('denied')) {
+            setCameraStatus('Camera permission blocked. Allow camera in browser settings.');
+        } else if (errorText.includes('notfound') || errorText.includes('overconstrained') || errorText.includes('no cameras')) {
+            setCameraStatus('No camera found');
+        } else if (errorText.includes('notreadable') || errorText.includes('trackstart')) {
+            setCameraStatus('Camera is busy. Close other camera apps and retry.');
+        } else {
+            setCameraStatus('Camera could not start');
+        }
+    };
+
+    const cameraPermissionState = async () => {
+        if (!navigator.permissions?.query) return 'unknown';
+
+        try {
+            const permission = await navigator.permissions.query({ name: 'camera' });
+            return permission.state || 'unknown';
+        } catch (error) {
+            return 'unknown';
+        }
+    };
+
+    const requestCameraAccess = async () => {
+        if (await cameraPermissionState() === 'denied') {
+            throw new DOMException('Camera permission denied', 'NotAllowedError');
+        }
+
+        let stream = null;
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: { facingMode: { ideal: 'environment' } },
+            });
+        } catch (error) {
+            const errorText = cameraErrorText(error);
+
+            if (!errorText.includes('overconstrained')) {
+                throw error;
+            }
+
+            stream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: true,
+            });
+        } finally {
+            stopMediaStream(stream);
+        }
     };
 
     const getScannerState = () => {
@@ -269,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (phoneNumber) phoneNumber.textContent = 'Unavailable';
         if (systemStatus) systemStatus.textContent = 'Unknown';
         if (quantityInput) {
-            quantityInput.max = '10';
+            quantityInput.max = String(MAX_ALLOWED_ENTRIES);
             quantityInput.value = '1';
         }
     };
@@ -283,7 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.lastScannedCode = null;
         state.lastScannedAt = 0;
 
-        if (manualToken) manualToken.value = '';
     };
 
     const pauseCameraForResult = async (message = 'Scan paused') => {
@@ -409,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (phoneNumber) phoneNumber.textContent = guest?.phone_number || 'Unavailable';
         if (systemStatus) systemStatus.textContent = (guest?.usage_status || guest?.system_status || result).replaceAll('_', ' ');
 
-        state.token = payload.token || state.token || manualToken?.value || '';
+        state.token = payload.token || state.token || '';
         state.guestId = guest?.id || payload.guest_id || state.guestId || null;
         state.remaining = Number(guest?.remaining_admissions || 0);
 
@@ -423,26 +561,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const verifyToken = async (rawToken) => {
         if (state.isProcessing) return false;
 
-        const token = (rawToken || manualToken?.value || '').trim();
+        const token = (rawToken || '').trim();
         if (!token) {
             setResult({ ok: false, result: 'invalid', message: 'Enter or scan a QR token.' });
             return false;
         }
 
         state.isProcessing = true;
-        if (verifyButton) verifyButton.textContent = 'Verifying...';
+        state.token = token;
         setCameraStatus('Validating QR code...');
 
         try {
             const { data } = await jsonRequest(verifyUrl, csrf, { scanned_url: token });
-            if (manualToken) manualToken.value = data.token || token;
+            state.token = data.token || token;
             setResult(data);
         } catch (error) {
             setResult({ ok: false, result: 'connection_error', message: 'Connection failed. Try again.' });
         }
 
         state.isProcessing = false;
-        if (verifyButton) verifyButton.textContent = 'Verify pass';
         setCameraStatus('Result ready');
         return true;
     };
@@ -501,6 +638,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        state.isStarting = true;
+        setCameraStatus('Requesting camera permission...');
+
+        try {
+            await requestCameraAccess();
+        } catch (error) {
+            state.isScanning = false;
+            state.scanLocked = false;
+            setCameraErrorStatus(error);
+            return;
+        } finally {
+            state.isStarting = false;
+        }
+
         setCameraStatus('Starting camera...');
 
         const scanConfig = {
@@ -519,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.scanLocked = true;
             state.lastScannedCode = scannedCode;
             state.lastScannedAt = now;
-            if (manualToken) manualToken.value = scannedCode;
+            state.token = scannedCode;
             setCameraStatus('QR detected');
             await pauseCameraForResult('Scan paused');
             await verifyToken(scannedCode);
@@ -546,15 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             state.isScanning = false;
             state.scanLocked = false;
-            const errorText = `${error?.name || ''} ${error?.message || error || ''}`.toLowerCase();
-
-            if (errorText.includes('permission') || errorText.includes('notallowed') || errorText.includes('denied')) {
-                setCameraStatus('Allow camera permission, then tap Start Camera');
-            } else if (errorText.includes('notfound') || errorText.includes('overconstrained') || errorText.includes('no cameras')) {
-                setCameraStatus('No camera found');
-            } else {
-                setCameraStatus('Camera could not start');
-            }
+            setCameraErrorStatus(error);
         } finally {
             state.isStarting = false;
         }
@@ -563,19 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
     startCameraButton?.addEventListener('click', startCamera);
     stopCameraButton?.addEventListener('click', () => stopCamera());
     scanAnotherButton?.addEventListener('click', () => startCamera({ reset: true }));
-    verifyButton?.addEventListener('click', async () => {
-        state.scanLocked = true;
-        await pauseCameraForResult('Manual verification');
-        await verifyToken(manualToken?.value || '');
-    });
-    manualToken?.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            state.scanLocked = true;
-            pauseCameraForResult('Manual verification').then(() => verifyToken(manualToken?.value || ''));
-        }
-    });
-
     const syncQuantity = () => {
         if (!quantityInput) return;
         quantityInput.value = String(clamp(quantityInput.value, 1, Math.max(1, state.remaining)));
@@ -605,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { data } = await jsonRequest(admitUrl, csrf, {
                 guest_id: state.guestId,
-                qr_token: state.token || manualToken?.value || '',
+                qr_token: state.token || '',
                 entries_to_admit: quantity,
                 admitted_by: admittedBy?.value || '',
                 device_label: 'Mobile scanner',

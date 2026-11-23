@@ -50,7 +50,7 @@
                     <button type="submit" class="primary-button">Generate missing QR codes</button>
                 </form>
                 <a href="{{ route('admin.qr-codes.download-all') }}" class="secondary-button">Download all ZIP</a>
-                <a href="{{ route('admin.qr-codes.export') }}" class="secondary-button">Export QR list CSV</a>
+                <a href="{{ route('admin.qr-codes.export') }}" class="secondary-button">Export QR list Excel</a>
             </div>
         </div>
 
@@ -87,9 +87,28 @@
             </article>
         </div>
 
+        <div class="app-card p-4">
+            <form method="GET" action="{{ route('admin.qr-codes.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                @if ($activeFilter !== '')
+                    <input type="hidden" name="filter" value="{{ $activeFilter }}">
+                @endif
+                <label class="field-label min-w-0 flex-1">
+                    <span>Search guests</span>
+                    <input type="search" name="search" value="{{ $search }}" class="input-control w-full"
+                        placeholder="Search by guest name or phone number" autocomplete="off">
+                </label>
+                <div class="flex gap-2">
+                    <button type="submit" class="primary-button">Search</button>
+                    @if ($search !== '')
+                        <a href="{{ route('admin.qr-codes.index', $activeFilter !== '' ? ['filter' => $activeFilter] : []) }}" class="secondary-button">Clear</a>
+                    @endif
+                </div>
+            </form>
+        </div>
+
         <div class="flex flex-wrap gap-2">
             @foreach ($filterItems as $key => $item)
-                <a href="{{ $key === '' ? route('admin.qr-codes.index') : route('admin.qr-codes.index', ['filter' => $key]) }}"
+                <a href="{{ route('admin.qr-codes.index', array_filter(['filter' => $key, 'search' => $search], fn ($value) => $value !== '')) }}"
                     @class(['filter-pill', 'is-active' => $activeFilter === $key])>
                     {{ $item['label'] }}
                     <span class="ml-2 rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-600">{{ $item['count'] }}</span>
@@ -97,11 +116,26 @@
             @endforeach
         </div>
 
+        <form id="qr-selection-export-form" method="POST" action="{{ route('admin.qr-codes.download-selected') }}"
+            class="app-card flex flex-wrap items-center justify-between gap-3 p-4" data-qr-selection-form>
+            @csrf
+            <div>
+                <p class="text-sm font-bold text-zinc-900"><span data-qr-selection-count>0</span> QR codes selected</p>
+                <p class="mt-1 text-xs font-semibold text-zinc-500">Select one or more guests from the filtered list below.</p>
+            </div>
+            <button type="submit" class="primary-button" data-qr-export-button disabled>Export selected ZIP</button>
+        </form>
+
         <div class="app-card overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-[1180px] divide-y divide-stone-200 text-sm">
+                <table class="min-w-[1240px] divide-y divide-stone-200 text-sm">
                     <thead class="bg-stone-50 text-left text-xs font-bold uppercase text-zinc-500">
                         <tr>
+                            <th class="px-5 py-3">
+                                <input type="checkbox"
+                                    class="size-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                                    aria-label="Select all QR codes on this page" data-qr-select-all>
+                            </th>
                             <th class="px-5 py-3">Preview</th>
                             <th class="px-5 py-3">Guest</th>
                             <th class="px-5 py-3">Pass</th>
@@ -115,7 +149,17 @@
                     <tbody class="divide-y divide-stone-100">
                         @forelse ($guests as $guest)
                             @php($status = $qrStatus($guest->qrCode))
-                            <tr class="align-top">
+                            <tr class="align-top transition-colors" data-qr-row>
+                                <td class="px-5 py-4">
+                                    <input type="checkbox"
+                                        class="size-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                        aria-label="Select QR code for {{ $guest->name }}"
+                                        @if ($guest->qrCode)
+                                            name="guest_ids[]" value="{{ $guest->id }}" form="qr-selection-export-form" data-qr-select
+                                        @else
+                                            disabled title="Generate this guest's QR code before exporting"
+                                        @endif>
+                                </td>
                                 <td class="px-5 py-4">
                                     @if ($guest->qrCode)
                                         <a href="{{ route('admin.guests.qr', $guest) }}" class="qr-thumb" target="_blank">
@@ -146,7 +190,7 @@
                                 <td class="whitespace-nowrap px-5 py-4">{{ $guest->qrCode?->generated_at?->format('M j, Y H:i') ?? 'Not generated' }}</td>
                                 <td class="px-5 py-4 font-mono text-xs text-zinc-500">
                                     @if ($guest->qrCode)
-                                        ...{{ substr($guest->qrCode->qr_token, -10) }}
+                                        ...{{ $guest->qrCode->qr_token_tail }}
                                     @else
                                         --
                                     @endif
@@ -187,7 +231,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-5 py-12 text-center text-sm font-semibold text-zinc-500">No guests match this QR filter.</td>
+                                <td colspan="9" class="px-5 py-12 text-center text-sm font-semibold text-zinc-500">
+                                    {{ $search !== '' ? 'No guests match this search and QR filter.' : 'No guests match this QR filter.' }}
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

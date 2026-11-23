@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Services\ManualCodeService;
+use App\Services\PhoneNumberService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -17,6 +20,9 @@ class Guest extends Model
     public const PASS_SINGLE = 'single';
     public const PASS_DOUBLE = 'double';
     public const PASS_SPECIAL = 'special';
+
+    public const MIN_SPECIAL_ENTRIES = 3;
+    public const MAX_ALLOWED_ENTRIES = 100;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_PARTIALLY_USED = 'partially_used';
@@ -29,6 +35,7 @@ class Guest extends Model
 
     protected $fillable = [
         'event_id',
+        'manual_code',
         'name',
         'phone_number',
         'pass_type',
@@ -39,11 +46,19 @@ class Guest extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Guest $guest): void {
-            $guest->event_id ??= Event::defaultEvent()->id;
-        });
-
         static::saving(function (Guest $guest): void {
+            $hasEventId = Schema::hasColumn($guest->getTable(), 'event_id');
+
+            if ($hasEventId) {
+                $guest->event_id ??= Event::defaultEvent()->id;
+            }
+
+            if ($guest->manual_code === null || $guest->manual_code === '') {
+                $guest->manual_code = app(ManualCodeService::class)
+                    ->generate($hasEventId && $guest->event_id ? (int) $guest->event_id : null);
+            }
+
+            $guest->assertManualCodeIsValid();
             $guest->applyPassRules();
             $guest->applyUsageStatus();
         });
@@ -70,7 +85,7 @@ class Guest extends Model
         return match ($passType) {
             self::PASS_SINGLE => 1,
             self::PASS_DOUBLE => 2,
-            self::PASS_SPECIAL => min(10, max(3, $requestedEntries)),
+            self::PASS_SPECIAL => min(self::MAX_ALLOWED_ENTRIES, max(self::MIN_SPECIAL_ENTRIES, $requestedEntries)),
             default => throw new InvalidArgumentException('Invalid pass type.'),
         };
     }
@@ -95,6 +110,11 @@ class Guest extends Model
         return $this->hasMany(ScanLog::class);
     }
 
+    public function offlineScannerImportConflicts(): HasMany
+    {
+        return $this->hasMany(OfflineScannerImportConflict::class);
+    }
+
     public function remainingEntries(): int
     {
         return max(0, $this->allowed_entries - $this->used_entries);
@@ -104,7 +124,7 @@ class Guest extends Model
     {
         return $this->status !== self::STATUS_CANCELLED
             && $entries >= 1
-            && $entries <= 10
+            && $entries <= self::MAX_ALLOWED_ENTRIES
             && $entries <= $this->remainingEntries();
     }
 
@@ -152,6 +172,11 @@ class Guest extends Model
         $this->attributes['name'] = $value;
     }
 
+    public function setPhoneNumberAttribute(string $value): void
+    {
+        $this->attributes['phone_number'] = app(PhoneNumberService::class)->normalizeOrFail($value);
+    }
+
     public function getAllowedAdmissionsAttribute(): int
     {
         return (int) $this->allowed_entries;
@@ -183,12 +208,19 @@ class Guest extends Model
         $this->allowed_entries = self::allowedEntriesForPassType($this->pass_type, $requestedEntries);
         $this->used_entries = min((int) $this->used_entries, $this->allowed_entries);
 
-        if ($this->allowed_entries > 10) {
-            throw new InvalidArgumentException('Allowed entries may not exceed 10.');
+        if ($this->allowed_entries > self::MAX_ALLOWED_ENTRIES) {
+            throw new InvalidArgumentException('Allowed entries may not exceed '.self::MAX_ALLOWED_ENTRIES.'.');
         }
 
         if ($this->used_entries > $this->allowed_entries) {
             throw new InvalidArgumentException('Used entries may not exceed allowed entries.');
+        }
+    }
+
+    private function assertManualCodeIsValid(): void
+    {
+        if (! preg_match('/^\d{4}$/', (string) $this->manual_code)) {
+            throw new InvalidArgumentException('Manual code must be exactly 4 digits.');
         }
     }
 
