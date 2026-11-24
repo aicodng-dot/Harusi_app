@@ -4,6 +4,7 @@ namespace App\Services\Sharing;
 
 use App\Models\Event;
 use App\Models\Guest;
+use App\Services\Rsvp\RsvpService;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +71,11 @@ class InvitationLinks
                 }
                 // Without $create a guest can be "ok" (shareable) before a link has been issued.
                 $out[$id] = ['url' => $key === null ? null : route('invitations.public', ['key' => $key]), 'reason' => $key === null && $create ? 'no_card' : 'ok'];
+            }
+            // Issuing a personal link is issuing the invitation: the guest gets a pending RSVP.
+            $issued = array_keys(array_filter($out, fn ($row, $id) => in_array($id, $chunk, true) && $row['url'] !== null, ARRAY_FILTER_USE_BOTH));
+            if ($issued !== []) {
+                app(RsvpService::class)->issue((int) $event->id, $issued);
             }
         }
 

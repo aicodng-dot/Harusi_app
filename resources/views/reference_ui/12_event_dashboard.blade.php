@@ -144,14 +144,14 @@
                         </div>
                         <p class="db-stat-desc">{{ $t('invitations_desc') }}</p>
                     </article>
-                    <article class="db-stat is-unavailable" data-stat="confirmed">
+                    <a class="db-stat db-stat-link" data-stat="confirmed" href="{{ route('customer.events.rsvp', ['event' => $event->id]) }}">
                         <span class="db-stat-icon is-green" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{!! $icons['check'] !!}</svg></span>
                         <div class="db-stat-body">
                             <h3 class="db-stat-label">{{ $t('confirmed') }}</h3>
-                            <p class="db-stat-value is-unavailable">{{ $t('confirmed_unavailable') }}</p>
+                            <p class="db-stat-value">{{ number_format($stats['rsvp_confirmed']) }}</p>
                         </div>
-                        <p class="db-stat-desc">{{ $t('confirmed_desc') }}</p>
-                    </article>
+                        <p class="db-stat-desc">{{ $stats['rsvp_invited'] > 0 ? $t('confirmed_live', ['pending' => number_format($stats['rsvp_pending'])]) : $t('confirmed_none') }}</p>
+                    </a>
                     <article class="db-stat" data-stat="scanner">
                         <span class="db-stat-icon is-lilac" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{!! $icons['scanner'] !!}</svg></span>
                         <div class="db-stat-body">

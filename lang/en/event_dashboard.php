@@ -43,6 +43,8 @@ return [
     'confirmed' => 'Confirmed',
     'confirmed_unavailable' => 'Coming soon',
     'confirmed_desc' => 'RSVP responses will be available soon.',
+    'confirmed_live' => 'Guests attending · :pending awaiting reply',
+    'confirmed_none' => 'Replies appear here after you share invitations.',
     'scanner' => 'Scanner',
     'scanner_ready' => 'Ready',
     'scanner_none' => 'Not assigned',

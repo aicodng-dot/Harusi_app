@@ -36,6 +36,7 @@ return [
         'invitations_partial' => ':sent of :guests invitations sent.',
         'invitations_completed' => 'Invitations sent to all :guests guests.',
         'rsvp' => 'Track your guests\' responses.',
+        'rsvp_progress' => ':attending attending · :pending awaiting reply.',
         'scanner_completed' => '{1} :count scanner assigned.|[2,*] :count scanners assigned.',
         'scanner_none' => 'Assign the team that scans tickets.',
         'reports_completed' => '{1} :count guest admitted; statistics are ready.|[2,*] :count guests admitted; statistics are ready.',

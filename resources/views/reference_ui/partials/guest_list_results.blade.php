@@ -74,6 +74,9 @@
                             @else
                                 <span class="is-pill {{ $cardTone[$guest->card] }}">{{ $t('guests.card_states.'.$guest->card) }}</span>
                             @endif
+                            @if ($guest->rsvp)
+                                <span class="is-pill {{ ['attending' => 'ok', 'not_attending' => 'bad', 'pending' => 'muted'][$guest->rsvp] }}">{{ __('rsvp.responses.'.$guest->rsvp, [], $language) }}</span>
+                            @endif
                             @if ($guest->share)
                                 <span class="is-pill {{ ['confirmed' => 'ok', 'initiated' => 'warn', 'skipped' => 'muted'][$guest->share] }}">{{ __('customer_share.statuses.'.$guest->share, [], $language) }}</span>
                             @endif

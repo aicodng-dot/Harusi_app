@@ -13,7 +13,7 @@ use Illuminate\Database\Connection;
  * dashboard and the checklist never disagree. Admission entries reuse the existing
  * administrator calculation: permitted = sum of allowed_entries for non-cancelled
  * guests; used = sum of entries_added on admitted check-ins. Individual guests and
- * admission entries are reported separately. RSVP has no records yet: null, never 0.
+ * admission entries are reported separately. RSVP comes from the setup query (attending replies).
  */
 class EventDashboardStats
 {
@@ -41,7 +41,9 @@ class EventDashboardStats
             'guests' => $guests,
             'invitations_sent' => $sent,
             'invitations_remaining' => max(0, $guests - $sent),
-            'rsvp_confirmed' => null,
+            'rsvp_confirmed' => (int) $counts['rsvp']['attending'],
+            'rsvp_pending' => (int) $counts['rsvp']['pending'],
+            'rsvp_invited' => (int) $counts['rsvp']['invited'],
             'scanners' => (int) $counts['scanner']['scanners'],
             'permitted_entries' => $permitted,
             'used_entries' => $used,

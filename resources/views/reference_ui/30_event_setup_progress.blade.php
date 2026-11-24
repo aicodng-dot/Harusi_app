@@ -32,7 +32,7 @@
                 $c['sent'] > 0 => $t('descriptions.invitations_partial', ['sent' => number_format($c['sent']), 'guests' => number_format($c['guests'])]),
                 default => $t('descriptions.invitations_none'),
             },
-            'rsvp' => $t('descriptions.rsvp'),
+            'rsvp' => $c['invited'] > 0 ? $t('descriptions.rsvp_progress', ['attending' => number_format($c['attending']), 'pending' => number_format($c['pending'])]) : $t('descriptions.rsvp'),
             'scanner' => $c['scanners'] > 0 ? $choice('descriptions.scanner_completed', $c['scanners']) : $t('descriptions.scanner_none'),
             'reports' => $c['checkins'] > 0 ? $choice('descriptions.reports_completed', $c['checkins']) : $t('descriptions.reports_none'),
         };
@@ -135,6 +135,8 @@
                             @if ($step['key'] === 'invitations')
                                 {{-- Working Flow 14: invitations start with the card design. --}}
                                 <a class="sp-step-card" href="{{ route('customer.events.template', ['event' => $event->id]) }}" data-sp-template>
+                            @elseif ($step['key'] === 'rsvp')
+                                <a class="sp-step-card" href="{{ route('customer.events.rsvp', ['event' => $event->id]) }}" data-sp-rsvp>
                             @else
                                 <button class="sp-step-card" type="button" aria-describedby="sp-note" data-sp-pending="{{ $t('step_pending', ['step' => $stepName]) }}">
                             @endif
@@ -145,7 +147,7 @@
                                 </span>
                                 <span class="sp-pill">{{ $t('statuses.'.$state) }}</span>
                                 <svg class="sp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
-                            @if ($step['key'] === 'invitations')
+                            @if (in_array($step['key'], ['invitations', 'rsvp'], true))
                                 </a>
                             @else
                                 </button>

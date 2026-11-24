@@ -129,6 +129,9 @@ class CustomerWorkspaceCreationTest extends TestCase
             'customer.events.share.templates.store' => [['POST'], 'throttle:30,1', ['event']],
             'customer.events.share.templates.update' => [['PUT'], 'throttle:30,1', ['event', 'template']],
             'customer.events.share.templates.destroy' => [['DELETE'], 'throttle:30,1', ['event', 'template']],
+            // RSVP (owner side).
+            'customer.events.rsvp' => [['GET', 'HEAD'], null, ['event']], 'customer.events.rsvp.settings' => [['PUT'], 'throttle:30,1', ['event']],
+            'customer.events.rsvp.record' => [['POST'], 'throttle:60,1', ['event']], 'customer.events.rsvp.export' => [['GET', 'HEAD'], 'throttle:20,1', ['event']],
         ];
         foreach ($selfService as $name => [$methods, $throttle, $ids]) {
             $route = Route::getRoutes()->getByName($name);
@@ -188,8 +191,8 @@ class CustomerWorkspaceCreationTest extends TestCase
         $this->assertContains('throttle:5,1', Route::getRoutes()->getByName('register.store')->gatherMiddleware());
         // + 14 invitation-workflow customer routes, the signed invitation media route, the 6 Add/Import Guest routes,
         // the 9 customer self-service routes, the customer Help page, the 7 admin customer-management routes,
-        // the 13 Sharing Center routes and the 2 guest-facing invitation-link routes.
-        $this->assertCount(100 + count($onboarding) + 8 + 14 + 1 + count($guests) + 9 + 1 + 7 + 13 + 2, Route::getRoutes());
+        // the 13 Sharing Center routes, the 2 guest-facing invitation-link routes, 4 owner RSVP routes and the guest RSVP reply.
+        $this->assertCount(100 + count($onboarding) + 8 + 14 + 1 + count($guests) + 9 + 1 + 7 + 13 + 2 + 4 + 1, Route::getRoutes());
     }
 
     #[DataProvider('languages')]

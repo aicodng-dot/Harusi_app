@@ -1,5 +1,7 @@
 # RSVP and guest tickets
 
+> **Implementation note (2026-11-24):** RSVP is now implemented on the Sharing Center personal link (`/i/{key}`) with the `existing_pass` ticket policy. Decisions taken, schema and evidence: [project plan — RSVP](PROJECT_PLAN.md#rsvp--2026-11-24-p19-ux-02--p19-ux-04-scope-on-the-sharing-center-link). Differences from this design: the link key is stored encrypted (for re-copying) besides its SHA-256 lookup hash; links have no expiry (they stop with QR revocation/replacement, guest cancellation or an inactive event); RSVP rows cascade with guest deletion; seating/table labels and reminders are not implemented.
+
 **PLANNED — additive requirement received 2026-10-25; reviewed 2026-10-26 (Africa/Dar_es_Salaam).** This is a design contract for the pending invitation phases, not implemented functionality. Phase 4 authorization remains IN PROGRESS; the customer event portal and public signup remain closed. See the [project plan](PROJECT_PLAN.md), [reference flow](REFERENCE_UX_FLOW.md), [API contract](API_CONTRACT.md) and [database conventions](DATABASE_CONVENTIONS.md).
 
 ## CURRENT — inspected source and reuse

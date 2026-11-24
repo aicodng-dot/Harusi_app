@@ -14,11 +14,11 @@ return [
     'defaults' => [
         'whatsapp' => [
             'name' => 'WhatsApp invitation',
-            'body' => "Hello {{guest_name}}!\n\nYou are warmly invited to {{event_name}}.\n\nDate: {{event_date}}\nTime: {{event_time}}\nVenue: {{venue}}\n\nYour personal QR invitation is here:\n{{invitation_url}}\n\nPlease show your QR invitation at the entrance.\n\nWe look forward to celebrating with you!",
+            'body' => "Hello {{guest_name}}!\n\nYou are warmly invited to {{event_name}}.\n\nDate: {{event_date}}\nTime: {{event_time}}\nVenue: {{venue}}\n\nYour personal QR invitation is here — please also tell us if you will attend:\n{{invitation_url}}\n\nPlease show your QR invitation at the entrance.\n\nWe look forward to celebrating with you!",
         ],
         'sms' => [
             'name' => 'SMS invitation',
-            'body' => 'Hello {{guest_name}}! You are invited to {{event_name}} on {{event_date}} at {{venue}}. Your personal QR invitation: {{invitation_url}}',
+            'body' => 'Hello {{guest_name}}! You are invited to {{event_name}} on {{event_date}} at {{venue}}. Invitation and RSVP: {{invitation_url}}',
         ],
         'short' => [
             'name' => 'Short reminder',

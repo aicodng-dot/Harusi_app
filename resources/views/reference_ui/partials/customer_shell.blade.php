@@ -30,6 +30,7 @@
         $csIn(['customer.events.invitation.guests', 'customer.events.invitation.guest']) || $csStarts('customer.events.guests.') => 'guests',
         $csStarts('customer.events.template') || $csIn(['customer.events.invitation', 'customer.events.invitation.save']) => 'card',
         $csName === 'customer.events.share.history' => 'history',
+        $csStarts('customer.events.rsvp') => 'rsvp',
         $csName === 'customer.events.invitation.status' || $csStarts('customer.events.share') => 'invites',
         $csIn(['customer.events.edit', 'customer.events.update', 'customer.events.destroy']) => 'details',
         $csStarts('customer.profile') => 'account',
@@ -93,6 +94,7 @@
         'chevron' => '<path d="m9 6 6 6-6 6"/>',
         'history' => '<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5M12 8v4l3 2"/>',
         'template' => '<path d="M5 5h14v10H9l-4 4z"/><path d="M9 9h6M9 12h4"/>',
+        'rsvp' => '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
     ];
     $csIcon = fn (string $name, float $w = 1.9) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'.$w.'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$csIcons[$name].'</svg>';
     $ev = fn (string $route) => route($route, ['event' => $csEventId]);
@@ -117,6 +119,7 @@
         ['key' => 'card', 'icon' => 'card', 'url' => $ev('customer.events.invitation')],
         ['key' => 'invites', 'icon' => 'invites', 'url' => $ev('customer.events.share')],
         ['key' => 'history', 'icon' => 'history', 'url' => $ev('customer.events.share.history')],
+        ['key' => 'rsvp', 'icon' => 'rsvp', 'url' => $ev('customer.events.rsvp')],
         ['key' => 'details', 'icon' => 'details', 'url' => $ev('customer.events.edit')],
         ['key' => 'setup', 'icon' => 'setup', 'url' => $ev('customer.events.setup')],
     ] : [];
@@ -195,6 +198,7 @@
     </div>
     @if ($csEventId > 0)
         <ul class="cs-sheet-list">
+            <li><a href="{{ $ev('customer.events.rsvp') }}">{!! $csIcon('rsvp') !!}<span>{{ $cs('side.rsvp') }}</span>{!! $csIcon('chevron') !!}</a></li>
             <li><a href="{{ $ev('customer.events.share.history') }}">{!! $csIcon('history') !!}<span>{{ $cs('side.history') }}</span>{!! $csIcon('chevron') !!}</a></li>
             <li><a href="{{ $ev('customer.events.share.templates') }}">{!! $csIcon('template') !!}<span>{{ $cs('side.templates') }}</span>{!! $csIcon('chevron') !!}</a></li>
             <li><a href="{{ $ev('customer.events.edit') }}">{!! $csIcon('details') !!}<span>{{ $cs('side.details') }}</span>{!! $csIcon('chevron') !!}</a></li>

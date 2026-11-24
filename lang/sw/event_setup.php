@@ -36,6 +36,7 @@ return [
         'invitations_partial' => 'Mialiko :sent kati ya :guests imetumwa.',
         'invitations_completed' => 'Mialiko imetumwa kwa wageni wote :guests.',
         'rsvp' => 'Fuatilia majibu ya wageni.',
+        'rsvp_progress' => 'Watahudhuria :attending · wanasubiriwa :pending.',
         'scanner_completed' => '{1} Mhakiki :count amepangwa.|[2,*] Wahakiki :count wamepangwa.',
         'scanner_none' => 'Wapangie timu ya ku scan tiketi.',
         'reports_completed' => '{1} Mgeni :count ameingia; takwimu ziko tayari.|[2,*] Wageni :count wameingia; takwimu ziko tayari.',

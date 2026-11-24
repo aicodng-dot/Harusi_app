@@ -24,7 +24,7 @@ return [
     ],
     'side' => [
         'home' => 'Muhtasari', 'guests' => 'Wageni', 'add' => 'Ongeza wageni', 'card' => 'Kadi ya mwaliko',
-        'invites' => 'Tuma mialiko', 'history' => 'Historia ya utumaji', 'templates' => 'Violezo vya ujumbe', 'details' => 'Taarifa za tukio', 'setup' => 'Orodha ya maandalizi', 'designs' => 'Miundo ya kadi',
+        'rsvp' => 'Majibu (RSVP)', 'invites' => 'Tuma mialiko', 'history' => 'Historia ya utumaji', 'templates' => 'Violezo vya ujumbe', 'details' => 'Taarifa za tukio', 'setup' => 'Orodha ya maandalizi', 'designs' => 'Miundo ya kadi',
     ],
     'event' => [
         'label' => 'Tukio',
@@ -34,6 +34,6 @@ return [
     ],
     'crumbs' => [
         'events' => 'Matukio yangu', 'home' => 'Orodha ya maandalizi', 'guests' => 'Wageni', 'add' => 'Ongeza wageni', 'card' => 'Kadi ya mwaliko',
-        'invites' => 'Tuma mialiko', 'history' => 'Historia ya utumaji', 'details' => 'Taarifa za tukio', 'account' => 'Akaunti', 'help' => 'Msaada', 'new' => 'Tukio jipya',
+        'rsvp' => 'RSVP', 'invites' => 'Tuma mialiko', 'history' => 'Historia ya utumaji', 'details' => 'Taarifa za tukio', 'account' => 'Akaunti', 'help' => 'Msaada', 'new' => 'Tukio jipya',
     ],
 ];

@@ -56,12 +56,12 @@ class Screen12EventDashboardTest extends TestCase
         $page = $this->actingAs($users['owner'])->get(route('customer.events.dashboard', ['event' => 101]));
         $stats = $page->viewData('stats');
 
-        $this->assertSame([4, 2, 2, null, 1, 7, 3, 4, 2, 43], [
+        $this->assertSame([4, 2, 2, 0, 1, 7, 3, 4, 2, 43], [
             $stats['guests'], $stats['invitations_sent'], $stats['invitations_remaining'], $stats['rsvp_confirmed'], $stats['scanners'],
             $stats['permitted_entries'], $stats['used_entries'], $stats['remaining_entries'], $stats['admitted_guests'], $stats['entries_percent'],
         ]);
         $page->assertSee('Nafasi 3 kati ya 7 zimetumika')->assertSee('Wageni 2 wameingia · Nafasi 4 zimebaki')
-            ->assertSee('Hivi karibuni')->assertSee('Majibu ya RSVP yatapatikana hivi karibuni.')
+            ->assertSee('Majibu yataonekana hapa ukishatuma mialiko.')
             ->assertSee('Mialiko Yako')->assertSee('Endelea na Mialiko')->assertSee('Bado kuna wageni 2 ambao hawajapewa mialiko.');
 
         // The second event's records never leak into the first (and vice versa).
@@ -81,8 +81,12 @@ class Screen12EventDashboardTest extends TestCase
         $page = $this->actingAs($users['owner'])->get(route('customer.events.dashboard', ['event' => 101]));
 
         $this->assertSame(2, $page->viewData('stats')['invitations_sent']);
-        $this->assertNull($page->viewData('stats')['rsvp_confirmed']);
-        $this->assertMatchesRegularExpression('/data-stat="confirmed".*?db-stat-value is-unavailable">Hivi karibuni</s', $page->getContent());
+        // QR codes and messages are not RSVP replies: confirmed stays 0 until a guest answers.
+        $this->assertSame(0, $page->viewData('stats')['rsvp_confirmed']);
+        $this->assertMatchesRegularExpression('/data-stat="confirmed".*?db-stat-value">0</s', $page->getContent());
+        $guest = DB::table('guests')->where('event_id', 101)->value('id');
+        DB::table('guest_rsvps')->insert(['event_id' => 101, 'guest_id' => $guest, 'response' => 'attending', 'attending_count' => 1, 'invited_at' => now()]);
+        $this->assertSame(1, $this->actingAs($users['owner'])->get(route('customer.events.dashboard', ['event' => 101]))->viewData('stats')['rsvp_confirmed']);
     }
 
     public function test_new_event_without_guests_renders_zero_states(): void
@@ -93,7 +97,7 @@ class Screen12EventDashboardTest extends TestCase
 
         $page->assertOk()->assertSee('<html lang="en">', false)->assertSee('Event Dashboard')->assertSee('Kitchen Party Invitation')
             ->assertSee('2:30 PM')->assertSee('No admission entries yet. Add guests first.')->assertSee('Add Your Event Guests')
-            ->assertSee('Not assigned')->assertSee('Event setup: 1 of 5 (20%)');
+            ->assertSee('Not assigned')->assertSee('Event setup: 1 of 6 (17%)');
         $stats = $page->viewData('stats');
         $this->assertSame([0, 0, 0, 0], [$stats['guests'], $stats['invitations_sent'], $stats['permitted_entries'], $stats['used_entries']]);
     }
@@ -232,7 +236,7 @@ class Screen12EventDashboardTest extends TestCase
         preg_match_all('/href="([^"]+)"/', $html, $links);
         foreach ($links[1] as $href) {
             $path = (string) parse_url(html_entity_decode($href), PHP_URL_PATH);
-            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/invitation/continue', '/customer/events/101/edit', '/customer/events/101/template', /* navigation shell: */ '/customer/help', '/customer/profile', '/customer/events/create', '/customer/events/101/edit', '/customer/events/101/invitation', '/customer/events/101/invitation/guests', '/customer/events/101/guests/add', '/customer/events/101/invitation/status', '/customer/events/101/share', '/customer/events/101/share/history', '/customer/events/101/share/templates', ''], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
+            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/invitation/continue', '/customer/events/101/edit', '/customer/events/101/template', /* navigation shell: */ '/customer/help', '/customer/profile', '/customer/events/create', '/customer/events/101/edit', '/customer/events/101/invitation', '/customer/events/101/invitation/guests', '/customer/events/101/guests/add', '/customer/events/101/invitation/status', '/customer/events/101/share', '/customer/events/101/share/history', '/customer/events/101/share/templates', '/customer/events/101/rsvp', ''], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
         }
         $this->assertStringNotContainsString('/admin/', $html);
         $this->assertStringContainsString('aria-current="page" aria-label="Nyumbani — Dashibodi ya Neema &amp; Baraka"', $html);

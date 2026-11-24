@@ -14,11 +14,11 @@ return [
     'defaults' => [
         'whatsapp' => [
             'name' => 'Mwaliko wa WhatsApp',
-            'body' => "Habari {{guest_name}}!\n\nUnakaribishwa kwa furaha kwenye {{event_name}}.\n\nTarehe: {{event_date}}\nMuda: {{event_time}}\nMahali: {{venue}}\n\nMwaliko wako binafsi wenye QR uko hapa:\n{{invitation_url}}\n\nTafadhali onyesha QR yako mlangoni.\n\nTunatarajia kusherehekea pamoja nawe!",
+            'body' => "Habari {{guest_name}}!\n\nUnakaribishwa kwa furaha kwenye {{event_name}}.\n\nTarehe: {{event_date}}\nMuda: {{event_time}}\nMahali: {{venue}}\n\nMwaliko wako binafsi wenye QR uko hapa — tafadhali tujulishe pia kama utahudhuria:\n{{invitation_url}}\n\nTafadhali onyesha QR yako mlangoni.\n\nTunatarajia kusherehekea pamoja nawe!",
         ],
         'sms' => [
             'name' => 'Mwaliko wa SMS',
-            'body' => 'Habari {{guest_name}}! Umealikwa kwenye {{event_name}} tarehe {{event_date}}, {{venue}}. Mwaliko wako wenye QR: {{invitation_url}}',
+            'body' => 'Habari {{guest_name}}! Umealikwa kwenye {{event_name}} tarehe {{event_date}}, {{venue}}. Mwaliko na kuthibitisha kuhudhuria: {{invitation_url}}',
         ],
         'short' => [
             'name' => 'Kikumbusho kifupi',

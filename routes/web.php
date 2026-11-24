@@ -19,6 +19,7 @@ use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerInvitationController;
 use App\Http\Controllers\CustomerInvitationTemplateController;
 use App\Http\Controllers\CustomerProfileController;
+use App\Http\Controllers\CustomerRsvpController;
 use App\Http\Controllers\CustomerShareController;
 use App\Http\Controllers\InvitationMediaController;
 use App\Http\Controllers\CustomerWorkspaceController;
@@ -123,6 +124,14 @@ Route::prefix('/customer/events/{event}/share')->whereNumber('event')->name('cus
         Route::put('/templates/{template}', [CustomerShareController::class, 'updateTemplate'])->whereNumber('template')->middleware('throttle:30,1')->name('.templates.update');
         Route::delete('/templates/{template}', [CustomerShareController::class, 'destroyTemplate'])->whereNumber('template')->middleware('throttle:30,1')->name('.templates.destroy');
     });
+// RSVP (owner side): summary, settings, replies, record a reply received by phone, CSV export.
+Route::prefix('/customer/events/{event}/rsvp')->whereNumber('event')->name('customer.events.rsvp')
+    ->middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
+        Route::get('/', [CustomerRsvpController::class, 'index'])->name('');
+        Route::put('/settings', [CustomerRsvpController::class, 'settings'])->middleware('throttle:30,1')->name('.settings');
+        Route::post('/record', [CustomerRsvpController::class, 'record'])->middleware('throttle:60,1')->name('.record');
+        Route::get('/export.csv', [CustomerRsvpController::class, 'export'])->middleware('throttle:20,1')->name('.export');
+    });
 // Customer self-service: own profile, and edit/delete of an event they own or manage.
 Route::middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
     Route::get('/customer/profile', [CustomerProfileController::class, 'show'])->name('customer.profile');
@@ -142,6 +151,8 @@ Route::get('/i/{key}', [PublicInvitationController::class, 'show'])->where('key'
     ->middleware('throttle:60,1')->name('invitations.public');
 Route::get('/i/{key}/card.png', [PublicInvitationController::class, 'card'])->where('key', '[A-Za-z0-9_-]{32}')
     ->middleware('throttle:60,1')->name('invitations.public.card');
+Route::post('/i/{key}/rsvp', [PublicInvitationController::class, 'respond'])->where('key', '[A-Za-z0-9_-]{32}')
+    ->middleware('throttle:rsvp')->name('invitations.public.rsvp');
 
 Route::get('/webhooks/whatsapp/meta', [MetaWhatsappWebhookController::class, 'verify'])
     ->name('webhooks.whatsapp.meta.verify');

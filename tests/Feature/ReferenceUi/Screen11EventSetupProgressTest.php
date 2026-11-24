@@ -50,8 +50,8 @@ class Screen11EventSetupProgressTest extends TestCase
             ->assertSee('Mpangilio wa Tukio')->assertSee('Tukio lako &quot;Amani &amp; Zawadi&quot; limeundwa.', false)
             ->assertSee('14 Februari 2027')->assertSee('16:30')->assertSee('Serena Hotel')
             ->assertSee('30_Event_Setup_Progress_Wedding_Ring.webp', false)
-            ->assertSee('Hatua 1 kati ya 5')->assertSee('20%')->assertSee('aria-valuenow="20"', false);
-        $this->assertSame(['details' => 'completed', 'guests' => 'not_started', 'invitations' => 'not_started', 'rsvp' => 'unavailable', 'scanner' => 'not_started', 'reports' => 'not_started'],
+            ->assertSee('Hatua 1 kati ya 6')->assertSee('17%')->assertSee('aria-valuenow="17"', false);
+        $this->assertSame(['details' => 'completed', 'guests' => 'not_started', 'invitations' => 'not_started', 'rsvp' => 'not_started', 'scanner' => 'not_started', 'reports' => 'not_started'],
             $this->statuses($page));
         $this->assertSame('guests', $page->viewData('progress')['current']);
     }
@@ -74,14 +74,22 @@ class Screen11EventSetupProgressTest extends TestCase
         $page = $this->actingAs($users['owner'])->get(route('customer.events.setup', ['event' => 101]));
 
         $page->assertOk()->assertSee('Wageni 4 wameongezwa.')->assertSee('Mialiko 2 kati ya 4 imetumwa.')->assertSee('Mhakiki 1 amepangwa.');
-        $this->assertSame(['details' => 'completed', 'guests' => 'completed', 'invitations' => 'in_progress', 'rsvp' => 'unavailable', 'scanner' => 'completed', 'reports' => 'not_started'],
+        $this->assertSame(['details' => 'completed', 'guests' => 'completed', 'invitations' => 'in_progress', 'rsvp' => 'not_started', 'scanner' => 'completed', 'reports' => 'not_started'],
             $this->statuses($page));
         $progress = $page->viewData('progress');
-        $this->assertSame([3, 5, 60, 'invitations'], [$progress['completed'], $progress['total'], $progress['percent'], $progress['current']]);
-        $page->assertSee('Hatua 3 kati ya 5')->assertSee('60%');
+        $this->assertSame([3, 6, 50, 'invitations'], [$progress['completed'], $progress['total'], $progress['percent'], $progress['current']]);
+        $page->assertSee('Hatua 3 kati ya 6')->assertSee('50%');
+
+        // RSVP: issued invitations with a pending reply put the step in progress; answered ones complete it.
+        foreach ([$ids[0] => 'attending', $ids[1] => 'pending'] as $guest => $response) {
+            DB::table('guest_rsvps')->insert(['event_id' => 101, 'guest_id' => $guest, 'response' => $response, 'invited_at' => now()]);
+        }
+        $page = $this->actingAs($users['owner'])->get(route('customer.events.setup', ['event' => 101]));
+        $this->assertSame('in_progress', $this->statuses($page)['rsvp']);
+        $page->assertSee('Watahudhuria 1 · wanasubiriwa 1.')->assertSee('href="'.route('customer.events.rsvp', ['event' => 101]).'"', false);
     }
 
-    public function test_fully_completed_setup_never_counts_the_unavailable_rsvp_step(): void
+    public function test_fully_completed_setup_includes_answered_rsvp(): void
     {
         $users = $this->fixture();
         $this->guests(101, 2);
@@ -90,12 +98,15 @@ class Screen11EventSetupProgressTest extends TestCase
         }
         DB::table('users')->where('id', $users['scanner']->id)->update(['event_id' => 101]);
         DB::table('checkins')->insert(['event_id' => 101, 'guest_id' => DB::table('guests')->where('event_id', 101)->value('id'), 'user_id' => $users['scanner']->id, 'entries_added' => 1, 'used_entries_after_scan' => 1, 'scan_result' => 'success', 'checked_in_at' => now()]);
+        foreach (DB::table('guests')->where('event_id', 101)->pluck('id') as $i => $guest) {
+            DB::table('guest_rsvps')->insert(['event_id' => 101, 'guest_id' => $guest, 'response' => $i === 0 ? 'attending' : 'not_attending', 'invited_at' => now()]);
+        }
 
         $page = $this->actingAs($users['owner'])->get(route('customer.events.setup', ['event' => 101]));
 
-        $this->assertSame('unavailable', $this->statuses($page)['rsvp']);
-        $this->assertSame([5, 5, 100, null], array_values(array_intersect_key($page->viewData('progress'), array_flip(['completed', 'total', 'percent', 'current']))));
-        $page->assertSee('Hivi karibuni')->assertSee('href="'.route('customer.events.dashboard', ['event' => 101]).'"', false);
+        $this->assertSame('completed', $this->statuses($page)['rsvp']);
+        $this->assertSame([6, 6, 100, null], array_values(array_intersect_key($page->viewData('progress'), array_flip(['completed', 'total', 'percent', 'current']))));
+        $page->assertSee('href="'.route('customer.events.dashboard', ['event' => 101]).'"', false);
     }
 
     public function test_missing_optional_details_show_fallbacks_and_are_not_completed(): void
@@ -105,7 +116,7 @@ class Screen11EventSetupProgressTest extends TestCase
         $page = $this->actingAs($users['owner'])->get(route('customer.events.setup', ['event' => 102, 'lang' => 'en']));
 
         $page->assertOk()->assertSee('<html lang="en">', false)->assertSee('Event Setup')->assertSee('Date not set yet')
-            ->assertSee('Venue not set yet')->assertSee('Complete the missing event details.')->assertSee('Step 0 of 5')->assertSee('0%');
+            ->assertSee('Venue not set yet')->assertSee('Complete the missing event details.')->assertSee('Step 0 of 6')->assertSee('0%');
         $this->assertSame('in_progress', $this->statuses($page)['details']);
     }
 
@@ -176,7 +187,7 @@ class Screen11EventSetupProgressTest extends TestCase
         preg_match_all('/href="([^"]+)"/', $html, $links);
         foreach ($links[1] as $href) {
             $path = (string) parse_url(html_entity_decode($href), PHP_URL_PATH);
-            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/template', /* navigation shell: */ '/customer/help', '/customer/profile', '/customer/events/create', '/customer/events/101/edit', '/customer/events/101/invitation', '/customer/events/101/invitation/guests', '/customer/events/101/guests/add', '/customer/events/101/invitation/status', '/customer/events/101/share', '/customer/events/101/share/history', '/customer/events/101/share/templates', ''], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
+            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/template', /* navigation shell: */ '/customer/help', '/customer/profile', '/customer/events/create', '/customer/events/101/edit', '/customer/events/101/invitation', '/customer/events/101/invitation/guests', '/customer/events/101/guests/add', '/customer/events/101/invitation/status', '/customer/events/101/share', '/customer/events/101/share/history', '/customer/events/101/share/templates', '/customer/events/101/rsvp', ''], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
         }
         $this->assertStringNotContainsString('/admin/', $html);
         // Working Flow 12: Continue opens this event's dashboard; step cards stay honest notes.

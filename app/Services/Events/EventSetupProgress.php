@@ -44,6 +44,15 @@ class EventSetupProgress
                 ->where('n.message_type', NotificationLog::TYPE_DIGITAL_CARD)
                 ->where('n.status', NotificationLog::STATUS_SENT)
                 ->selectRaw('count(distinct n.guest_id)'), 'invited')
+            ->selectSub(fn (Builder $q) => $q->from('guest_rsvps as r')->join('guests as rg', 'rg.id', '=', 'r.guest_id')
+                ->whereColumn('r.event_id', 'e.id')->whereColumn('rg.event_id', 'e.id')->where('rg.status', '!=', Guest::STATUS_CANCELLED)
+                ->selectRaw('count(*)'), 'rsvp_invited')
+            ->selectSub(fn (Builder $q) => $q->from('guest_rsvps as r2')->join('guests as rg2', 'rg2.id', '=', 'r2.guest_id')
+                ->whereColumn('r2.event_id', 'e.id')->whereColumn('rg2.event_id', 'e.id')->where('rg2.status', '!=', Guest::STATUS_CANCELLED)
+                ->where('r2.response', 'attending')->selectRaw('count(*)'), 'rsvp_attending')
+            ->selectSub(fn (Builder $q) => $q->from('guest_rsvps as r3')->join('guests as rg3', 'rg3.id', '=', 'r3.guest_id')
+                ->whereColumn('r3.event_id', 'e.id')->whereColumn('rg3.event_id', 'e.id')->where('rg3.status', '!=', Guest::STATUS_CANCELLED)
+                ->where('r3.response', 'pending')->selectRaw('count(*)'), 'rsvp_pending')
             ->selectSub(fn (Builder $q) => $q->from('users as s')->whereColumn('s.event_id', 'e.id')
                 ->where('s.role', 'scanner')->where('s.is_active', true)->selectRaw('count(*)'), 'scanners')
             ->selectSub(fn (Builder $q) => $q->from('checkins as c')->whereColumn('c.event_id', 'e.id')->selectRaw('count(*)'), 'checkins')
@@ -69,8 +78,12 @@ class EventSetupProgress
                 $invited > 0 => self::IN_PROGRESS,
                 default => self::NOT_STARTED,
             }, 'counts' => ['sent' => $invited, 'guests' => $guests]],
-            // No RSVP records exist in the schema yet: never completed, never counted.
-            ['key' => 'rsvp', 'status' => self::UNAVAILABLE, 'counts' => []],
+            // RSVP: issued invitations (personal links) and their replies; complete when nobody is awaited.
+            ['key' => 'rsvp', 'status' => match (true) {
+                (int) ($stats->rsvp_invited ?? 0) === 0 => self::NOT_STARTED,
+                (int) ($stats->rsvp_pending ?? 0) === 0 => self::COMPLETED,
+                default => self::IN_PROGRESS,
+            }, 'counts' => ['invited' => (int) ($stats->rsvp_invited ?? 0), 'attending' => (int) ($stats->rsvp_attending ?? 0), 'pending' => (int) ($stats->rsvp_pending ?? 0)]],
             ['key' => 'scanner', 'status' => $scanners > 0 ? self::COMPLETED : self::NOT_STARTED, 'counts' => ['scanners' => $scanners]],
             ['key' => 'reports', 'status' => $checkins > 0 ? self::COMPLETED : self::NOT_STARTED, 'counts' => ['checkins' => $checkins]],
         ];

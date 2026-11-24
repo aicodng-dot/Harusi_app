@@ -59,6 +59,14 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
+        // Guest RSVP replies: per IP, and per invitation link (hashed, never the raw key).
+        RateLimiter::for('rsvp', function (Request $request): array {
+            return [
+                Limit::perMinute(30)->by('ip:'.$request->ip()),
+                Limit::perMinute(10)->by('invite:'.hash('sha256', (string) $request->route('key'))),
+            ];
+        });
+
         RateLimiter::for('customer-workspace-create', function (Request $request): array {
             $language = in_array($request->user()?->preferred_language, ['en', 'sw'], true)
                 ? $request->user()->preferred_language : 'sw';

@@ -24,7 +24,7 @@ return [
     ],
     'side' => [
         'home' => 'Overview', 'guests' => 'Guests', 'add' => 'Add guests', 'card' => 'Invitation card',
-        'invites' => 'Share invitations', 'history' => 'Sharing history', 'templates' => 'Message templates', 'details' => 'Event details', 'setup' => 'Setup checklist', 'designs' => 'Card designs',
+        'rsvp' => 'RSVP replies', 'invites' => 'Share invitations', 'history' => 'Sharing history', 'templates' => 'Message templates', 'details' => 'Event details', 'setup' => 'Setup checklist', 'designs' => 'Card designs',
     ],
     'event' => [
         'label' => 'Event',
@@ -34,6 +34,6 @@ return [
     ],
     'crumbs' => [
         'events' => 'My events', 'home' => 'Setup checklist', 'guests' => 'Guests', 'add' => 'Add guests', 'card' => 'Invitation card',
-        'invites' => 'Share invitations', 'history' => 'Sharing history', 'details' => 'Event details', 'account' => 'Account', 'help' => 'Help', 'new' => 'New event',
+        'rsvp' => 'RSVP', 'invites' => 'Share invitations', 'history' => 'Sharing history', 'details' => 'Event details', 'account' => 'Account', 'help' => 'Help', 'new' => 'New event',
     ],
 ];

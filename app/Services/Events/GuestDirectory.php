@@ -5,6 +5,7 @@ namespace App\Services\Events;
 use App\Models\Guest;
 use App\Services\Invitations\InvitationDesign;
 use App\Services\Invitations\InvitationDelivery;
+use App\Services\Rsvp\RsvpService;
 use App\Services\Sharing\ShareRecords;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
@@ -35,16 +36,19 @@ class GuestDirectory
     /** Manual sharing (Sharing Center): only what the customer did or told us. */
     public const SHARE = ['not_shared', 'initiated', 'confirmed', 'skipped'];
 
+    /** RSVP reply (no row = the invitation has not been issued yet). */
+    public const RSVP = ['attending', 'not_attending', 'pending', 'not_invited'];
+
     public const PASSES = [Guest::PASS_SINGLE, Guest::PASS_DOUBLE, Guest::PASS_SPECIAL];
 
     private const SENT = ['pending', 'sent', 'delivered', 'read'];
 
-    public function __construct(private InvitationDelivery $delivery, private ShareRecords $shares) {}
+    public function __construct(private InvitationDelivery $delivery, private ShareRecords $shares, private RsvpService $rsvp) {}
 
     /**
      * Normalises the query string into known values only.
      *
-     * @return array{q: string, pass: list<string>, invite: string, share: string, admission: string, phone: string, added: string, entries: string, remaining: string, sort: string, page: int}
+     * @return array{q: string, pass: list<string>, invite: string, share: string, rsvp: string, admission: string, phone: string, added: string, entries: string, remaining: string, sort: string, page: int}
      */
     public static function params(array $query): array
     {
@@ -59,6 +63,7 @@ class GuestDirectory
             'pass' => $pass,
             'invite' => $pick('invite', self::INVITE, $legacy),
             'share' => $pick('share', self::SHARE),
+            'rsvp' => $pick('rsvp', self::RSVP),
             'admission' => $pick('admission', self::ADMISSION),
             'phone' => $pick('phone', ['has', 'missing']),
             'added' => $pick('added', ['today', '7d', '30d']),
@@ -72,7 +77,7 @@ class GuestDirectory
     /** Number of active filters (search and sort are not filters). */
     public static function activeFilters(array $p): int
     {
-        return count($p['pass']) + count(array_filter([$p['invite'], $p['share'], $p['admission'], $p['phone'], $p['added'], $p['entries'], $p['remaining']], fn ($v) => $v !== ''));
+        return count($p['pass']) + count(array_filter([$p['invite'], $p['share'], $p['rsvp'], $p['admission'], $p['phone'], $p['added'], $p['entries'], $p['remaining']], fn ($v) => $v !== ''));
     }
 
     /**
@@ -96,6 +101,7 @@ class GuestDirectory
         $cards = [];
         $messages = [];
         $shares = $this->shares->statuses($eventId, $ids);
+        $replies = $this->rsvp->statuses($eventId, $ids);
         foreach (array_chunk($ids, 900) as $chunk) {
             foreach (DB::table('qr_codes')->whereIn('guest_id', $chunk)->get(['guest_id', 'qr_token']) as $qr) {
                 $tokens[(int) $qr->guest_id] = hash('sha256', 'invitation-card|'.$qr->qr_token);
@@ -117,7 +123,7 @@ class GuestDirectory
                 'id' => $id, 'name' => (string) $row->name, 'phone' => (string) $row->phone_number, 'code' => (string) $row->manual_code,
                 'pass_type' => (string) $row->pass_type, 'allowed' => $allowed, 'used' => $used, 'remaining' => max(0, $allowed - $used),
                 'status' => (string) $row->status, 'created_at' => $row->created_at,
-                'card' => $state, 'card_at' => $card?->generated_at, 'message' => $messages[$id] ?? null, 'share' => $shares[$id]['status'] ?? null,
+                'card' => $state, 'card_at' => $card?->generated_at, 'message' => $messages[$id] ?? null, 'share' => $shares[$id]['status'] ?? null, 'rsvp' => $replies[$id] ?? null,
                 'initials' => InvitationDesign::initials((string) $row->name),
                 'admission' => $row->status === Guest::STATUS_CANCELLED ? 'cancelled' : ($used <= 0 ? 'not_checked_in' : ($used >= $allowed ? 'full' : 'partial')),
             ];
@@ -134,6 +140,9 @@ class GuestDirectory
         }
         if ($p['share'] !== '') {
             $list = array_values(array_filter($list, fn (object $g) => $p['share'] === 'not_shared' ? $g->share === null : $g->share === $p['share']));
+        }
+        if ($p['rsvp'] !== '') {
+            $list = array_values(array_filter($list, fn (object $g) => $p['rsvp'] === 'not_invited' ? $g->rsvp === null : $g->rsvp === $p['rsvp']));
         }
         if ($p['sort'] === 'card_newest') {
             usort($list, fn (object $a, object $b) => [$b->card_at === null ? 0 : 1, (string) $b->card_at, $a->name] <=> [$a->card_at === null ? 0 : 1, (string) $a->card_at, $b->name]);

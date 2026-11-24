@@ -6,13 +6,14 @@
     $l = fn (string $key, array $replace = []) => __('customer_guest_list.'.$key, $replace, $language);
     $p = $params;
     $base = fn (array $override = []) => route('customer.events.invitation.guests', array_filter(['event' => $event->id] + array_merge(
-        ['q' => $p['q'], 'pass' => $p['pass'], 'invite' => $p['invite'], 'share' => $p['share'], 'admission' => $p['admission'], 'phone' => $p['phone'], 'added' => $p['added'],
+        ['q' => $p['q'], 'pass' => $p['pass'], 'invite' => $p['invite'], 'share' => $p['share'], 'rsvp' => $p['rsvp'], 'admission' => $p['admission'], 'phone' => $p['phone'], 'added' => $p['added'],
          'entries' => $p['entries'], 'remaining' => $p['remaining'], 'sort' => $p['sort'] === 'name_asc' ? null : $p['sort']], $override),
         fn ($v) => $v !== null && $v !== '' && $v !== []));
     $passLabels = ['single' => __('customer_guests.add.passes.single', [], $language), 'double' => __('customer_guests.add.passes.double', [], $language), 'special' => __('customer_guests.add.passes.special', [], $language)];
     $groups = [
         'invite' => $whatsapp ? GuestDirectory::INVITE : ['generated', 'outdated', 'not_generated'],
         'share' => GuestDirectory::SHARE,
+        'rsvp' => GuestDirectory::RSVP,
         'admission' => GuestDirectory::ADMISSION,
         'phone' => ['has', 'missing'],
         'added' => ['today', '7d', '30d'],

@@ -170,8 +170,10 @@ class CustomerHomeBoundaryTest extends TestCase
         }
         // + 3 guest edit/delete routes, 6 customer self-service routes, 7 admin customer-management routes,
         // + 3 guest entry routes (review, bulk, CSV template), the customer Help page and guest bulk delete,
-        // + 13 sharing routes and 2 public invitation-link routes.
-        $this->assertCount(169, Route::getRoutes());
+        // + 13 sharing routes and 2 public invitation-link routes,
+        // + 4 owner RSVP routes and the guest RSVP reply (throttle:rsvp, key-scoped).
+        $this->assertContains('throttle:rsvp', Route::getRoutes()->getByName('invitations.public.rsvp')->gatherMiddleware());
+        $this->assertCount(174, Route::getRoutes());
         $before = $this->snapshot(DB::connection());
 
         $this->get('/customer')->assertRedirect(route('login'));

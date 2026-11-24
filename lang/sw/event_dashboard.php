@@ -43,6 +43,8 @@ return [
     'confirmed' => 'Wamethibitisha',
     'confirmed_unavailable' => 'Hivi karibuni',
     'confirmed_desc' => 'Majibu ya RSVP yatapatikana hivi karibuni.',
+    'confirmed_live' => 'Wageni watakaohudhuria · wanasubiriwa :pending',
+    'confirmed_none' => 'Majibu yataonekana hapa ukishatuma mialiko.',
     'scanner' => 'Scanner',
     'scanner_ready' => 'Tayari',
     'scanner_none' => 'Hawajapangwa',
