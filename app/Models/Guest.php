@@ -172,9 +172,14 @@ class Guest extends Model
         $this->attributes['name'] = $value;
     }
 
+    /**
+     * Any phone given must be a valid, normalised number. An empty string means "no phone":
+     * customers may add guests without one (the column is NOT NULL). Admin forms and
+     * imports keep requiring a phone through their own validation.
+     */
     public function setPhoneNumberAttribute(string $value): void
     {
-        $this->attributes['phone_number'] = app(PhoneNumberService::class)->normalizeOrFail($value);
+        $this->attributes['phone_number'] = trim($value) === '' ? '' : app(PhoneNumberService::class)->normalizeOrFail($value);
     }
 
     public function getAllowedAdmissionsAttribute(): int

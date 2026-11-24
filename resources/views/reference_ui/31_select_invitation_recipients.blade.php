@@ -6,7 +6,6 @@
     $date = $event->event_date ? Carbon::parse($event->event_date) : null;
     $dateText = $date ? InvitationWording::dateParts($date, $language)['date_short'] : null;
     $timeText = is_string($event->event_time) ? substr($event->event_time, 0, 5) : null;
-    $url = fn (array $query) => route('customer.events.invitation.guests', array_filter(['event' => $event->id] + $query, fn ($v) => $v !== null && $v !== '' && $v !== 'all'));
     $g = fn (string $key) => __('customer_guests.'.$key, [], $language);
     $plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
     $upload = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5m-4 4 4-4 4 4M5 20h14"/></svg>';
@@ -16,6 +15,7 @@
         'routes' => [
             'generate' => route('customer.events.invitation.generate', ['event' => $event->id]),
             'send' => route('customer.events.invitation.send', ['event' => $event->id]),
+            'delete' => route('customer.events.guests.bulk_destroy', ['event' => $event->id]),
         ],
         'batch' => \App\Http\Controllers\CustomerInvitationController::GENERATE_BATCH,
         'whatsapp' => $whatsapp,
@@ -23,6 +23,8 @@
             'selectFirst' => $t('guests.select_first'), 'generating' => $t('guests.generating'), 'sending' => $t('guests.sending'),
             'generated' => $t('guests.generated'), 'problems' => $t('guests.problems'), 'sendResult' => $t('guests.send_result'),
             'network' => $t('network'), 'notConfigured' => $t('whatsapp_not_configured'), 'refresh' => $t('guests.needs_refresh'),
+            'deleteResult' => __('customer_guest_list.delete_result', [], $language), 'deleteLocked' => __('customer_guest_list.delete_locked', [], $language),
+            'deleteTooMany' => __('customer_guest_list.delete_too_many', [], $language), 'loading' => __('customer_guest_list.loading', [], $language),
         ],
     ];
 @endphp
@@ -34,10 +36,11 @@
     <meta name="theme-color" content="#fbfbf8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $t('guests.page_title') }} · {{ $event->event_name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/css/reference_ui/customer_manage.css', 'resources/js/reference_ui/31_select_invitation_recipients.js'])
+    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/css/reference_ui/customer_manage.css', 'resources/js/reference_ui/31_select_invitation_recipients.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body>
-<div class="is-page has-bar">
+@include('reference_ui.partials.customer_shell')
+<div class="is-page cu-wide gm-page has-bar">
     <header class="is-header">
         <a class="is-back" href="{{ route('customer.events.invitation', ['event' => $event->id]) }}" aria-label="{{ $t('guests.edit_design') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
@@ -45,7 +48,7 @@
         <span class="is-brand">PangaEvents</span>
         <nav class="is-languages" aria-label="{{ $t('language') }}">
             @foreach (['sw' => 'SW', 'en' => 'EN'] as $locale => $code)
-                <a @class(['is-language', 'is-active' => $language === $locale]) href="{{ $url(['q' => $search, 'filter' => $filter, 'lang' => $locale]) }}" lang="{{ $locale }}" @if ($language === $locale) aria-current="true" @endif>{{ $code }}</a>
+                <a @class(['is-language', 'is-active' => $language === $locale]) href="{{ request()->fullUrlWithQuery(['lang' => $locale]) }}" lang="{{ $locale }}" @if ($language === $locale) aria-current="true" @endif>{{ $code }}</a>
             @endforeach
         </nav>
     </header>
@@ -81,22 +84,6 @@
         @endunless
         <p id="rc-alert" class="is-alert" role="status" hidden></p>
 
-        @if ($total > 0)
-        <form class="rc-search" method="GET" action="{{ route('customer.events.invitation.guests', ['event' => $event->id]) }}" role="search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <label class="sr-only" for="rc-q">{{ $t('guests.search') }}</label>
-            <input id="rc-q" type="search" name="q" value="{{ $search }}" placeholder="{{ $t('guests.search') }}" maxlength="60" autocomplete="off">
-            @if ($filter !== 'all')<input type="hidden" name="filter" value="{{ $filter }}">@endif
-            <button class="sr-only" type="submit">{{ $t('guests.search_button') }}</button>
-        </form>
-
-        <nav class="rc-chips" aria-label="{{ $t('guests.title') }}">
-            @foreach (['all', 'no_card', 'ready', 'sent', 'failed'] as $option)
-                <a @class(['rc-chip', 'is-active' => $filter === $option]) href="{{ $url(['q' => $search, 'filter' => $option]) }}" @if ($filter === $option) aria-current="true" @endif>{{ $t('guests.filters.'.$option) }}</a>
-            @endforeach
-        </nav>
-
-        @endif
         @if ($total > 0 && ! $readOnly)
             <nav class="rc-add" aria-label="{{ $g('add_guest') }}">
                 <a href="{{ route('customer.events.guests.create', ['event' => $event->id]) }}">{!! $plus !!}{{ $g('add_guest') }}</a>
@@ -113,39 +100,9 @@
                     <a class="is-secondary" href="{{ route('customer.events.guests.import', ['event' => $event->id]) }}">{!! $upload !!}{{ $g('import_guests') }}</a>
                 @endunless
             </section>
-        @elseif ($guests->isEmpty())
-            <p class="rc-empty">{{ $t('guests.no_results') }}</p>
         @else
-            <div class="rc-toolbar">
-                <label class="ed-check" style="min-height:44px"><input type="checkbox" id="rc-all" @disabled($readOnly)> {{ $t('guests.select_all') }}</label>
-                <span>{{ $t('guests.count', ['shown' => $guests->count(), 'total' => $total]) }}</span>
-            </div>
-            <ul class="rc-list" id="rc-list">
-                @foreach ($guests as $guest)
-                    <li class="rc-item">
-                        <label class="rc-check"><input type="checkbox" value="{{ $guest->id }}" data-rc-guest @disabled($readOnly || $guest->status === 'cancelled')><span class="sr-only">{{ $guest->name }}</span></label>
-                        <span class="rc-avatar t{{ $guest->id % 4 }}" aria-hidden="true">{{ str_replace(' & ', '', $guest->initials) }}</span>
-                        <span style="min-width:0">
-                            <a class="rc-name" href="{{ route('customer.events.invitation.guest', ['event' => $event->id, 'guest' => $guest->id]) }}">{{ $guest->name }}</a>
-                            <span class="rc-sub">{{ $guest->phone }} · {{ $t('guests.passes.'.($guest->pass_type === 'special' ? 'special' : $guest->pass_type), ['count' => $guest->allowed]) }}</span>
-                            @unless ($readOnly)<a class="cm-inline-edit" style="min-height:0;padding:0" href="{{ route('customer.events.guests.edit', ['event' => $event->id, 'guest' => $guest->id]) }}" aria-label="{{ __('customer_manage.guest.edit', [], $language) }}: {{ $guest->name }}">{{ __('customer_manage.guest.edit', [], $language) }}</a>@endunless
-                        </span>
-                        <span class="rc-pills">
-                            @if ($guest->status === 'cancelled')
-                                <span class="is-pill bad">{{ $t('guests.cancelled') }}</span>
-                            @else
-                                <span class="is-pill {{ $cardTone[$guest->card] }}">{{ $t('guests.card_states.'.$guest->card) }}</span>
-                            @endif
-                            @if ($guest->message)
-                                <span class="is-pill {{ $messageTone[$guest->message] ?? 'muted' }}">{{ $t('guests.message_states.'.$guest->message) }}</span>
-                            @endif
-                        </span>
-                        <a href="{{ route('customer.events.invitation.guest', ['event' => $event->id, 'guest' => $guest->id]) }}" aria-label="{{ $t('guests.view', ['name' => $guest->name]) }}">
-                            <svg class="rc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
+            @include('reference_ui.partials.guest_list_toolbar')
+            @include('reference_ui.partials.guest_list_results')
         @endif
         <p style="margin-top:18px"><a class="is-small-link" href="{{ route('customer.events.invitation.status', ['event' => $event->id]) }}">{{ $t('guests.status_link') }} →</a></p>
     </main>
@@ -164,11 +121,16 @@
             </button>
         </div>
         <div class="rc-more" role="group" aria-label="{{ $t('guests.more_actions') }}">
+            <button type="button" class="ed-tool gm-share-bulk" id="rc-share">{{ __('customer_guest_list.share_selected', [], $language) }}</button>
             <button type="button" class="ed-tool" data-rc-download="png">{{ $t('guests.download_png') }}</button>
             <button type="button" class="ed-tool" data-rc-download="pdf">{{ $t('guests.download_pdf') }}</button>
+            <button type="button" class="ed-tool gm-danger" id="rc-delete" data-confirm="{{ __('customer_guest_list.delete_confirm', [], $language) }}">{{ __('customer_guest_list.delete', [], $language) }}</button>
             <button type="button" class="ed-tool" id="rc-send" @disabled(! $whatsapp) @unless ($whatsapp) title="{{ $t('whatsapp_not_configured') }}" @endunless>{{ $t('guests.send') }}</button>
         </div>
     </div>
+    <form id="rc-share-form" method="POST" action="{{ route('customer.events.share.select', ['event' => $event->id]) }}" hidden>
+        @csrf
+    </form>
     <form id="rc-download-form" method="POST" action="{{ route('customer.events.invitation.download', ['event' => $event->id]) }}" hidden>
         @csrf
         <input type="hidden" name="format" value="png">

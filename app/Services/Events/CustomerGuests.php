@@ -4,7 +4,6 @@ namespace App\Services\Events;
 
 use App\Models\Event;
 use App\Models\Guest;
-use App\Services\GuestImportExcelReader;
 use App\Services\Invitations\InvitationCredentials;
 use App\Services\OfflineEventLockService;
 use App\Services\PhoneNumberService;
@@ -31,6 +30,13 @@ class CustomerGuests
         'phone_number' => 'phone_number', 'phone' => 'phone_number', 'simu' => 'phone_number', 'namba_ya_simu' => 'phone_number',
         'pass_type' => 'pass_type', 'pass' => 'pass_type', 'aina' => 'pass_type', 'aina_ya_tiketi' => 'pass_type', 'ticket' => 'pass_type',
         'allowed_entries' => 'allowed_entries', 'entries' => 'allowed_entries', 'idadi' => 'allowed_entries', 'idadi_ya_wageni' => 'allowed_entries',
+        // Other common spreadsheet headings.
+        'full_name' => 'name', 'names' => 'name', 'majina' => 'name', 'guest_names' => 'name', 'jina_la_mgeni' => 'name',
+        'mobile' => 'phone_number', 'mobile_number' => 'phone_number', 'phone_no' => 'phone_number', 'tel' => 'phone_number', 'telephone' => 'phone_number',
+        'whatsapp' => 'phone_number', 'whatsapp_number' => 'phone_number', 'namba' => 'phone_number', 'simu_namba' => 'phone_number',
+        'type' => 'pass_type', 'pass_types' => 'pass_type', 'category' => 'pass_type', 'card_type' => 'pass_type', 'aina_ya_kadi' => 'pass_type',
+        'people' => 'allowed_entries', 'persons' => 'allowed_entries', 'number_of_people' => 'allowed_entries', 'no_of_people' => 'allowed_entries',
+        'guests_count' => 'allowed_entries', 'count' => 'allowed_entries', 'quantity' => 'allowed_entries', 'qty' => 'allowed_entries', 'watu' => 'allowed_entries', 'idadi_ya_watu' => 'allowed_entries',
     ];
 
     private const PASS_ALIASES = [
@@ -57,11 +63,14 @@ class CustomerGuests
     {
         $errors = [];
         $name = is_scalar($input['name'] ?? null) ? trim((string) preg_replace('/\s+/u', ' ', (string) $input['name'])) : '';
-        if ($name === '' || mb_strlen($name) > 120) {
+        // A name needs at least one letter, so a stray number pasted into a list is not a guest.
+        if ($name === '' || mb_strlen($name) > 120 || preg_match('/\p{L}/u', $name) !== 1) {
             $errors[] = 'name';
         }
-        $phone = is_scalar($input['phone_number'] ?? null) && mb_strlen((string) $input['phone_number']) <= 40
-            ? $this->phones->normalize((string) $input['phone_number']) : null;
+        // The phone number is optional: a guest without one is stored with an empty string
+        // (the column is NOT NULL) and is simply skipped by WhatsApp delivery.
+        $rawPhone = is_scalar($input['phone_number'] ?? null) ? trim((string) $input['phone_number']) : '';
+        $phone = $rawPhone === '' ? '' : (mb_strlen($rawPhone) <= 40 ? $this->phones->normalize($rawPhone) : null);
         if ($phone === null) {
             $errors[] = 'phone_number';
         }
@@ -107,7 +116,7 @@ class CustomerGuests
         }
         $found = [];
         foreach ($payloads as $key => $payload) {
-            if (isset($phones[$payload['phone_number']])) {
+            if ($payload['phone_number'] !== '' && isset($phones[$payload['phone_number']])) {
                 $found[$key] = 'phone';
             } elseif (isset($names[self::nameKey($payload['name'])])) {
                 $found[$key] = 'name';
@@ -151,7 +160,7 @@ class CustomerGuests
     public function duplicateOfOther(int $eventId, int $guestId, array $payload): ?string
     {
         $others = DB::table('guests')->where('event_id', $eventId)->where('id', '!=', $guestId)->get(['name', 'phone_number']);
-        if ($others->contains(fn ($row) => (string) $row->phone_number === $payload['phone_number'])) {
+        if ($payload['phone_number'] !== '' && $others->contains(fn ($row) => (string) $row->phone_number === $payload['phone_number'])) {
             return 'phone';
         }
 
@@ -250,11 +259,10 @@ class CustomerGuests
     {
         $extension = strtolower($file->getClientOriginalExtension());
         if ($extension === 'xlsx') {
-            [$rows, $errors] = app(GuestImportExcelReader::class)->read($file->getRealPath());
-            if ($errors !== []) {
-                return ['rows' => [], 'error' => str_contains($errors[0], 'Missing required columns') ? 'columns' : (str_contains($errors[0], 'empty') ? 'empty' : 'unreadable')];
+            $rows = $this->readXlsx($file->getRealPath());
+            if (is_string($rows)) {
+                return ['rows' => [], 'error' => $rows];
             }
-            $rows = array_map(fn (array $row) => ['row' => (int) $row['row_number'], 'data' => $row['data']], array_values($rows));
         } else {
             $rows = $this->readCsv($file->getRealPath());
             if (is_string($rows)) {
@@ -269,6 +277,67 @@ class CustomerGuests
         }
 
         return ['rows' => $rows, 'error' => null];
+    }
+
+    /**
+     * Reads the first worksheet of an .xlsx file with the same column-name aliases as CSV
+     * (name/jina/guest name, phone/simu/mobile, ...). Only a name column is required.
+     * Numeric phone cells are read as whole digits so 255712345678 is not shown as 2.5E+11.
+     *
+     * @return list<array{row: int, data: array<string, string>}>|string
+     */
+    private function readXlsx(string $path): array|string
+    {
+        try {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+            $reader->setReadDataOnly(true);
+            $reader->setReadEmptyCells(false);
+            $sheet = $reader->load($path)->getSheet(0);
+        } catch (\Throwable) {
+            return 'unreadable';
+        }
+        $highestRow = min($sheet->getHighestDataRow(), self::IMPORT_MAX_ROWS + 2);
+        $highestColumn = min(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($sheet->getHighestDataColumn()), 30);
+        $cell = function (int $column, int $row) use ($sheet): string {
+            $value = $sheet->getCell([$column, $row])->getValue();
+            if (is_float($value) && floor($value) === $value && abs($value) < 1e16) {
+                return sprintf('%.0f', $value);
+            }
+
+            return is_scalar($value) ? trim((string) $value) : '';
+        };
+        $columns = [];
+        for ($column = 1; $column <= $highestColumn; $column++) {
+            $key = self::headerKey($cell($column, 1));
+            if ($key !== null && ! in_array($key, $columns, true)) {
+                $columns[$column] = $key;
+            }
+        }
+        if ($columns === [] && $highestRow <= 1) {
+            return 'empty';
+        }
+        if (! in_array('name', $columns, true)) {
+            return 'columns';
+        }
+        $rows = [];
+        for ($number = 2; $number <= $highestRow; $number++) {
+            $data = ['name' => '', 'phone_number' => '', 'pass_type' => '', 'allowed_entries' => ''];
+            foreach ($columns as $column => $key) {
+                $data[$key] = $cell($column, $number);
+            }
+            if (implode('', $data) === '') {
+                continue;
+            }
+            $rows[] = ['row' => $number, 'data' => $data];
+        }
+
+        return $rows;
+    }
+
+    /** Canonical column for a header cell, or null when it is not one we know. */
+    public static function headerKey(string $header): ?string
+    {
+        return self::HEADERS[trim((string) preg_replace('/[\s\-]+/', '_', mb_strtolower(trim($header))), '_')] ?? null;
     }
 
     /** @return list<array{row: int, data: array<string, string>}>|string */
@@ -287,12 +356,13 @@ class CustomerGuests
         $delimiter = substr_count($first, ';') > substr_count($first, ',') ? ';' : (substr_count($first, "\t") > substr_count($first, ',') ? "\t" : ',');
         $columns = [];
         foreach (str_getcsv($first, $delimiter, '"', '') as $index => $header) {
-            $key = self::HEADERS[preg_replace('/[\s\-]+/', '_', mb_strtolower(trim((string) $header)))] ?? null;
+            $key = self::headerKey((string) $header);
             if ($key !== null && ! in_array($key, $columns, true)) {
                 $columns[$index] = $key;
             }
         }
-        if (array_diff(['name', 'phone_number', 'pass_type'], $columns) !== []) {
+        // Only the name column is required; phone and pass type may be absent (blank pass = by count).
+        if (! in_array('name', $columns, true)) {
             return 'columns';
         }
         $rows = [];
@@ -329,8 +399,8 @@ class CustomerGuests
         $reviewed = [];
         $valid = [];
         foreach ($rows as $index => $row) {
-            [$payload, $errors] = $this->validate($row['data'], true);
-            $reviewed[$index] = ['row' => $row['row'], 'name' => mb_substr((string) ($row['data']['name'] ?? ''), 0, 120), 'phone' => mb_substr((string) ($row['data']['phone_number'] ?? ''), 0, 40),
+            [$payload, $errors] = $this->validate(self::defaultPass($row['data']), true);
+            $reviewed[$index] = ['row' => $row['row'], 'data' => $row['data'], 'name' => mb_substr((string) ($row['data']['name'] ?? ''), 0, 120), 'phone' => mb_substr((string) ($row['data']['phone_number'] ?? ''), 0, 40),
                 'status' => $payload === null ? 'invalid' : 'ready', 'errors' => $errors, 'payload' => $payload];
             if ($payload !== null) {
                 $valid[$index] = $payload;
@@ -341,13 +411,74 @@ class CustomerGuests
         $seenNames = [];
         foreach ($valid as $index => $payload) {
             $name = self::nameKey($payload['name']);
-            if (isset($existing[$index]) || isset($seenPhones[$payload['phone_number']]) || isset($seenNames[$name])) {
+            $phone = $payload['phone_number'];
+            if (isset($existing[$index]) || ($phone !== '' && isset($seenPhones[$phone])) || isset($seenNames[$name])) {
                 $reviewed[$index]['status'] = 'duplicate';
                 $reviewed[$index]['payload'] = null;
 
                 continue;
             }
-            $seenPhones[$payload['phone_number']] = true;
+            if ($phone !== '') {
+                $seenPhones[$phone] = true;
+            }
+            $seenNames[$name] = true;
+        }
+
+        return array_values($reviewed);
+    }
+
+    /**
+     * A blank pass type in an import row means "decide from the number of people":
+     * blank or 1 = Single, 2 = Double, 3 or more = Special. A stated pass is left alone
+     * so strict import validation still reports a contradicting allowance.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function defaultPass(array $data): array
+    {
+        if (trim((string) ($data['pass_type'] ?? '')) === '') {
+            $data['pass_type'] = GuestTextParser::passForCount(trim((string) ($data['allowed_entries'] ?? '')));
+        }
+
+        return $data;
+    }
+
+    /**
+     * Review of rows typed, pasted or picked on the Add Guests page (and Excel rows the owner
+     * chose to correct). Unlike a file import, every row is normalised first (pass type
+     * aliases such as VIP or "regular", allowance decides Single/Double/Special), then
+     * validated, then checked for duplicates against the event and earlier rows.
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array{data: array{name: string, phone_number: string, pass_type: string, allowed_entries: string}, status: 'ready'|'invalid'|'duplicate', errors: list<string>, duplicate: ?string, payload: ?array}>
+     */
+    public function reviewEntries(int $eventId, array $rows): array
+    {
+        $reviewed = [];
+        $valid = [];
+        foreach (array_values($rows) as $index => $row) {
+            $data = GuestTextParser::normalise($row);
+            [$payload, $errors] = $this->validate($data);
+            $reviewed[$index] = ['data' => $data, 'status' => $payload === null ? 'invalid' : 'ready', 'errors' => $errors, 'duplicate' => null, 'payload' => $payload];
+            if ($payload !== null) {
+                $valid[$index] = $payload;
+            }
+        }
+        $existing = $this->duplicates($eventId, $valid);
+        $seenPhones = [];
+        $seenNames = [];
+        foreach ($valid as $index => $payload) {
+            $name = self::nameKey($payload['name']);
+            $phone = $payload['phone_number'];
+            $reason = $existing[$index] ?? (($phone !== '' && isset($seenPhones[$phone])) ? 'list_phone' : (isset($seenNames[$name]) ? 'list_name' : null));
+            if ($reason !== null) {
+                $reviewed[$index]['status'] = 'duplicate';
+                $reviewed[$index]['duplicate'] = $reason;
+            }
+            if ($phone !== '') {
+                $seenPhones[$phone] = true;
+            }
             $seenNames[$name] = true;
         }
 

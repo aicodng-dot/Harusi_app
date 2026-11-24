@@ -1,0 +1,38 @@
+<?php
+
+return [
+    'label' => 'Muhtasari',
+    'events' => 'Matukio',
+    'guests' => 'Wageni walioalikwa',
+    'people' => '{1} Mtu 1 kwa jumla|[0,*] Watu :count kwa jumla',
+    'cards' => 'Kadi zilizotengenezwa',
+    'admitted' => 'Walioingia',
+    'remaining' => 'Nafasi :count zimebaki',
+    'quick' => 'Vitendo vya haraka',
+    'next_for' => 'Kwa :event',
+    'actions' => [
+        'create' => 'Unda tukio',
+        'add_guests' => 'Ongeza wageni',
+        'design' => 'Buni kadi',
+        'cards' => 'Tengeneza na shiriki kadi',
+        'help' => 'Jinsi inavyofanya kazi',
+    ],
+    'activity' => 'Shughuli za karibuni',
+    'no_activity' => 'Bado hakuna. Ongeza wageni au buni kadi yako kuanza.',
+    'action' => [
+        'card_generated' => 'Kadi imetengenezwa kwa :guest',
+        'card_downloaded' => 'Kadi imepakuliwa kwa :guest',
+        'zip_downloaded' => 'Kadi zimepakuliwa kama ZIP',
+        'design_saved' => 'Muundo wa kadi umehifadhiwa',
+        'photo_uploaded' => 'Picha imeongezwa kwenye kadi',
+        'guest_added' => ':guest ameongezwa',
+        'guest_updated' => ':guest amesasishwa',
+        'guest_deleted' => 'Mgeni ameondolewa',
+        'guests_imported' => '{0} Orodha ya wageni imeletwa|{1} Mgeni 1 ameletwa|[2,*] Wageni :count wameletwa',
+        'guests_added' => '{0} Orodha ya wageni imekaguliwa|{1} Mgeni 1 ameongezwa|[2,*] Wageni :count wameongezwa',
+        'whatsapp_sent' => 'Mwaliko umetumwa kwa WhatsApp kwa :guest',
+        'whatsapp_failed' => 'Kutuma kwa WhatsApp kumeshindwa kwa :guest',
+        'other' => 'Shughuli ya mwaliko',
+    ],
+    'a_guest' => 'mgeni',
+];

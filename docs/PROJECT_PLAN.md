@@ -1,6 +1,66 @@
  # Kadify project plan
 
-Updated 2026-11-23 (Africa/Dar_es_Salaam). Read with [architecture](ARCHITECTURE.md), [API](API_CONTRACT.md) and [database conventions](DATABASE_CONVENTIONS.md).
+Updated 2026-11-24 (Africa/Dar_es_Salaam). Read with [architecture](ARCHITECTURE.md), [API](API_CONTRACT.md) and [database conventions](DATABASE_CONVENTIONS.md).
+
+## Invitation Sharing Center — 2026-11-24
+
+**Status: COMPLETE (SOURCE LEVEL), migration applied to the local database after a backup.** No messaging API, gateway or automation: the server prepares text and links; the customer opens WhatsApp / Messages / the share sheet with a tap and sends.
+
+- **Migration `2026_11_24_000000_create_invitation_sharing_tables` (additive):** `invitation_links` (one per guest; SHA-256 of a 32-char random key for lookup, key encrypted with APP_KEY for re-copying, bound to the QR credential fingerprint), `invitation_share_templates`, `invitation_share_sessions` (customer, event, channel, template, message, recipient guest ids, position, status, last activity), `invitation_shares` (guest, event, session, channel, status initiated/confirmed/skipped, attempts, timestamps). No guest data is copied.
+- **Services:** `Sharing\ShareMessage` (fixed placeholders, plain-text cleaning, validation, `wa.me` / `sms:?&body=` links with rawurlencode, phone normalisation, GSM-7/UCS-2 SMS segment estimate), `Sharing\InvitationLinks` (issue/resolve; a link works only while the guest is not cancelled, the event is active, the QR is active and the stored card matches the current credential; replacing the QR kills the old link), `Sharing\ShareRecords` (honest per-channel state; confirmed outranks initiated outranks skipped; idempotent confirm; "undo sent").
+- **Routes:** 13 under `customer.events.share*` (hub, wizard, selection hand-off, sessions store/show/progress, one guest, record, history, templates CRUD) behind auth + role:customer + WorkspaceAccess (`event.view`; writes `event.update` + active event); sessions are also scoped to the customer who started them. Public `invitations.public` and `.card` (`/i/{key}`, throttle 60/min, noindex, no-store, no-referrer, DENY framing). Route total 169.
+- **UI:** Share tab replaces Invites in the bottom bar; sidebar adds Share invitations and Sharing history; ⋯ sheet adds history and templates. Guests list: Sharing filter, sharing pill, Share action per guest and a bulk Share button. Guided run: send button and "Did you send it?" first on phones, card thumbnail beside the editable message, copy message/link, share card image (Web Share API with files, from the tap, image pre-fetched), download, previous/skip/next, pause/continue, completion summary listing guests not yet confirmed.
+- **Evidence:** `ShareMessageTest` (6) and `InvitationSharingTest` (8): link encoding, personal messages, public-link isolation and revocation, honest/idempotent recording, guest/QR/admission/notification tables unchanged, no HTTP sent, session progress/pause/resume/complete, other customer / other manager / other event 404, selection hand-off, templates validation and scope, read-only events. Final full suite: **3,045 tests / 74,722 assertions, zero failures**. Headless Edge on the sandbox copy at 390, 360 and 1440px: wizard → run → WhatsApp/SMS links (intercepted, nothing left the machine) → confirm → skip → share image (mocked share sheet) → pause → resume → one-guest page → history → templates → public page; no overflow, no console errors, no external requests.
+- **Limits:** not tested on a physical phone. `sms:` body prefill and Web Share with files vary by phone and browser (fallbacks: copy message, share text, download). WhatsApp opening does not mean sending; confirmations are the customer's word. Links use the request host (APP_URL in `.env` is stale). Links break if APP_KEY changes only for re-copying (a new link is issued). Guests need a generated card for the current QR before they can be shared.
+
+## Customer experience — 2026-11-24
+
+**Status: COMPLETE (SOURCE LEVEL) for the scope below.** No migration; no schema change.
+
+- **Guest entry without spreadsheets:**
+  - `GuestTextParser` is deterministic, with no AI. Names mode works line by line, splits on commas and semicolons, strips list markers, picks out phones, and offers an optional one-word-per-guest split. Structured mode chooses the separator (tab, `|`, `;` or `,`) per line and classifies cells by content (phone, count, pass word, name), so column order does not matter. It skips a header line.
+  - Documented defaults: a blank pass becomes Single; VIP, Regular and similar labels take their pass from the number of people; a number that contradicts Single or Double wins.
+  - New routes:
+    - `customer.events.guests.review` (POST, parse and review; nothing is saved)
+    - `customer.events.guests.bulk` (POST; re-validates every row; nothing is saved while any row is invalid; duplicates in the event or the list are skipped and re-checked inside the transaction; saved through `CustomerGuests::create()`, so credentials and manual codes are identical to import)
+    - `customer.events.guests.import.sample_csv`
+  - Rows travel as one `rows_json` field (PHP `max_input_vars` is 1000), with `rows[]` as a no-JS fallback. The limit is 1,000 rows.
+  - Contact Picker API on supporting browsers only, after a tap; otherwise a fallback message.
+- **Optional phone:** stored as `''` (the column stays NOT NULL). The `Guest` mutator accepts an empty string and still normalises or rejects anything else. Admin forms and imports still require a phone through their own validation. Duplicate checks ignore empty phones. WhatsApp sending returns `no_phone` and sends nothing. Customer guest names must contain a letter.
+- **Import:**
+  - The customer `.xlsx` reader uses header aliases and needs only a name column (the admin reader is unchanged).
+  - CSV likewise.
+  - A blank pass is decided by the count.
+  - The preview can send every row to the editable review.
+- **Navigation shell (redesigned 2026-11-24 after a UX audit: the hamburger drawer had 12 mixed links and phones showed two stacked headers):** `partials/customer_shell` is on every customer page. Phones use an app bar (back to parent, context, ⋯), bottom tabs (3 outside an event; 5 inside with a raised centre + Add) and a ⋯ bottom sheet with a focus trap, Esc and swipe-down. Task routes hide the tabs. The pages' own header rows are hidden at all sizes, and the language switch moved to the sheet (phones) or the bar (desktop). The desktop sidebar mirrors the tab names. Earlier description: Phones get a sticky bar with breadcrumbs and a focus-trapped drawer; screens 1024px and wider get a fixed sidebar. It has global and event sections and a language switch. The old bottom tab bars, with their two dead items, are hidden. New `customer.help` page.
+- **Design system and layout:** `customer_shell.css` defines the tokens and components. On desktop the 28rem pages widen with `--rp` pinned, so type keeps its size. Pre-existing bug fixed: the guest-list action bar sat outside the page container, so its button scaled with the viewport on wide screens. The editor uses two columns from 1200px.
+- **Overview on My Events:** every read goes through the authorized-events subquery, so the membership check is in every query (`CustomerHomeBoundaryTest` enforces this).
+- **Templates:**
+  - `InvitationTemplateCatalog::FEATURED` (10 families) adds a "Featured" chip.
+  - The guest name is larger (36 / 46 script, was 30 / 38) and the box is wider (640, was 600), with no geometry change elsewhere, so the content area and the QR tile and quiet zone are unchanged.
+  - `VERSION` went from 1 to 2, so earlier cards show as outdated.
+- **Advanced guest list:**
+  - `GuestDirectory` (event-scoped):
+    - SQL search: partial name, phone digits (a local `07…` form matches the stored `+255…`), 4-character invitation code, pass word, status word.
+    - SQL filters: pass type (the configured Single/Double/Special; no VIP/VVIP types exist), admission (not checked in / partial / full / cancelled), phone present or missing, date added, people per pass, entries remaining.
+    - SQL sorts: 8 sorts.
+    - Card state (SHA-256 of the QR token) and the latest WhatsApp status are computed for the matching rows only. Invitation filters, the card-date sort and paging (50 per page, up to 5,000 matches) are then applied on the server.
+    - The sending filters are shown only when WhatsApp is configured.
+  - UI: the desktop table becomes cards below 1360px; debounced live search swaps only the results region; a filter bottom sheet with active chips and a count; select the page or all matching guests.
+  - Bulk delete (`customer.events.guests.bulk_destroy`, JSON, `confirm` required, up to 500) goes through `CustomerGuests::delete()`, so admitted guests are kept and the offline lock applies.
+  - ZIP download also accepts one `guest_ids` list, because `guests[]` hit PHP `max_input_vars`.
+  - Old `?filter=` links still work.
+  - `CustomerGuestListTest` (7). The full suite after this: **3,031 tests / 74,319 assertions, zero failures**.
+- **Evidence:**
+  - New tests `GuestTextParserTest` (10) and `CustomerGuestEntryTest` (9). Route inventories and link allowlists were updated for the new routes and shell links.
+  - Full suite **3,024 tests / 74,229 assertions, zero failures**, run with the default WhatsApp provider; HTTP is faked.
+  - Headless Edge on a cloned MySQL database: 11 pages × 6 viewports (360, 390, 430, 768, 1024, 1440), with no horizontal overflow and no console errors.
+  - End to end at 390px: 100 pasted names, reviewed and saved; cards generated through the existing endpoint; PNG card 200 `image/png`; ZIP 200 `application/zip`.
+- **Limits:**
+  - Not verified on a physical phone; Contact Picker not exercised (needs Chrome on Android over HTTPS).
+  - The 100 templates were not individually redesigned; only the curated collection and the guest block changed.
+  - Offline packages for customer events (still disabled) would need `''` phones accepted by `OfflineScannerPackageValidator`.
+  - Bulk guest deletion was not added.
 
 ## Feature batch — 2026-11-23 (P4-048 online assignment, offline signing tooling, admin customer management, customer self-service)
 

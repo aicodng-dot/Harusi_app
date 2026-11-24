@@ -147,16 +147,31 @@ class CustomerHomeBoundaryTest extends TestCase
             $this->assertSame('[0-9]+', $route->wheres['event']);
         }
         $this->assertContains('signed', Route::getRoutes()->getByName('invitations.media')->gatherMiddleware());
-        // Add/Import/Edit/Delete Guest: 9 customer routes behind auth + role:customer, numeric event id.
+        // Add/Import/Edit/Delete Guest + paste/review/bulk/CSV template/bulk delete: 13 customer routes behind auth + role:customer, numeric event id.
         $guests = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) => str_starts_with((string) $route->getName(), 'customer.events.guests'));
-        $this->assertCount(9, $guests);
+        $this->assertCount(13, $guests);
         foreach ($guests as $route) {
             $this->assertContains('auth', $route->gatherMiddleware());
             $this->assertContains('role:customer', $route->gatherMiddleware());
             $this->assertSame('[0-9]+', $route->wheres['event']);
         }
-        // + 3 guest edit/delete routes, 6 customer self-service routes, 7 admin customer-management routes.
-        $this->assertCount(149, Route::getRoutes());
+        // Invitation Sharing Center: 13 customer routes (auth + role:customer, numeric ids) and the
+        // throttled guest-facing invitation link pair (/i/{key}, /i/{key}/card.png; key-scoped, no session).
+        $share = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) => str_starts_with((string) $route->getName(), 'customer.events.share'));
+        $this->assertCount(13, $share);
+        foreach ($share as $route) {
+            $this->assertContains('auth', $route->gatherMiddleware());
+            $this->assertContains('role:customer', $route->gatherMiddleware());
+            $this->assertSame('[0-9]+', $route->wheres['event']);
+        }
+        foreach (['invitations.public', 'invitations.public.card'] as $name) {
+            $this->assertContains('throttle:60,1', Route::getRoutes()->getByName($name)->gatherMiddleware());
+            $this->assertSame('[A-Za-z0-9_-]{32}', Route::getRoutes()->getByName($name)->wheres['key']);
+        }
+        // + 3 guest edit/delete routes, 6 customer self-service routes, 7 admin customer-management routes,
+        // + 3 guest entry routes (review, bulk, CSV template), the customer Help page and guest bulk delete,
+        // + 13 sharing routes and 2 public invitation-link routes.
+        $this->assertCount(169, Route::getRoutes());
         $before = $this->snapshot(DB::connection());
 
         $this->get('/customer')->assertRedirect(route('login'));
@@ -445,15 +460,17 @@ class CustomerHomeBoundaryTest extends TestCase
         $document = new DOMDocument;
         $this->assertTrue($document->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING));
         $xpath = new DOMXPath($document);
+        // The page and the navigation shell may each carry a sign-out form; nothing else posts anywhere.
         $forms = $xpath->query('//form');
-        $this->assertSame(1, $forms->length);
-        $form = $forms->item(0);
-        $this->assertSame('post', strtolower($form->getAttribute('method')));
-        $this->assertSame(route('logout'), $form->getAttribute('action'));
-        $this->assertSame(1, $xpath->query('.//input[@name="_token"]', $form)->length);
+        $this->assertGreaterThanOrEqual(1, $forms->length);
+        foreach ($forms as $form) {
+            $this->assertSame('post', strtolower($form->getAttribute('method')));
+            $this->assertSame(route('logout'), $form->getAttribute('action'));
+            $this->assertSame(1, $xpath->query('.//input[@name="_token"]', $form)->length);
+        }
         foreach ($xpath->query('//a[@href]') as $link) {
             $path = parse_url($link->getAttribute('href'), PHP_URL_PATH);
-            $this->assertTrue(in_array($path, ['/customer', '/customer/workspaces/create', '/customer/events/create', '/customer/profile', null, ''], true), 'Only customer list, workspace creation, event-type and own-profile navigation is supported.');
+            $this->assertTrue(in_array($path, ['/customer', '/customer/workspaces/create', '/customer/events/create', '/customer/profile', '/customer/help', null, ''], true), 'Only customer list, workspace creation, event-type and own-profile navigation is supported.');
         }
         $this->assertStringNotContainsString('/admin/', $html);
         $this->assertStringNotContainsString('/scanner/', $html);

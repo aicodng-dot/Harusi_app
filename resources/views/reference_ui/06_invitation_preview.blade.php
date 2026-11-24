@@ -22,9 +22,10 @@
     <meta name="theme-color" content="#fbfbf8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $t('preview.page_title') }} · {{ $guest->name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/js/reference_ui/06_invitation_preview.js'])
+    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/js/reference_ui/06_invitation_preview.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body>
+@include('reference_ui.partials.customer_shell')
 <div class="is-page">
     <header class="is-header">
         <a class="is-back" href="{{ route('customer.events.invitation.guests', ['event' => $event->id]) }}" aria-label="{{ $t('preview.back_to_list') }}">

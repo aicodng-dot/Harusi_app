@@ -176,7 +176,7 @@ class Screen11EventSetupProgressTest extends TestCase
         preg_match_all('/href="([^"]+)"/', $html, $links);
         foreach ($links[1] as $href) {
             $path = (string) parse_url(html_entity_decode($href), PHP_URL_PATH);
-            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/template'], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
+            $this->assertTrue(in_array($path, ['/customer', '/customer/events/101/setup', '/customer/events/101/dashboard', '/customer/events/101/template', /* navigation shell: */ '/customer/help', '/customer/profile', '/customer/events/create', '/customer/events/101/edit', '/customer/events/101/invitation', '/customer/events/101/invitation/guests', '/customer/events/101/guests/add', '/customer/events/101/invitation/status', '/customer/events/101/share', '/customer/events/101/share/history', '/customer/events/101/share/templates', ''], true) || str_starts_with($path, '/build/') || str_starts_with($path, '/assets/'), $href);
         }
         $this->assertStringNotContainsString('/admin/', $html);
         // Working Flow 12: Continue opens this event's dashboard; step cards stay honest notes.

@@ -11,7 +11,13 @@ return [
     'date_missing' => 'Tarehe bado haijawekwa',
     'venue_missing' => 'Ukumbi bado haujawekwa',
     'categories_label' => 'Aina za miundo',
+    'families' => [
+        'luxury_gold' => 'Dhahabu ya Kifahari', 'minimal_modern' => 'Kisasa Rahisi', 'floral_elegance' => 'Maua Maridadi',
+        'royal_traditional' => 'Kifalme cha Jadi', 'romantic_botanical' => 'Mimea ya Kimapenzi', 'modern_photo' => 'Picha ya Kisasa',
+        'black_gold' => 'Nyeusi na Dhahabu', 'cultural' => 'Sherehe ya Kitamaduni', 'clean_minimalist' => 'Safi na Rahisi', 'editorial' => 'Mtindo wa Jarida',
+    ],
     'categories' => [
+        'featured' => 'Bora Zaidi',
         'wedding' => 'Harusi',
         'send_off' => 'Send-Off',
         'kitchen_party' => 'Kitchen Party',

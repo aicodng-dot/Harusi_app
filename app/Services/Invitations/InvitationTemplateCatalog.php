@@ -18,10 +18,28 @@ namespace App\Services\Invitations;
  */
 class InvitationTemplateCatalog
 {
-    public const VERSION = 1;
+    /** Bumped when the renderer's output changes, so cards made earlier are shown as outdated. 2: larger guest name. */
+    public const VERSION = 2;
 
     /** Style categories shown as gallery chips (after the event-type chips). */
     public const STYLE_CATEGORIES = ['floral', 'elegant', 'modern', 'luxury', 'traditional', 'botanical', 'romantic', 'photo', 'editorial', 'faith'];
+
+    /**
+     * Featured collection: one design per family, each with its own composition,
+     * typography and ornament set (not one card in ten colours). Shown first in the gallery.
+     */
+    public const FEATURED = [
+        'midnight_gold' => 'luxury_gold',
+        'minimal_modern' => 'minimal_modern',
+        'floral_classic' => 'floral_elegance',
+        'royal_green' => 'royal_traditional',
+        'garden_vows' => 'romantic_botanical',
+        'photo_circle_gold' => 'modern_photo',
+        'onyx_deco' => 'black_gold',
+        'kanga_border' => 'cultural',
+        'clean_slate' => 'clean_minimalist',
+        'the_date_issue' => 'editorial',
+    ];
 
     /** Event-type chips: wedding, send-off, kitchen party and general celebration. */
     public const EVENT_CATEGORIES = ['wedding', 'send_off', 'kitchen_party', 'celebration'];
@@ -323,7 +341,7 @@ class InvitationTemplateCatalog
 
     public static function category(mixed $value): ?string
     {
-        return is_string($value) && (in_array($value, self::EVENT_CATEGORIES, true) || in_array($value, self::STYLE_CATEGORIES, true)) ? $value : null;
+        return is_string($value) && ($value === 'featured' || in_array($value, self::EVENT_CATEGORIES, true) || in_array($value, self::STYLE_CATEGORIES, true)) ? $value : null;
     }
 
     /** The chip matching the customer's event type. */
@@ -346,7 +364,9 @@ class InvitationTemplateCatalog
     public static function filter(?string $category, ?string $search = null): array
     {
         $templates = self::all();
-        if ($category !== null) {
+        if ($category === 'featured') {
+            $templates = array_intersect_key(array_replace(self::FEATURED, $templates), self::FEATURED);
+        } elseif ($category !== null) {
             $templates = array_filter($templates, function (array $template) use ($category): bool {
                 if (in_array($category, self::EVENT_CATEGORIES, true)) {
                     $event = $category === 'celebration' ? 'other' : $category;

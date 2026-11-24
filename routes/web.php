@@ -19,9 +19,11 @@ use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerInvitationController;
 use App\Http\Controllers\CustomerInvitationTemplateController;
 use App\Http\Controllers\CustomerProfileController;
+use App\Http\Controllers\CustomerShareController;
 use App\Http\Controllers\InvitationMediaController;
 use App\Http\Controllers\CustomerWorkspaceController;
 use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\PublicInvitationController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ScannerController;
 use App\Http\Controllers\SplashScreenController;
@@ -91,17 +93,40 @@ Route::prefix('/customer/events/{event}/guests')->whereNumber('event')->name('cu
     ->middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
         Route::get('/add', [CustomerGuestController::class, 'create'])->name('.create');
         Route::post('/add', [CustomerGuestController::class, 'store'])->middleware('throttle:60,1')->name('.store');
+        Route::post('/add/review', [CustomerGuestController::class, 'review'])->middleware('throttle:60,1')->name('.review');
+        Route::post('/add/bulk', [CustomerGuestController::class, 'bulk'])->middleware('throttle:30,1')->name('.bulk');
+        Route::post('/bulk-delete', [CustomerGuestController::class, 'bulkDestroy'])->middleware('throttle:10,1')->name('.bulk_destroy');
         Route::get('/import', [CustomerGuestController::class, 'import'])->name('.import');
         Route::post('/import', [CustomerGuestController::class, 'preview'])->middleware('throttle:20,1')->name('.import.preview');
         Route::post('/import/confirm', [CustomerGuestController::class, 'confirm'])->middleware('throttle:20,1')->name('.import.confirm');
         Route::get('/import/template', [CustomerGuestController::class, 'sample'])->name('.import.sample');
+        Route::get('/import/template.csv', [CustomerGuestController::class, 'sampleCsv'])->name('.import.sample_csv');
         Route::get('/{guest}/edit', [CustomerGuestController::class, 'edit'])->whereNumber('guest')->name('.edit');
         Route::put('/{guest}', [CustomerGuestController::class, 'update'])->whereNumber('guest')->middleware('throttle:60,1')->name('.update');
         Route::delete('/{guest}', [CustomerGuestController::class, 'destroy'])->whereNumber('guest')->middleware('throttle:30,1')->name('.destroy');
     });
+// Invitation Sharing Center: the customer shares invitations through their own WhatsApp / SMS / share
+// sheet. No messaging API; the server prepares text and links and records only what the customer did.
+Route::prefix('/customer/events/{event}/share')->whereNumber('event')->name('customer.events.share')
+    ->middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
+        Route::get('/', [CustomerShareController::class, 'index'])->name('');
+        Route::get('/new', [CustomerShareController::class, 'create'])->name('.create');
+        Route::post('/select', [CustomerShareController::class, 'select'])->middleware('throttle:30,1')->name('.select');
+        Route::post('/sessions', [CustomerShareController::class, 'store'])->middleware('throttle:20,1')->name('.sessions.store');
+        Route::get('/sessions/{session}', [CustomerShareController::class, 'session'])->whereNumber('session')->name('.sessions.show');
+        Route::post('/sessions/{session}', [CustomerShareController::class, 'progress'])->whereNumber('session')->middleware('throttle:240,1')->name('.sessions.progress');
+        Route::get('/guests/{guest}', [CustomerShareController::class, 'guest'])->whereNumber('guest')->name('.guest');
+        Route::post('/record', [CustomerShareController::class, 'record'])->middleware('throttle:240,1')->name('.record');
+        Route::get('/history', [CustomerShareController::class, 'history'])->name('.history');
+        Route::get('/templates', [CustomerShareController::class, 'templatesPage'])->name('.templates');
+        Route::post('/templates', [CustomerShareController::class, 'storeTemplate'])->middleware('throttle:30,1')->name('.templates.store');
+        Route::put('/templates/{template}', [CustomerShareController::class, 'updateTemplate'])->whereNumber('template')->middleware('throttle:30,1')->name('.templates.update');
+        Route::delete('/templates/{template}', [CustomerShareController::class, 'destroyTemplate'])->whereNumber('template')->middleware('throttle:30,1')->name('.templates.destroy');
+    });
 // Customer self-service: own profile, and edit/delete of an event they own or manage.
 Route::middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
     Route::get('/customer/profile', [CustomerProfileController::class, 'show'])->name('customer.profile');
+    Route::get('/customer/help', [CustomerProfileController::class, 'help'])->name('customer.help');
     Route::put('/customer/profile', [CustomerProfileController::class, 'update'])->middleware('throttle:20,1')->name('customer.profile.update');
     Route::put('/customer/profile/password', [CustomerProfileController::class, 'password'])->middleware('throttle:10,1')->name('customer.profile.password');
     Route::get('/customer/events/{event}/edit', [CustomerEventManageController::class, 'edit'])->whereNumber('event')->name('customer.events.edit');
@@ -111,6 +136,12 @@ Route::middleware(['auth', 'role:'.User::ROLE_CUSTOMER])->group(function () {
 // Signed, expiring card image for the WhatsApp Cloud API media fetch (no session).
 Route::get('/invitations/media/{card}/{v}', [InvitationMediaController::class, 'show'])
     ->middleware(['signed', 'throttle:120,1'])->name('invitations.media');
+
+// Guest-facing personal invitation link shared by the customer (no login; key-scoped to one guest).
+Route::get('/i/{key}', [PublicInvitationController::class, 'show'])->where('key', '[A-Za-z0-9_-]{32}')
+    ->middleware('throttle:60,1')->name('invitations.public');
+Route::get('/i/{key}/card.png', [PublicInvitationController::class, 'card'])->where('key', '[A-Za-z0-9_-]{32}')
+    ->middleware('throttle:60,1')->name('invitations.public.card');
 
 Route::get('/webhooks/whatsapp/meta', [MetaWhatsappWebhookController::class, 'verify'])
     ->name('webhooks.whatsapp.meta.verify');

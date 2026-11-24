@@ -61,6 +61,12 @@ class InvitationDelivery
             }
             try {
                 $guest = Guest::query()->whereKey($guestId)->where('event_id', $event->id)->firstOrFail();
+                if (trim((string) $guest->phone_number) === '') {
+                    // Guests may be added without a phone; their card can still be downloaded and shared by hand.
+                    $results[] = ['guest_id' => $guestId, 'status' => 'no_phone'];
+
+                    continue;
+                }
                 if (! $resend && $this->latest((int) $event->id, $guestId) !== null
                     && in_array($this->latest((int) $event->id, $guestId)->status, self::ACTIVE, true)) {
                     $results[] = ['guest_id' => $guestId, 'status' => 'already_sent'];

@@ -53,7 +53,7 @@
     <meta name="theme-color" content="#fbfbf8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $t('edit.page_title') }} · {{ $event->event_name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/js/reference_ui/14_edit_invitation_card.js'])
+    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/js/reference_ui/14_edit_invitation_card.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
     <style>
         @foreach ($fonts as $key => $font)
         @font-face { font-family: "inv-{{ $key }}"; src: url("{{ asset('assets/invitation/fonts/'.$font['regular'].'.ttf') }}") format("truetype"); font-display: swap; }
@@ -61,7 +61,8 @@
     </style>
 </head>
 <body>
-<div class="is-page">
+@include('reference_ui.partials.customer_shell')
+<div class="is-page cu-wide">
     <header class="is-header">
         <a class="is-back" href="{{ route('customer.events.template', ['event' => $event->id]) }}" aria-label="{{ $t('edit.change_design') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
@@ -90,6 +91,8 @@
         </div>
         <p id="ed-alert" class="is-alert is-alert-error" role="alert" hidden></p>
 
+        <div class="ed-layout">
+        <div class="ed-col-preview">
         <figure class="ed-preview" id="ed-preview" aria-live="polite">
             <div class="ed-stage">
                 <img id="ed-preview-img" alt="{{ $t('edit.preview_alt', ['event' => $event->event_name]) }}" width="600" height="800">
@@ -113,6 +116,8 @@
             <a class="ed-tool" href="{{ route('customer.events.template', ['event' => $event->id, 'template' => $doc['template']]) }}" data-ed-nav>{{ $t('edit.change_design') }} · {{ $template['name'] }}</a>
         </div>
 
+        </div>
+        <div class="ed-col-controls">
         <form id="ed-form" novalidate onsubmit="return false">
         <fieldset style="border:0;margin:0;padding:0;min-width:0" @disabled($readOnly)>
         <ul class="ed-rows">
@@ -386,6 +391,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-7-7 7 7-7 7"/></svg>
             </button>
             <button type="button" class="is-secondary" id="ed-save-only" @disabled($readOnly)>{{ $t('edit.save') }}</button>
+        </div>
+        </div>
         </div>
     </main>
 </div>

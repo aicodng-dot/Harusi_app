@@ -37,9 +37,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fbfbf8">
     <title>{{ $t('page_title') }} · {{ $event->event_name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/13_choose_invitation_template.css', 'resources/css/reference_ui/invitation_steps.css','resources/js/reference_ui/13_choose_invitation_template.js'])
+    @vite(['resources/css/reference_ui/13_choose_invitation_template.css', 'resources/css/reference_ui/invitation_steps.css','resources/js/reference_ui/13_choose_invitation_template.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body class="tp-body">
+@include('reference_ui.partials.customer_shell')
     <div class="tp-page">
         <header class="tp-header">
             <a class="tp-back" href="{{ route('customer.events.dashboard', ['event' => $event->id]) }}" aria-label="{{ $t('back') }}">
@@ -86,7 +87,7 @@
             </section>
 
             <nav class="tp-chips" aria-label="{{ $t('categories_label') }}">
-                @foreach (array_merge(InvitationTemplateCatalog::EVENT_CATEGORIES, InvitationTemplateCatalog::STYLE_CATEGORIES) as $option)
+                @foreach (array_merge(['featured'], InvitationTemplateCatalog::EVENT_CATEGORIES, InvitationTemplateCatalog::STYLE_CATEGORIES) as $option)
                     <a @class(['tp-chip', 'is-active' => $category === $option])
                        href="{{ $pageUrl(['category' => $option, 'template' => $selected, 'q' => $search]) }}"
                        data-tp-keep @if ($category === $option) aria-current="true" @endif>{{ $t('categories.'.$option) }}</a>
@@ -120,7 +121,7 @@
                                 <span class="tp-preview is-rendered" role="img" aria-label="{{ $t('preview_of', ['template' => $template['name'], 'event' => $event->event_name]) }}">
                                     {{-- Rendered by the invitation engine with this event's real details. --}}
                                     <img class="tp-preview-bg" src="{{ route('customer.events.invitation.thumb', ['event' => $event->id, 'template' => $key, 'lang' => $language]) }}" alt="" width="330" height="440" @if ($loop->index > 3) loading="lazy" @endif decoding="async">
-                                    <span class="tp-category" aria-hidden="true">{{ $t('categories.'.$template['category']) }}</span>
+                                    <span class="tp-category" aria-hidden="true">{{ isset(InvitationTemplateCatalog::FEATURED[$key]) ? $t('families.'.InvitationTemplateCatalog::FEATURED[$key]) : $t('categories.'.$template['category']) }}</span>
                                     <span class="tp-thumb-error" hidden>{{ $t('thumb_failed') }}</span>
                                     <button type="button" class="tp-zoom" data-tp-preview="{{ $key }}" data-name="{{ $template['name'] }}"
                                             data-src="{{ route('customer.events.invitation.thumb', ['event' => $event->id, 'template' => $key, 'lang' => $language, 'size' => 'large']) }}"

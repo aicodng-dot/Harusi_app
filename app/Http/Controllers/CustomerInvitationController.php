@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\AuthorizesCustomerEvent;
 use App\Models\Event;
 use App\Models\Guest;
 use App\Models\User;
+use App\Services\Events\GuestDirectory;
 use App\Services\Invitations\InvitationDelivery;
 use App\Services\Invitations\InvitationDesign;
 use App\Services\Invitations\InvitationFonts;
@@ -178,50 +179,25 @@ class CustomerInvitationController extends Controller
         $design = $this->studio->design($full, $language);
         ['spec' => $spec, 'warnings' => $warnings] = $this->studio->spec($full, $design['doc']);
 
-        $search = is_string($request->query('q')) ? mb_substr(trim($request->query('q')), 0, 60) : '';
-        $filter = in_array($request->query('filter'), ['all', 'no_card', 'ready', 'sent', 'failed'], true) ? $request->query('filter') : 'all';
-        $query = DB::table('guests')->where('event_id', $full->id);
-        if ($search !== '') {
-            $digits = preg_replace('/\D+/', '', $search);
-            $query->where(function ($q) use ($search, $digits): void {
-                $q->where('name', 'like', '%'.addcslashes($search, '%_\\').'%');
-                if ($digits !== '' && strlen($digits) >= 3) {
-                    $q->orWhere('phone_number', 'like', '%'.$digits.'%');
-                }
-            });
-        }
-        $rows = $query->orderBy('name')->orderBy('id')->limit(2000)
-            ->get(['id', 'name', 'phone_number', 'pass_type', 'allowed_entries', 'used_entries', 'status']);
-        $ids = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
-        $cards = $this->studio->cardStates($full, $ids, $spec);
-        $messages = $delivery->statuses((int) $full->id, $ids);
-        $guests = $rows->map(function ($guest) use ($cards, $messages) {
-            $id = (int) $guest->id;
+        $params = GuestDirectory::params($request->query());
+        $result = app(GuestDirectory::class)->find($full, $spec, $params);
+        $guests = collect($result['rows'])->map(function (object $guest) {
+            $guest->phone = $guest->phone === '' ? '' : self::maskPhone($guest->phone);
 
-            return (object) [
-                'id' => $id, 'name' => (string) $guest->name, 'phone' => self::maskPhone((string) $guest->phone_number),
-                'pass_type' => $guest->pass_type, 'allowed' => (int) $guest->allowed_entries, 'status' => $guest->status,
-                'card' => $cards[$id]['state'] ?? 'none', 'message' => $messages[$id] ?? null,
-                'initials' => InvitationDesign::initials((string) $guest->name),
-            ];
+            return $guest;
         });
-        $guests = $guests->filter(fn ($g) => match ($filter) {
-            'no_card' => $g->card !== 'current',
-            'ready' => $g->card === 'current' && $g->message === null,
-            'sent' => in_array($g->message, ['sent', 'delivered', 'read'], true),
-            'failed' => in_array($g->message, ['failed', 'skipped'], true),
-            default => true,
-        })->values();
 
         return response()->view('reference_ui.31_select_invitation_recipients', [
             'language' => $language,
             'event' => $full,
             'guests' => $guests,
-            'total' => DB::table('guests')->where('event_id', $full->id)->count(),
+            'result' => $result,
+            'params' => $params,
+            'filterCount' => GuestDirectory::activeFilters($params),
+            'total' => $result['total'],
             'invited' => DB::table('guests')->where('event_id', $full->id)->where('status', '!=', Guest::STATUS_CANCELLED)->count(),
             'progress' => app(InvitationProgress::class)->forEvent($full, $language),
-            'search' => $search,
-            'filter' => $filter,
+            'search' => $params['q'],
             'warnings' => $warnings,
             'designSaved' => $design['saved'],
             'whatsapp' => $delivery->configured(),
@@ -317,7 +293,9 @@ class CustomerInvitationController extends Controller
     public function download(Request $request, string $event, WorkspaceAccess $access): BinaryFileResponse|Response
     {
         [$user, $row, $language] = $this->context($request, $event, $access);
-        $ids = $this->guestIds($request->input('guests'), (int) $row->id, 2000);
+        // "Select all matching" can exceed PHP's max_input_vars as guests[] fields: accept one comma list too.
+        $input = is_string($request->input('guest_ids')) ? explode(',', $request->input('guest_ids'), 2001) : $request->input('guests');
+        $ids = $this->guestIds($input, (int) $row->id, 2000);
         $format = in_array($request->input('format'), ['png', 'pdf', 'all'], true) ? $request->input('format') : 'png';
         $full = $this->studio->event((int) $row->id);
         $path = $this->studio->zip($full, $ids, $format);

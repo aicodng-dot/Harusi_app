@@ -2,7 +2,18 @@
 
 Additive UI task UI-REF-001 is COMPLETE as reference documentation only (2026-10-30), documenting all 39 approved PangaEvents references. Approved-design implementation and screen QA remain incomplete; Phase4 backend authorization is active. The latest completed source task is P4-047, verified at 2,579 tests / 46,472 assertions on 2026-11-11. [39-screen plan](REFERENCE_UI_IMPLEMENTATION.md).
 
-## CURRENT - 2026-11-23
+## CURRENT - 2026-11-24 (customer experience)
+
+- **Adding guests no longer needs Excel.** A new Add Guests page offers: type guests (several rows, "Add another guest"), paste a list of names (one per line, e.g. from WhatsApp), paste names with phone / pass / number of people in any order, Excel/CSV upload, and picking phone contacts (Chrome on Android). Every method shows an editable review before anything is saved. A phone number is now optional.
+- **Excel/CSV import** accepts everyday column names, needs only a name column, offers Excel and CSV templates, and can send every row (including problem rows) to the editable review.
+- **Navigation (app pattern):** phones get a slim top bar (back, event name, ⋯ menu) and bottom tabs. Inside an event the tabs are Home, Guests, a raised + Add, Card and Invites; outside an event they are Events, + New and Account. The ⋯ sheet holds event details, setup, designs, switch event, account, help, language and sign out. Focused task screens hide the tabs; the guest bulk bar appears over the tabs only while guests are selected. Computers get a sidebar with the same names, a New event button and breadcrumbs. There is also a Help page. Desktop pages are no longer phone-width; the card editor shows the preview beside the controls.
+- **My Events overview:** totals (events, guests, cards, admissions), quick actions and recent activity.
+- **Cards:** a Featured collection of 10 design families; guest names print larger. Cards made before this change show as "outdated" until re-created (QR codes do not change).
+- **Guest list:** search as you type (name, phone, invitation code, pass word), filters (pass type, invitation card, sending, admission, phone, date added, people per pass, entries left), sorting, pages of 50, select all matching guests, and bulk delete (admitted guests are kept). Desktop shows a table; phones show compact cards.
+- **Share invitations (no paid messaging):** a new Share tab per event. Customers choose guests (not shared yet, all, by pass type, or a selection from the Guests page), pick WhatsApp, SMS or the phone's share menu, and go through guests one at a time: each tap opens WhatsApp or Messages with the guest's number and a personal message containing their own invitation link; the customer presses Send, comes back and taps "I sent it". Progress is saved (pause and continue later). Also: share one guest from the Guests list, reusable message templates, a sharing history, and a guest-facing invitation page (/i/…) showing that guest's card with its QR. Statuses are only "sharing started", "you confirmed sent" and "skipped" — never delivered or read. Nothing is sent automatically.
+- **Testing:** full suite 3,045 tests passing (zero failures); browser checks at 6 screen sizes on a copy of the database. Not checked on real phones. [Details](PROJECT_PLAN.md#customer-experience--2026-11-24).
+
+## Previous - 2026-11-23
 
 - **Scanners for customer events:** administrators can now assign a gate scanner to a customer's event. That scanner admits only that event's guests, with the usual limits and duplicate protection. Offline (Android) sessions are still available only for admin events.
 - **Admin → Customers:** a new section to find customers, see their events and guests, edit their details, suspend or reactivate them, and delete customers who have no events. Every action is recorded in an audit log.

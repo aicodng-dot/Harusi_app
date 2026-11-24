@@ -106,15 +106,29 @@ class CustomerWorkspaceCreationTest extends TestCase
         // Add Guest (reference 15) and Import Guests (reference 16): GET pages plus throttled POSTs.
         $guests = ['customer.events.guests.create' => null, 'customer.events.guests.store' => 'throttle:60,1',
             'customer.events.guests.import' => null, 'customer.events.guests.import.preview' => 'throttle:20,1',
-            'customer.events.guests.import.confirm' => 'throttle:20,1', 'customer.events.guests.import.sample' => null];
+            'customer.events.guests.import.confirm' => 'throttle:20,1', 'customer.events.guests.import.sample' => null,
+            // Add Guests without a spreadsheet: parse-and-review, bulk save and the CSV template.
+            'customer.events.guests.review' => 'throttle:60,1', 'customer.events.guests.bulk' => 'throttle:30,1', 'customer.events.guests.import.sample_csv' => null,
+            // Guests page bulk delete (JSON, confirmed).
+            'customer.events.guests.bulk_destroy' => 'throttle:10,1'];
         // Self-service: own profile, edit/delete own event, edit/delete own guest (method, throttle, numeric ids).
         $selfService = [
             'customer.profile' => [['GET', 'HEAD'], null, []], 'customer.profile.update' => [['PUT'], 'throttle:20,1', []],
-            'customer.profile.password' => [['PUT'], 'throttle:10,1', []],
+            'customer.profile.password' => [['PUT'], 'throttle:10,1', []], 'customer.help' => [['GET', 'HEAD'], null, []],
             'customer.events.edit' => [['GET', 'HEAD'], null, ['event']], 'customer.events.update' => [['PUT'], 'throttle:30,1', ['event']],
             'customer.events.destroy' => [['DELETE'], 'throttle:10,1', ['event']],
             'customer.events.guests.edit' => [['GET', 'HEAD'], null, ['event', 'guest']], 'customer.events.guests.update' => [['PUT'], 'throttle:60,1', ['event', 'guest']],
             'customer.events.guests.destroy' => [['DELETE'], 'throttle:30,1', ['event', 'guest']],
+            // Invitation Sharing Center (manual WhatsApp / SMS / share sheet; no messaging API).
+            'customer.events.share' => [['GET', 'HEAD'], null, ['event']], 'customer.events.share.create' => [['GET', 'HEAD'], null, ['event']],
+            'customer.events.share.select' => [['POST'], 'throttle:30,1', ['event']], 'customer.events.share.sessions.store' => [['POST'], 'throttle:20,1', ['event']],
+            'customer.events.share.sessions.show' => [['GET', 'HEAD'], null, ['event', 'session']],
+            'customer.events.share.sessions.progress' => [['POST'], 'throttle:240,1', ['event', 'session']],
+            'customer.events.share.guest' => [['GET', 'HEAD'], null, ['event', 'guest']], 'customer.events.share.record' => [['POST'], 'throttle:240,1', ['event']],
+            'customer.events.share.history' => [['GET', 'HEAD'], null, ['event']], 'customer.events.share.templates' => [['GET', 'HEAD'], null, ['event']],
+            'customer.events.share.templates.store' => [['POST'], 'throttle:30,1', ['event']],
+            'customer.events.share.templates.update' => [['PUT'], 'throttle:30,1', ['event', 'template']],
+            'customer.events.share.templates.destroy' => [['DELETE'], 'throttle:30,1', ['event', 'template']],
         ];
         foreach ($selfService as $name => [$methods, $throttle, $ids]) {
             $route = Route::getRoutes()->getByName($name);
@@ -173,8 +187,9 @@ class CustomerWorkspaceCreationTest extends TestCase
         }
         $this->assertContains('throttle:5,1', Route::getRoutes()->getByName('register.store')->gatherMiddleware());
         // + 14 invitation-workflow customer routes, the signed invitation media route, the 6 Add/Import Guest routes,
-        // the 9 customer self-service routes and the 7 admin customer-management routes.
-        $this->assertCount(100 + count($onboarding) + 8 + 14 + 1 + count($guests) + 9 + 7, Route::getRoutes());
+        // the 9 customer self-service routes, the customer Help page, the 7 admin customer-management routes,
+        // the 13 Sharing Center routes and the 2 guest-facing invitation-link routes.
+        $this->assertCount(100 + count($onboarding) + 8 + 14 + 1 + count($guests) + 9 + 1 + 7 + 13 + 2, Route::getRoutes());
     }
 
     #[DataProvider('languages')]

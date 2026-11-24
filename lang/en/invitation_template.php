@@ -11,7 +11,13 @@ return [
     'date_missing' => 'Date not set yet',
     'venue_missing' => 'Venue not set yet',
     'categories_label' => 'Design categories',
+    'families' => [
+        'luxury_gold' => 'Luxury Gold', 'minimal_modern' => 'Minimal Modern', 'floral_elegance' => 'Floral Elegance',
+        'royal_traditional' => 'Royal Traditional', 'romantic_botanical' => 'Romantic Botanical', 'modern_photo' => 'Modern Photo',
+        'black_gold' => 'Black & Gold', 'cultural' => 'Cultural Celebration', 'clean_minimalist' => 'Clean Minimalist', 'editorial' => 'Premium Editorial',
+    ],
     'categories' => [
+        'featured' => 'Featured',
         'wedding' => 'Wedding',
         'send_off' => 'Send-Off',
         'kitchen_party' => 'Kitchen Party',

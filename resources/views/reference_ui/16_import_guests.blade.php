@@ -10,9 +10,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fbfbf8">
     <title>{{ $t('import.page_title') }} · {{ $event->event_name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/js/reference_ui/customer_guests.js'])
+    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/invitation_steps.css', 'resources/js/reference_ui/customer_guests.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body>
+@include('reference_ui.partials.customer_shell')
 <div class="is-page">
     <header class="is-header">
         <a class="is-back" href="{{ route('customer.events.invitation.guests', ['event' => $event->id]) }}" aria-label="{{ $t('back') }}">
@@ -109,6 +110,13 @@
                 @endif
                 <a class="is-secondary" href="{{ route('customer.events.guests.import', ['event' => $event->id]) }}">{{ $t('import.another') }}</a>
             </div>
+            {{-- Every row of the file (including the ones with problems) can be corrected on the review screen. --}}
+            <form method="POST" action="{{ route('customer.events.guests.review', ['event' => $event->id]) }}" style="margin-top:12px">
+                @csrf
+                <input type="hidden" name="mode" value="rows">
+                <input type="hidden" name="rows_json" value="{{ json_encode(array_map(fn ($r) => array_map(fn ($v) => mb_substr((string) $v, 0, 120), array_intersect_key($r['data'] ?? [], array_flip(['name', 'phone_number', 'pass_type', 'allowed_entries']))), $review['rows']), JSON_UNESCAPED_UNICODE) }}">
+                <button type="submit" class="is-secondary" style="width:100%">{{ $t('import_fix') }}</button>
+            </form>
         @endif
     </main>
 </div>

@@ -50,9 +50,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fbfbf8">
     <title>{{ $t('page_title') }} · {{ $event->event_name }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/12_event_dashboard.css', 'resources/js/reference_ui/12_event_dashboard.js'])
+    @vite(['resources/css/reference_ui/12_event_dashboard.css', 'resources/js/reference_ui/12_event_dashboard.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body class="db-body">
+@include('reference_ui.partials.customer_shell')
     <div class="db-page">
         <header class="db-header">
             <a class="db-back" href="{{ route('customer.home') }}" aria-label="{{ $t('back') }}">

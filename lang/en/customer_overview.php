@@ -1,0 +1,38 @@
+<?php
+
+return [
+    'label' => 'Overview',
+    'events' => 'Events',
+    'guests' => 'Guests invited',
+    'people' => '{1} 1 person in total|[0,*] :count people in total',
+    'cards' => 'Cards generated',
+    'admitted' => 'Admitted',
+    'remaining' => ':count entries remaining',
+    'quick' => 'Quick actions',
+    'next_for' => 'For :event',
+    'actions' => [
+        'create' => 'Create event',
+        'add_guests' => 'Add guests',
+        'design' => 'Design the card',
+        'cards' => 'Generate & share cards',
+        'help' => 'How it works',
+    ],
+    'activity' => 'Recent activity',
+    'no_activity' => 'Nothing yet. Add guests or design your card to get started.',
+    'action' => [
+        'card_generated' => 'Card created for :guest',
+        'card_downloaded' => 'Card downloaded for :guest',
+        'zip_downloaded' => 'Cards downloaded as a ZIP',
+        'design_saved' => 'Card design saved',
+        'photo_uploaded' => 'Photo added to the card',
+        'guest_added' => ':guest added',
+        'guest_updated' => ':guest updated',
+        'guest_deleted' => 'A guest was removed',
+        'guests_imported' => '{0} Guest list imported|{1} 1 guest imported|[2,*] :count guests imported',
+        'guests_added' => '{0} Guest list checked|{1} 1 guest added|[2,*] :count guests added',
+        'whatsapp_sent' => 'Invitation sent on WhatsApp to :guest',
+        'whatsapp_failed' => 'WhatsApp sending failed for :guest',
+        'other' => 'Invitation activity',
+    ],
+    'a_guest' => 'a guest',
+];

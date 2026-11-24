@@ -19,9 +19,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fcfaf3">
     <title>{{ $t('page_title') }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/04_choose_event_type.css', 'resources/js/reference_ui/04_choose_event_type.js'])
+    @vite(['resources/css/reference_ui/04_choose_event_type.css', 'resources/js/reference_ui/04_choose_event_type.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body class="et-body">
+@include('reference_ui.partials.customer_shell')
     <div class="et-page">
         <header class="et-header">
             <a class="et-back" href="{{ route('customer.home') }}" aria-label="{{ $t('back') }}">

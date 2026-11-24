@@ -45,9 +45,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fbfbf8">
     <title>{{ $t('page_title') }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/30_event_setup_progress.css', 'resources/js/reference_ui/30_event_setup_progress.js'])
+    @vite(['resources/css/reference_ui/30_event_setup_progress.css', 'resources/js/reference_ui/30_event_setup_progress.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body class="sp-body">
+@include('reference_ui.partials.customer_shell')
     <div class="sp-page">
         <header class="sp-header">
             <a class="sp-back" href="{{ route('customer.home') }}" aria-label="{{ $t('back') }}">

@@ -182,8 +182,9 @@ class Screen08MyEventsListTest extends TestCase
         preg_match_all('/href="([^"]+)"/', $html, $links);
         foreach ($links[1] as $href) {
             $path = parse_url(html_entity_decode($href), PHP_URL_PATH);
-            $this->assertTrue(in_array($path, ['/customer', '/customer/workspaces/create', '/customer/events/create', '/customer/profile'], true)
-                || preg_match('#\A/customer/events/(101|102|103|104|105|106|107|108)/dashboard\z#', (string) $path) === 1
+            // Shell navigation (help, skip link) and the overview's quick actions for the owner's own events are allowed.
+            $this->assertTrue(in_array($path, ['/customer', '/customer/workspaces/create', '/customer/events/create', '/customer/profile', '/customer/help', null, ''], true)
+                || preg_match('#\A/customer/events/(101|102|103|104|105|106|107|108)/(dashboard|guests/add|template|invitation/guests)\z#', (string) $path) === 1
                 || str_starts_with((string) $path, '/build/') || str_starts_with((string) $path, '/assets/'), $href);
         }
         $this->assertStringNotContainsString('/admin/', $html);

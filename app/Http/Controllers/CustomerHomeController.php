@@ -45,6 +45,7 @@ class CustomerHomeController extends Controller
             'events' => null,
             'counts' => array_fill_keys(self::FILTERS, 0),
             'loadError' => false,
+            'overview' => null,
         ];
         $status = 200;
 
@@ -56,6 +57,7 @@ class CustomerHomeController extends Controller
                 $base = $this->authorizedEvents($connection, $user);
                 $this->applySearch($base, $search);
                 $data['counts'] = $this->counts(clone $base, $today);
+                $data['overview'] = $this->overview(fn () => $this->authorizedEvents($connection, $user)->select('e.id'));
 
                 $list = clone $base;
                 $this->applyFilter($list, $filter, $today);
@@ -83,6 +85,48 @@ class CustomerHomeController extends Controller
             'Cache-Control' => 'no-store, private',
             'Referrer-Policy' => 'no-referrer',
         ]);
+    }
+
+    /**
+     * Account overview across every event this customer may open (not the search/filter):
+     * events, invited people, generated cards, admissions and the latest activity.
+     *
+     * @param  callable(): Builder  $eventIds  fresh "select e.id" query over the authorized events
+     * @return array{events: int, guests: int, people: int, admitted: int, remaining: int, cards: int, activity: list<object>}
+     */
+    private function overview(callable $eventIds): array
+    {
+        // Every read filters through the authorized-events subquery (membership check included),
+        // never through ids taken from the request.
+        $events = (int) DB::query()->fromSub($eventIds(), 'ae')->useWritePdo()->count();
+        if ($events === 0) {
+            return ['events' => 0, 'guests' => 0, 'people' => 0, 'admitted' => 0, 'remaining' => 0, 'cards' => 0, 'activity' => []];
+        }
+        $guests = DB::table('guests')->useWritePdo()->whereIn('event_id', $eventIds())->where('status', '!=', 'cancelled')
+            ->selectRaw('count(*) as guests, coalesce(sum(allowed_entries), 0) as people, coalesce(sum(used_entries), 0) as admitted')->first();
+        $activity = DB::table('invitation_activity as a')->useWritePdo()->join('events as ev', 'ev.id', '=', 'a.event_id')
+            ->leftJoin('guests as g', function ($join): void {
+                $join->on('g.id', '=', 'a.guest_id')->on('g.event_id', '=', 'a.event_id');
+            })
+            ->whereIn('a.event_id', $eventIds())->orderByDesc('a.id')->limit(6)
+            ->get(['a.action', 'a.details', 'a.created_at', 'a.event_id', 'ev.event_name', 'g.name as guest_name'])
+            ->map(function (object $row): object {
+                $details = json_decode((string) $row->details, true);
+                $row->count = is_array($details) ? (int) ($details['guests'] ?? 0) : 0;
+                unset($row->details);
+
+                return $row;
+            })->all();
+
+        return [
+            'events' => $events,
+            'guests' => (int) $guests->guests,
+            'people' => (int) $guests->people,
+            'admitted' => (int) $guests->admitted,
+            'remaining' => max(0, (int) $guests->people - (int) $guests->admitted),
+            'cards' => (int) DB::table('invitation_cards')->useWritePdo()->whereIn('event_id', $eventIds())->count(),
+            'activity' => $activity,
+        ];
     }
 
     /** Display state for one event row; never a stored status. */

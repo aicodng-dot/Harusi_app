@@ -11,9 +11,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fbfbf8">
     <title>{{ $t('page_title') }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/customer_manage.css'])
+    @vite(['resources/css/reference_ui/invitation_studio.css', 'resources/css/reference_ui/customer_manage.css', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body>
+@include('reference_ui.partials.customer_shell')
 <div class="is-page">
     <header class="is-header">
         <a class="is-back" href="{{ route('customer.home') }}" aria-label="{{ __('customer_manage.back', [], $language) }}">

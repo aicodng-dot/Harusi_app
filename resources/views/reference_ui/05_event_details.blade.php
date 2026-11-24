@@ -25,9 +25,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#fcfaf3">
     <title>{{ $t('page_title') }} · PangaEvents</title>
-    @vite(['resources/css/reference_ui/05_event_details.css', 'resources/js/reference_ui/05_event_details.js'])
+    @vite(['resources/css/reference_ui/05_event_details.css', 'resources/js/reference_ui/05_event_details.js', 'resources/css/reference_ui/customer_shell.css', 'resources/js/reference_ui/customer_shell.js'])
 </head>
 <body class="ed-body">
+@include('reference_ui.partials.customer_shell')
     <div class="ed-art" aria-hidden="true">
         <img src="{{ asset('assets/reference_ui/05_Event_Details/05_Event_Details_Footer_Botanicals.webp') }}" alt="" width="838" height="300" decoding="async">
     </div>

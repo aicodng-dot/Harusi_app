@@ -28,6 +28,16 @@ class CustomerProfileController extends Controller
         return $this->page($request, $user);
     }
 
+    /** Help & Support: a static guide to the customer workflow (no data is shown). */
+    public function help(Request $request): Response
+    {
+        $user = $this->customer($request);
+
+        return response()->view('reference_ui.customer_help', [
+            'language' => CustomerHomeController::language($request, $user),
+        ])->withHeaders(['Cache-Control' => 'no-store, private', 'Referrer-Policy' => 'no-referrer']);
+    }
+
     public function update(Request $request, PhoneNumberService $phones): RedirectResponse
     {
         $user = $this->customer($request);

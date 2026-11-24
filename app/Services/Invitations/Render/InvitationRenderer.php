@@ -154,8 +154,9 @@ class InvitationRenderer
         [$bx, $by, $bw, $bh] = $box;
         $role = $spec['guest_font'] ?? 'accent';
         $nameFont = $this->font($role, 'regular');
-        $size = $this->isScript($role) ? 38 : 30;
-        $maxWidth = $bw - 60;
+        // The guest's name is the most important line on a personal card: set it large.
+        $size = $this->isScript($role) ? 46 : 36;
+        $maxWidth = $bw - 56;
         while ($size > 16 && $this->c->textWidth($name, $nameFont, $size) > $maxWidth) {
             $size -= 1;
         }
@@ -171,7 +172,7 @@ class InvitationRenderer
         $cx = $bx + $bw / 2;
         $this->c->text($name, $nameFont, $size, $cx, $baseline, $nameColor, 'center');
         if ($pass !== '') {
-            $this->c->text(mb_strtoupper($pass), $this->font('label', 'regular'), 13, $cx, $by + $bh - 16, $subColor, 'center', 0.16);
+            $this->c->text(mb_strtoupper($pass), $this->font('label', 'regular'), 15, $cx, $by + $bh - 16, $subColor, 'center', 0.16);
         }
 
         [$qx, $qy, $qs] = $footer['qr'];
@@ -269,7 +270,7 @@ class InvitationRenderer
         $qrTop = $bottom - $captionSpace - $size;
         if ($position === 'center') {
             $boxH = 132;
-            $boxW = 600;
+            $boxW = 640;
             $boxTop = $qrTop - 22 - $boxH;
 
             return ['top' => $boxTop, 'position' => 'center', 'guest' => [600 - $boxW / 2, $boxTop, $boxW, $boxH],
